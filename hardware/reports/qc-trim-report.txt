@@ -1,0 +1,23 @@
+== 1. Integrity and size ==
+PASS  trimtop mesh is closed and consistently wound: 220 triangles, every edge used once each way: True
+PASS  trimtop mesh volume against the kernel's: mesh 17375.5 mm3, kernel 17375.5 mm3, 0.000% apart
+PASS  trimtop overall size: measured [67.0, 100.0, 5.6], drawn [67.0, 100.0, 5.6]; 17 cm3, about 18 g
+PASS  trimtop thinnest section: 1.00 mm (floor for this check 1.0 mm); thinnest values found [1.0, 1.12, 1.4, 2.0, 2.14, 2.2]
+PASS  trimrail mesh is closed and consistently wound: 180 triangles, every edge used once each way: True
+PASS  trimrail mesh volume against the kernel's: mesh 10743.4 mm3, kernel 10743.4 mm3, 0.000% apart
+PASS  trimrail overall size: measured [5.6, 100.0, 42.0], drawn [5.6, 100.0, 42.0]; 11 cm3, about 11 g
+PASS  trimrail thinnest section: 1.40 mm (floor for this check 1.0 mm); thinnest values found [1.4, 2.0, 2.2, 3.6, 3.84, 4.03]
+PASS  trimlip mesh is closed and consistently wound: 120 triangles, every edge used once each way: True
+PASS  trimlip mesh volume against the kernel's: mesh 11076.2 mm3, kernel 11076.2 mm3, 0.000% apart
+PASS  trimlip overall size: measured [5.1, 100.0, 42.0], drawn [5.1, 100.0, 42.0]; 11 cm3, about 11 g
+PASS  trimlip thinnest section: 1.20 mm (floor for this check 1.0 mm); thinnest values found [1.2, 2.0, 4.27, 4.7, 5.1, 6.0]
+== 2. Each cap on the joint it covers ==
+PASS  the top cap on a cell's top rail: centred collisions 0; at the limits of play 0; sliding on 0; held when pulled apart: True, on both lips at either end of the play: True; teeth catch: True
+PASS  the side cap over a cell's side rail: centred collisions 0; at the limits of play 0; sliding on 0; held when pulled apart: True, on both lips at either end of the play: True; teeth catch: True
+PASS  a cell's side lips over the other side cap's rail: centred collisions 0; at the limits of play 0; sliding on 0; held when pulled apart: True, on both lips at either end of the play: True; teeth catch: True
+== 3. What they leave to be seen ==
+PASS  trimtop from the front: only the 2 mm plate reaches the front plane; its joint ends 9 mm back (0 points of joint at the front)
+PASS  trimrail from the front: only the 2 mm plate reaches the front plane; its joint ends 9 mm back (0 points of joint at the front)
+PASS  trimlip from the front: only the 2 mm plate reaches the front plane; its joint ends 9 mm back (0 points of joint at the front)
+
+{'PASS': 18, 'FAIL': 0, 'NOTE': 0}

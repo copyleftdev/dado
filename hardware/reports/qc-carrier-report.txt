@@ -1,0 +1,47 @@
+== 1. Integrity ==
+PASS  carrier mesh is closed and consistently wound: 2260 triangles, every edge used once each way: True
+PASS  carrier mesh volume against the kernel's: mesh 15862.9 mm3, kernel 15863.1 mm3, 0.001% apart
+== 2. Measured dimensions ==
+PASS  carrier extent: measured [-6.0, 0.0, -1.2] to [104.38, 60.5, 35.5]; drawn [-6.0, 0.0, -1.2] to [104.38, 60.5, 35.5]
+PASS  carrier thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.6, 1.65, 1.8, 2.2, 2.4]
+PASS  fan barbs (snap features, floor 0.4) thinnest section: 0.57 mm (floor for this check 0.4 mm); thinnest values found [0.57, 0.73]
+== 3. Seated in the cell ==
+PASS  seated, at every extreme of its slack: 6 poses; collisions anywhere, teeth included: 0
+PASS  the latch rests unloaded: seated against the stop, the teeth stand 0.6 mm behind the cell's rear edge and touch nothing
+PASS  front flush with the cell: -0.02 mm from the cell's front plane; the pull stands 6 mm proud of it
+PASS  front in the cell's mouth: 0.25 mm each side, 0.5 mm under the roof, as drawn
+== 4. Going in, coming out ==
+PASS  sliding in: 47 steps; teeth riding on the floor in 47; collisions elsewhere 0
+PASS  pulled 1.1 mm out: the teeth meet the rear edge (14 samples) and nothing else touches; before that it moves freely at least 0.5 mm
+PASS  pushed 0.5 mm past its seat: its face meets the ends of the cell's ledges (32 samples)
+PASS  lifted 1 mm: hits the ledges (298 samples)
+== 5. A Raspberry Pi 5 on the carrier in the cell ==
+PASS  board: 0 points in the carrier, 0 in the cell; 29.8 mm to the cell's roof
+PASS  USB and Ethernet, through the back: 0 points in the carrier, 0 in the cell; 13.6 mm to the cell's roof
+PASS  Active Cooler: 0 points in the carrier, 0 in the cell; 16.1 mm to the cell's roof
+PASS  USB-C and HDMI overhang: 0 points in the carrier, 0 in the cell; 26.6 mm to the cell's roof
+PASS  card sticking out: 0 points in the carrier, 0 in the cell; 31.2 mm to the cell's roof
+PASS  HAT allowance to 29 above board: 0 points in the carrier, 0 in the cell; 0.8 mm to the cell's roof
+PASS  card on its way out through the face: 0 points in the carrier, 0 in the cell; 31.3 mm to the cell's roof
+PASS  25 mm fan, 6 thick, in its cradle: 0 points in the carrier, 0 in the cell; 1.5 mm to the cell's roof
+PASS  three plugs behind the back wall: 0 points in the carrier, 0 in the cell; 13.6 mm to the cell's roof
+PASS  port window against the ports: window 54 mm wide; the ports themselves are measured against it in pi5_fit.py, from Raspberry Pi's own model
+NOTE  open area: front 720 mm2 (five slots 18 tall, the fan behind the middle three); back about 607 mm2 (five slots, and the window around the ports)
+PASS  uprights spread 0.45 mm each as the fan goes in (as drawn): strain 0.15 % (2.5 % allowed)
+PASS  uprights spread 0.60 mm each as the fan goes in (fan 0.3 mm oversize): strain 0.20 % (2.5 % allowed)
+PASS  barbs over the fan: each barb reaches 0.60 mm over the fan's top edge; with the fan hard against one side, the other still has 0.30 mm
+NOTE  the fan's lead: it leaves the fan's rear face, which is open, and runs back over the board. Two ways to power it, neither verified: a splitter on the board's four-pin fan socket, which the Active Cooler also uses (the socket's current limit is not published in anything found), or 5 V and ground from the header, which a HAT covers
+== 6. Will it go together as made? (200,000 simulated carriers) ==
+PASS  printed nylon, +/-0.30 mm: goes in 99.94%; the teeth drop behind the edge 99.85%; both, with a tooth of 0.5 mm or more 99.79%; play in and out up to 1.1 mm
+PASS  moulded, +/-0.10 mm: goes in 100.00%; the teeth drop behind the edge 100.00%; both, with a tooth of 0.5 mm or more 100.00%; play in and out up to 0.8 mm
+== 7. The fingers (nylon PA12, modulus 1,700 MPa assumed) ==
+PASS  finger bent 1.20 mm (sliding in, as drawn): strain 1.65% (kept under 2.5%); each pushes with 8.67 N
+PASS  finger bent 1.50 mm (sliding in, worst made): strain 2.07% (kept under 2.5%); each pushes with 10.84 N
+PASS  finger bent 0.00 mm (seated): strain 0.00% (kept under 2.5%); each pushes with 0.00 N
+PASS  force to pull the carrier out: about 22.5 N on average over the ramps, twice that at the top (friction 0.3 assumed), against 1.0 N for a loaded carrier's own weight
+NOTE  unplugging a network cable: a plug with its tab pressed comes out for less than the 23 N the latch holds; one yanked with the tab up will still draw the carrier out
+NOTE  the pull: a rail 6 mm proud along the whole top edge, with a 1.5 mm lip under it; fingers pull it while the thumb rests on the cell's rim, so pulling a carrier does not drag its cell. Whether that grip is good for 23 N is for a hand to judge
+PASS  the pull rail under that pull: 8.8 MPa in bending along its 56.5 mm, safety factor 5
+NOTE  plate thickness: 1.8 mm, under the 2.5 to 3 mm at which printed flame-retardant materials are rated; the front is 2.6 mm
+
+{'PASS': 33, 'FAIL': 0, 'NOTE': 5}

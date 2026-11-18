@@ -1,0 +1,29 @@
+== 1. Can the designs be rebuilt from their scripts, identically? ==
+== 2. Do the three parts agree on the dimensions they share? ==
+PASS  cell and base: the joint: 13 shared dimensions; disagreeing: []
+PASS  the reach of a cell's teeth: 1.4 and 1.4
+PASS  play across the stacking joint: 0.8 and 0.8
+PASS  finger length: 12.0 and 12.0
+PASS  cell and base depth: one front plane: 100.0 and 100.0
+PASS  cell depth: 100.0 and 100.0
+PASS  the ledges' cut and the carrier's face: flush: 2.6 and 2.6
+PASS  inside width: 61.0 and 61.0
+PASS  inside height: 36.0 and 36.0
+PASS  underside of the ledges: 2.3 and 2.3
+PASS  reach of the ledges: 1.2 and 1.2
+PASS  cell and trimtop: 39 dimensions; differing only where a cap is a plate: ['body.height', 'v.mid']
+PASS  cell and trimrail: 39 dimensions; differing only where a cap is a plate: ['body.width', 'u.mid']
+PASS  cell and trimlip: 39 dimensions; differing only where a cap is a plate: ['body.width', 'u.mid']
+== 3. Do the QC scripts measure against the dimensions the parts now have? ==
+PASS  fit_check.py: W, H, GAP, DEPTH, WALL, FLOAT, SIDE_FLOAT: script has [67.0, 42.0, 3.6, 100.0, 3.0, 0.8, 1.6]; the parts have [67.0, 42.0, 3.6, 100.0, 3.0, 0.8, 1.6]
+PASS  qc.py: W, H, GAP, DEPTH, WALL: script has [67.0, 42.0, 3.6, 100.0, 3.0]; the parts have [67.0, 42.0, 3.6, 100.0, 3.0]
+PASS  qc_carrier.py: PLATE, PLATE_W, PLATE_L, FRONT_T, FRONT_H: script has [1.8, 60.5, 97.0, 2.6, 35.5]; the parts have [1.8, 60.5, 97.0, 2.6, 35.5]
+PASS  qc_carrier.py: TOOTH, RAMP, BEHIND: script has [1.2, 0.93, 0.6]; the parts have [1.2, 0.93, 0.6]
+PASS  qc_base.py: W, GAP, RAIL, HB, DEPTH, SETBACK, PAD: script has [67.0, 3.6, 3.1, 22.0, 100.0, 0.0, 1.0]; the parts have [67.0, 3.6, 3.0999999999999996, 22.0, 100.0, 0.0, 1.0]
+== 4. Assembled: two bases, four cells two by two, a carrier in each, with plugs behind it ==
+PASS  nothing collides that should not: 14 bodies, 30 neighbouring pairs tested both ways; unexpected collisions in 0
+PASS  every carrier's latch rests unloaded: carriers whose teeth press on their cell at rest: 0 of 4
+== 5. The engine's own check of intent, before the corners are rounded ==
+NOTE  cell and base at r3: the rounded corners are the only change after r2, and the engine cannot compare a part this thin once they are in; their volume was checked by hand instead
+
+{'PASS': 21, 'FAIL': 0, 'NOTE': 1}

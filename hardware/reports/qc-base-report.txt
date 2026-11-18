@@ -1,0 +1,52 @@
+== 1. Integrity ==
+PASS  base mesh is closed and consistently wound: 696 triangles, every edge used once each way: True
+PASS  base mesh volume against the kernel's: mesh 64302.2 mm3, kernel 64305.7 mm3, 0.005% apart
+== 2. Measured dimensions ==
+PASS  base overall size: measured [73.7, 100.0, 26.1], drawn [73.69999999999999, 100.0, 26.1]
+PASS  base thinnest section: 1.00 mm (floor for this check 1.0 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+NOTE  material: 64 cm3, about 65 g in nylon
+== 3. A cell on the base ==
+PASS  seated and centred: 3 poses; collisions 0
+PASS  seated and pushed to the limits of play: 4 poses; springs pressed in 4; collisions elsewhere 0
+PASS  sliding on from the front: 38 steps; teeth on the rail in 2; collisions elsewhere 0
+PASS  pulled 1 mm up off the base: it is held (76 samples collide)
+PASS  pulled up at either end of its play: held on both lips: True
+PASS  moved 2.5 mm along the rail: the cell's teeth catch in the base's notches: True
+PASS  what the cell stands on: its skids touch the deck (4 faces) and so do its lips (32 faces)
+== 4. A base beside a base ==
+PASS  seated and centred: 3 poses; collisions 0
+PASS  seated and pushed to the limits of play: 4 poses; springs pressed in 4; collisions elsewhere 0
+PASS  sliding on from the front: 38 steps; teeth on the rail in 2; collisions elsewhere 0
+PASS  pulled 1 mm apart: it is held (76 samples collide)
+PASS  one base lifted past the joint's play: the other holds it down (60 samples collide): joined bases tip as one
+PASS  pulled apart at either end of the play: held on both lips: True
+PASS  moved 2.5 mm along the joint: the teeth catch in the notches: True
+== 5. Will it go together as made? (200,000 simulated bases) ==
+PASS  printed nylon, +/-0.30 mm: slides and latches 99.71%; neighbours' joints line up on one surface 99.99%; both 99.71%
+PASS  moulded, +/-0.10 mm: slides and latches 100.00%; neighbours' joints line up on one surface 100.00%; both 100.00%
+PASS  finger bent 0.6 mm (centred): strain 0.62% (kept under 2.5%)
+PASS  finger bent 1.4 mm (at the end of the play): strain 1.46% (kept under 2.5%)
+PASS  finger bent 1.8 mm (at the end of the play, worst made): strain 1.88% (kept under 2.5%)
+== 6. Standing up ==
+  rule: the plinth is at least one base wide for every four cells of height; empty
+  bases go on in pairs, one each side, so the cells stay in the middle of it
+    cells high  cells wide  bases   sideways  front-back
+             1           1      1      38.8°       52.8°
+             1           2      2      60.0°       52.8°
+             1           3      3      69.4°       52.8°
+             2           1      1      26.5°       39.2°
+             2           2      2      47.0°       39.2°
+             2           3      3      58.8°       39.2°
+             3           1      1      19.9°       30.7°
+             3           2      2      38.0°       30.7°
+             3           3      3      50.2°       30.7°
+             4           1      1      15.9°       25.0°
+             4           2      2      31.5°       25.0°
+             4           3      3      43.3°       25.0°
+PASS  every desk cluster, to 4 high and 3 wide: the least steady tips past 15.9 degrees (bar: 15)
+NOTE  beyond the desk, three wide: tips past (degrees): 5 high 21.0, 6 high 18.1, 8 high 14.1; the base no longer reaches in front of or behind the cells, so tall walls would want a deeper one
+== 7. Strength (nylon PA12, about 48 MPa) ==
+PASS  a 4-high column leaning on the base beside it: 7 N through the side joint; 0.51 MPa at the root of each flange, safety factor 94
+PASS  the deck under a 4-high column's skids: 34 N/m along each skid, at most 3 mm in from a wall: 0.07 MPa in the 3 mm deck
+
+{'PASS': 26, 'FAIL': 0, 'NOTE': 2}

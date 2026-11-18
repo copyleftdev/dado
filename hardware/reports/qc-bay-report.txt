@@ -1,0 +1,116 @@
+==== bay: 3 across, 1 up ====
+== 1. Sound ==
+PASS  bay mesh is closed and consistently wound: 1408 triangles, every edge used once each way: True
+PASS  bay mesh volume against the kernel's: mesh 247331.3 mm3, kernel 247334.9 mm3, 0.001% apart
+PASS  shelf mesh is closed and consistently wound: 792 triangles, every edge used once each way: True
+PASS  shelf mesh volume against the kernel's: mesh 50405.0 mm3, kernel 50405.0 mm3, 0.000% apart
+PASS  bay thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  shelf thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.8, 2.2, 2.4, 2.5, 2.6]
+== 2. The lattice ==
+PASS  fills the place of 3 by 1 cells: 208.2 by 42.0 mm; 3 pitches and 1 rises less a gap each way is 208.2 by 42.0
+PASS  every joint dimension is the cell's: differing: none
+== 3. Joined to cells: seated without touching, held when pulled ==
+PASS  on a row of 3 cells: 3 joint(s); points of one part inside the other: 0
+PASS  on a row of 3 cells, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 321] points
+PASS  3 cells on it: 3 joint(s); points of one part inside the other: 0
+PASS  3 cells on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 291] points
+PASS  3 caps on it: 3 joint(s); points of one part inside the other: 0
+PASS  3 caps on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 291] points
+PASS  1 cell(s) at its rail side: 1 joint(s); points of one part inside the other: 0
+PASS  1 cell(s) at its rail side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320] points
+PASS  1 cell(s) at its lips side: 1 joint(s); points of one part inside the other: 0
+PASS  1 cell(s) at its lips side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320] points
+== 4. The shelf in the bay ==
+PASS  seated: points of the shelf inside the bay's walls, floor, ledges or roof: 0
+PASS  latch teeth: they start 0.66 mm behind the bay's rear edge, below its floor
+PASS  pushed 0.6 mm past its seat: its face meets the ends of the bay's ledges (5 points)
+PASS  lifted 1 mm: held down by the ledges (1082 points)
+PASS  the face under the roof: 0.50 mm between them
+== 5. What goes on it ==
+NOTE  room on the shelf: 201.7 mm wide, 30.2 tall; the back is open, so a device may stand out behind
+PASS  5-port PoE switch (TP-Link TL-SG1005P, maker's figures): fits: 101.9 mm spare across, 5.2 above; stands 3.6 mm behind the plate; strap slots clear of it: a, b, c
+PASS  8-port PoE switch (TP-Link TL-SG108PE, one spec sheet): fits: 43.7 mm spare across, 5.2 above; stands 6.6 mm behind the plate; strap slots clear of it: c
+PASS  a switch 29 mm tall (the tallest desktop figure met): fits: 43.7 mm spare across, 1.2 above; stands 6.6 mm behind the plate; strap slots clear of it: c
+NOTE  that 8-port switch if a flyer's larger figures are right: does not fit: 209.0 x 26.0 against 201.7 x 30.2
+NOTE  one unit of rack gear (44.45 mm tall): does not fit: 200.0 x 44.45 against 201.7 x 30.2
+== 6. Load on the roof ==
+PASS  1 row(s) of cells on it: about 5.9 N; the 7 mm roof sags about 0.13 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+NOTE  2 row(s) of cells on it: about 11.8 N; the 7 mm roof sags about 0.26 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+NOTE  3 row(s) of cells on it: about 17.7 N; the 7 mm roof sags about 0.39 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+
+==== baytall: 3 across, 2 up ====
+== 1. Sound ==
+PASS  baytall mesh is closed and consistently wound: 1684 triangles, every edge used once each way: True
+PASS  baytall mesh volume against the kernel's: mesh 340370.9 mm3, kernel 340374.5 mm3, 0.001% apart
+PASS  shelftall mesh is closed and consistently wound: 792 triangles, every edge used once each way: True
+PASS  shelftall mesh volume against the kernel's: mesh 72745.3 mm3, kernel 72745.3 mm3, 0.000% apart
+PASS  baytall thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  shelftall thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.8, 2.2, 2.4, 2.5, 2.6]
+== 2. The lattice ==
+PASS  fills the place of 3 by 2 cells: 208.2 by 87.6 mm; 3 pitches and 2 rises less a gap each way is 208.2 by 87.6
+PASS  every joint dimension is the cell's: differing: none
+== 3. Joined to cells: seated without touching, held when pulled ==
+PASS  on a row of 3 cells: 3 joint(s); points of one part inside the other: 0
+PASS  on a row of 3 cells, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 321] points
+PASS  3 cells on it: 3 joint(s); points of one part inside the other: 0
+PASS  3 cells on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 291] points
+PASS  3 caps on it: 3 joint(s); points of one part inside the other: 0
+PASS  3 caps on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 291] points
+PASS  2 cell(s) at its rail side: 2 joint(s); points of one part inside the other: 0
+PASS  2 cell(s) at its rail side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320] points
+PASS  2 cell(s) at its lips side: 2 joint(s); points of one part inside the other: 0
+PASS  2 cell(s) at its lips side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320] points
+== 4. The shelf in the bay ==
+PASS  seated: points of the shelf inside the bay's walls, floor, ledges or roof: 0
+PASS  latch teeth: they start 0.67 mm behind the bay's rear edge, below its floor
+PASS  pushed 0.6 mm past its seat: its face meets the ends of the bay's ledges (4 points)
+PASS  lifted 1 mm: held down by the ledges (825 points)
+PASS  the face under the roof: 0.50 mm between them
+== 5. What goes on it ==
+NOTE  room on the shelf: 201.7 mm wide, 72.8 tall; the back is open, so a device may stand out behind
+PASS  one unit of gear, 200 wide: fits: 1.7 mm spare across, 28.3 above; stands 5.6 mm behind the plate; strap slots clear of it: none, it covers them all
+NOTE  ten-inch rack gear between its ears (222.25 wide): does not fit: 222.25 x 44.45 against 201.7 x 72.8
+== 6. Load on the roof ==
+PASS  1 row(s) of cells on it: about 5.9 N; the 10 mm roof sags about 0.04 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+PASS  2 row(s) of cells on it: about 11.8 N; the 10 mm roof sags about 0.09 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+PASS  3 row(s) of cells on it: about 17.7 N; the 10 mm roof sags about 0.13 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+
+==== bayrack: 4 across, 2 up ====
+== 1. Sound ==
+PASS  bayrack mesh is closed and consistently wound: 1952 triangles, every edge used once each way: True
+PASS  bayrack mesh volume against the kernel's: mesh 491048.4 mm3, kernel 491052.0 mm3, 0.001% apart
+PASS  shelfrack mesh is closed and consistently wound: 912 triangles, every edge used once each way: True
+PASS  shelfrack mesh volume against the kernel's: mesh 97483.5 mm3, kernel 97483.5 mm3, 0.000% apart
+PASS  bayrack thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  shelfrack thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.8, 2.2, 2.4, 2.5, 2.6]
+== 2. The lattice ==
+PASS  fills the place of 4 by 2 cells: 278.8 by 87.6 mm; 4 pitches and 2 rises less a gap each way is 278.8 by 87.6
+PASS  every joint dimension is the cell's: differing: none
+== 3. Joined to cells: seated without touching, held when pulled ==
+PASS  on a row of 4 cells: 4 joint(s); points of one part inside the other: 0
+PASS  on a row of 4 cells, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 321, 321] points
+PASS  4 cells on it: 4 joint(s); points of one part inside the other: 0
+PASS  4 cells on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 291, 291] points
+PASS  4 caps on it: 4 joint(s); points of one part inside the other: 0
+PASS  4 caps on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306, 291, 291] points
+PASS  2 cell(s) at its rail side: 2 joint(s); points of one part inside the other: 0
+PASS  2 cell(s) at its rail side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320] points
+PASS  2 cell(s) at its lips side: 2 joint(s); points of one part inside the other: 0
+PASS  2 cell(s) at its lips side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320] points
+== 4. The shelf in the bay ==
+PASS  seated: points of the shelf inside the bay's walls, floor, ledges or roof: 0
+PASS  latch teeth: they start 0.85 mm behind the bay's rear edge, below its floor
+PASS  pushed 0.6 mm past its seat: its face meets the ends of the bay's ledges (2 points)
+PASS  lifted 1 mm: held down by the ledges (735 points)
+PASS  the face under the roof: 0.50 mm between them
+== 5. What goes on it ==
+NOTE  room on the shelf: 272.3 mm wide, 70.8 tall; the back is open, so a device may stand out behind
+PASS  ten-inch rack gear between its ears (222.25 wide, one unit): fits: 50.1 mm spare across, 26.3 above; stands 5.6 mm behind the plate; strap slots clear of it: c
+PASS  the same with its ears on (254 wide): fits: 18.3 mm spare across, 26.3 above; stands 5.6 mm behind the plate; strap slots clear of it: none, it covers them all
+NOTE  two units of rack gear (88.9 tall): does not fit: 222.25 x 88.9 against 272.3 x 70.8
+== 6. Load on the roof ==
+PASS  1 row(s) of cells on it: about 7.8 N; the 12 mm roof sags about 0.08 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+PASS  2 row(s) of cells on it: about 15.7 N; the 12 mm roof sags about 0.17 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+NOTE  3 row(s) of cells on it: about 23.5 N; the 12 mm roof sags about 0.25 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+
+{'PASS': 81, 'FAIL': 0, 'NOTE': 10}

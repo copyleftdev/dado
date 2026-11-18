@@ -1,0 +1,18 @@
+# Source of the hardware
+
+These scripts generated every part in `../step`. Each one writes a transaction for Ringwright, a headless parametric CAD engine: parameters with reasons, sketches whose every point is placed by dimension, features, and two checks the kernel must pass before the part is committed (a valid solid, and a volume within 0.05 % of one worked out by hand in the same script).
+
+**Ringwright is not yet public, so these cannot be run today.** They are published as the readable record of the design: every number in `../parameters` and every decision behind it is here. Set `RINGWRIGHT` to the binary's path if you have one.
+
+| Script | Builds or checks |
+|---|---|
+| `build_cell.py` | The cell, and the joint code every other part reuses |
+| `build_carrier.py` | The carrier |
+| `build_base.py`, `build_trim.py` | The base and the three caps |
+| `build_bay.py`, `build_shelf.py` | The three bays and their shelves |
+| `qc.py`, `qc_carrier.py`, `qc_base.py`, `qc_trim.py`, `qc_bay.py` | QC of each part; output in `../reports` |
+| `fit_check.py`, `qa.py` | The joint proof, and checks across parts |
+| `pi5_import.py`, `pi5_fit.py` | Imports Raspberry Pi's model and checks the carrier against it. Needs their STEP file, which is not redistributed here: get it from Raspberry Pi's product page |
+| `qclib.py` | Shared mesh checks |
+
+Some scripts refer to files that live only in the working project (scene files, earlier versions). They are kept as they were used, not tidied into a package.

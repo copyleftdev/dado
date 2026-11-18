@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dado</title>
+<meta name="description" content="Dado: an open-hardware modular enclosure for Raspberry Pi 5 clusters. One computer in one cell; slide a second on and it holds.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="film.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="stage" aria-label="The Dado cell, assembled from its real parts"></canvas>
+
+<header class="top">
+  <span class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#joint"/></svg>dado</span>
+  <span class="tools"><a class="link" href="https://github.com/copyleftdev/dado">Specs on GitHub</a><button id="sound" type="button" aria-pressed="false">Turn sound on</button><button id="play" type="button">Play the film</button></span>
+</header>
+
+<section class="hero" id="hero">
+  <h1>dado</h1>
+  <p>One computer in one cell. Slide a second on and it holds. Keep going.</p>
+  <span class="hint" id="hint">Loading the parts</span>
+</section>
+
+<div id="captions"></div>
+<svg id="leaders" aria-hidden="true"></svg>
+<div id="labels"></div>
+
+<div class="card" id="card">
+  <div class="lockup"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#joint"/></svg><span>dado</span></div>
+  <p>Starts at one.</p>
+</div>
+
+<aside id="panel" hidden>
+  <h2>Make it yours</h2>
+  <div class="ctl"><span>Start from</span><div class="row" id="presets"></div></div>
+  <div class="ctl"><span>Size</span>
+    <div class="row sizes">
+      <span class="row"><button id="colsDown" type="button" aria-label="Fewer columns">&minus;</button><b class="step" id="colsN">3</b><button id="colsUp" type="button" aria-label="More columns">+</button><em>wide</em></span>
+      <span class="row"><button id="rowsDown" type="button" aria-label="Fewer rows">&minus;</button><b class="step" id="rowsN">3</b><button id="rowsUp" type="button" aria-label="More rows">+</button><em>high</em></span>
+    </div></div>
+  <div class="ctl"><span>Sleeves, bases and caps</span><div class="row" id="sleeves"></div></div>
+  <div class="ctl"><span>Faces</span><div class="row" id="looks"></div><div class="row" id="hues"></div></div>
+  <div class="ctl"><span>Network</span><div class="row" id="bays"></div><p class="facts" id="bayNote"></p></div>
+  <table id="box"></table>
+  <p class="facts" id="facts"></p>
+  <p class="facts">Drag to turn it. Nothing here is priced yet.</p>
+  <p class="facts">Open hardware, CERN-OHL-S-2.0. The <a href="https://github.com/copyleftdev/dado">STEP files and dimensions</a> are free to use, change and make. The Raspberry Pi 5 model is Raspberry Pi Ltd's own, under the MIT licence.</p>
+</aside>
+
+<div id="track"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="joint" viewBox="0 0 24 24">
+    <g fill="currentColor"><rect x="2" y="2" width="20" height="3"/><rect x="2" y="5" width="3" height="10"/><rect x="19" y="5" width="3" height="10"/><rect x="2" y="12" width="7.5" height="3"/><rect x="14.5" y="12" width="7.5" height="3"/></g>
+    <g fill="var(--clay)"><rect x="6" y="7" width="12" height="3"/><rect x="10.5" y="10" width="3" height="9"/><rect x="2" y="19" width="20" height="3"/></g>
+  </symbol>
+</svg>
+<script type="module" src="film.js"></script>
+</body>
+</html>

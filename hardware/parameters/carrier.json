@@ -1,0 +1,433 @@
+{
+ "part": "carrier",
+ "unit": "mm",
+ "parameters": [
+  {
+   "description": "The row of slots across the back wall for air out",
+   "id": "air.height",
+   "value": 7.0
+  },
+  {
+   "description": "",
+   "expr": "front.height - top.bar - air.height",
+   "id": "air.low",
+   "value": 25.5
+  },
+  {
+   "description": "",
+   "expr": "front.height - top.bar",
+   "id": "air.top",
+   "value": 32.5
+  },
+  {
+   "description": "The plate ends this far short of the cell's back",
+   "id": "back.clear",
+   "value": 3.0
+  },
+  {
+   "description": "Back wall; the ports end flush with its rear face",
+   "id": "back.thickness",
+   "value": 2.6
+  },
+  {
+   "description": "",
+   "expr": "plate.length - back.thickness",
+   "id": "back.x",
+   "value": 94.4
+  },
+  {
+   "description": "",
+   "expr": "plate.thickness + post.height - 0.2",
+   "id": "band.high",
+   "value": 4.6
+  },
+  {
+   "description": "The barb, top to underside: all the room there is under the cell's roof",
+   "id": "barb.height",
+   "value": 0.9
+  },
+  {
+   "description": "",
+   "expr": "fan.low + fan.size + 0.1",
+   "id": "barb.low",
+   "value": 34.6
+  },
+  {
+   "description": "Its blunt nose, so it has no feather edge; above the nose a ramp the fan pushes past",
+   "id": "barb.nose",
+   "value": 0.4
+  },
+  {
+   "description": "A barb at the top of each upright that the fan snaps under",
+   "id": "barb.reach",
+   "value": 0.6
+  },
+  {
+   "description": "",
+   "expr": "plate.length - port.overhang - board.length",
+   "id": "board.front",
+   "value": 8.950000000000003
+  },
+  {
+   "description": "Raspberry Pi 5, long edge",
+   "id": "board.length",
+   "value": 85.0
+  },
+  {
+   "description": "From Raspberry Pi's STEP model",
+   "id": "board.thickness",
+   "value": 1.35
+  },
+  {
+   "description": "",
+   "expr": "plate.thickness + post.height + board.thickness",
+   "id": "board.top",
+   "value": 6.15
+  },
+  {
+   "description": "Raspberry Pi 5, short edge",
+   "id": "board.width",
+   "value": 56.0
+  },
+  {
+   "description": "That slot, top",
+   "id": "card.high",
+   "value": 5.2
+  },
+  {
+   "description": "That slot, bottom",
+   "id": "card.low",
+   "value": 2.6
+  },
+  {
+   "description": "Slot low in the face for the card to come out through",
+   "id": "card.width",
+   "value": 14.5
+  },
+  {
+   "description": "Cell, front to back",
+   "id": "cell.depth",
+   "value": 100.0
+  },
+  {
+   "description": "Inside the cell, floor to roof",
+   "id": "cell.height",
+   "value": 36.0
+  },
+  {
+   "description": "Inside the cell, across",
+   "id": "cell.width",
+   "value": 61.0
+  },
+  {
+   "description": "",
+   "expr": "front.thickness + fan.thick + 0.15",
+   "id": "cheek.back",
+   "value": 8.75
+  },
+  {
+   "description": "The two uprights the fan drops between",
+   "id": "cheek.thick",
+   "value": 2.5
+  },
+  {
+   "description": "",
+   "expr": "fan.low + fan.size + 0.1 + barb.height",
+   "id": "cheek.top",
+   "value": 35.5
+  },
+  {
+   "description": "",
+   "expr": "(fan.size + fan.slack) / 2",
+   "id": "fan.half",
+   "value": 12.65
+  },
+  {
+   "description": "Fan's underside above the carrier's underside: clear of the card and the board's end connector",
+   "id": "fan.low",
+   "value": 9.5
+  },
+  {
+   "description": "A 25 mm fan, square",
+   "id": "fan.size",
+   "value": 25.0
+  },
+  {
+   "description": "Cradle wider than the fan, in all",
+   "id": "fan.slack",
+   "value": 0.3
+  },
+  {
+   "description": "Its thickness: 6, because a 10 mm fan would reach over the board and under a HAT",
+   "id": "fan.thick",
+   "value": 6.0
+  },
+  {
+   "description": "",
+   "expr": "fan.low + fan.size",
+   "id": "fan.top",
+   "value": 34.5
+  },
+  {
+   "description": "Each finger's near edge from the centre line: clear of the stop",
+   "id": "finger.apart",
+   "value": 11.0
+  },
+  {
+   "description": "Where the fingers leave the plate, from the front: 14 to the cell's rear edge",
+   "id": "finger.root",
+   "value": 86.0
+  },
+  {
+   "description": "Cut either side of a finger to free it",
+   "id": "finger.slot",
+   "value": 1.0
+  },
+  {
+   "description": "",
+   "expr": "cell.depth + tooth.behind + tooth.ramp + tooth.lead + 0.1",
+   "id": "finger.tip",
+   "value": 104.38
+  },
+  {
+   "description": "Each finger, across; short and wide, for about 20 N of hold",
+   "id": "finger.width",
+   "value": 8.0
+  },
+  {
+   "description": "",
+   "expr": "cell.height - roof.slack",
+   "id": "front.height",
+   "value": 35.5
+  },
+  {
+   "description": "The face; it stops on the ends of the cell's ledges and sits flush with the cell",
+   "id": "front.thickness",
+   "value": 2.6
+  },
+  {
+   "description": "Mounting holes from the board's edges, at the card-slot end",
+   "id": "hole.inset",
+   "value": 3.5
+  },
+  {
+   "description": "Mounting holes, along the board",
+   "id": "hole.spacing_x",
+   "value": 58.0
+  },
+  {
+   "description": "Mounting holes, across the board",
+   "id": "hole.spacing_y",
+   "value": 49.0
+  },
+  {
+   "description": "The slots across the face, tall enough to cover the fan behind them",
+   "id": "intake.height",
+   "value": 18.0
+  },
+  {
+   "description": "",
+   "expr": "front.height - top.bar - intake.height",
+   "id": "intake.low",
+   "value": 14.5
+  },
+  {
+   "description": "Sunk, so a label's edges are protected",
+   "id": "label.depth",
+   "value": 0.4
+  },
+  {
+   "description": "The flat's upper edge",
+   "id": "label.high",
+   "value": 13.0
+  },
+  {
+   "description": "The flat's lower edge above the carrier's underside",
+   "id": "label.low",
+   "value": 7.0
+  },
+  {
+   "description": "A flat for a label, in the middle of the face",
+   "id": "label.width",
+   "value": 44.0
+  },
+  {
+   "description": "How far the ledges stand out from the cell's walls",
+   "id": "ledge.reach",
+   "value": 1.2
+  },
+  {
+   "description": "Underside of the cell's ledges above its floor",
+   "id": "ledge.under",
+   "value": 2.3
+  },
+  {
+   "description": "",
+   "expr": "front.thickness + fan.thick + 0.15 + lip.reach",
+   "id": "lip.back",
+   "value": 10.35
+  },
+  {
+   "description": "The lips' height: they stop below a HAT",
+   "id": "lip.height",
+   "value": 5.5
+  },
+  {
+   "description": "The lips' underside: above the board's end connector",
+   "id": "lip.low",
+   "value": 10.5
+  },
+  {
+   "description": "A lip on each upright that keeps the fan against the face",
+   "id": "lip.reach",
+   "value": 1.6
+  },
+  {
+   "description": "",
+   "expr": "(plate.width - board.width) / 2",
+   "id": "margin",
+   "value": 2.25
+  },
+  {
+   "description": "",
+   "expr": "plate.width / 2",
+   "id": "mid",
+   "value": 30.25
+  },
+  {
+   "description": "Cut from each back corner",
+   "id": "nose.taper",
+   "value": 2.0
+  },
+  {
+   "description": "",
+   "expr": "cell.depth - back.clear",
+   "id": "plate.length",
+   "value": 97.0
+  },
+  {
+   "description": "Leaves 0.5 under the cell's ledges",
+   "id": "plate.thickness",
+   "value": 1.8
+  },
+  {
+   "description": "",
+   "expr": "cell.width - side.slack",
+   "id": "plate.width",
+   "value": 60.5
+  },
+  {
+   "description": "Tallest port above the board, from Raspberry Pi's STEP model",
+   "id": "port.height",
+   "value": 16.2
+  },
+  {
+   "description": "USB and Ethernet beyond the board's port edge, from Raspberry Pi's STEP model",
+   "id": "port.overhang",
+   "value": 3.05
+  },
+  {
+   "description": "Posts the board rests on",
+   "id": "post.diameter",
+   "value": 6.0
+  },
+  {
+   "description": "Room under the board",
+   "id": "post.height",
+   "value": 3.0
+  },
+  {
+   "description": "",
+   "expr": "board.front + hole.inset",
+   "id": "post.x",
+   "value": 12.450000000000003
+  },
+  {
+   "description": "",
+   "expr": "margin + hole.inset",
+   "id": "post.y",
+   "value": 5.75
+  },
+  {
+   "description": "The rail's ends in from the face's sides",
+   "id": "pull.inset",
+   "value": 2.0
+  },
+  {
+   "description": "A lip under its edge, for fingertips to catch",
+   "id": "pull.lip",
+   "value": 1.5
+  },
+  {
+   "description": "The pull: a rail along the face's top edge",
+   "id": "pull.reach",
+   "value": 6.0
+  },
+  {
+   "description": "Front lower than the cell's roof",
+   "id": "roof.slack",
+   "value": 0.5
+  },
+  {
+   "description": "Clearance for an M2.5 screw",
+   "id": "screw.hole",
+   "value": 2.7
+  },
+  {
+   "description": "A shelf on the face that the fan stands on",
+   "id": "shelf.reach",
+   "value": 2.4
+  },
+  {
+   "description": "Its thickness",
+   "id": "shelf.thick",
+   "value": 1.5
+  },
+  {
+   "description": "Carrier narrower than the cell, in all",
+   "id": "side.slack",
+   "value": 0.5
+  },
+  {
+   "description": "Slot to slot: five of them",
+   "id": "slot.pitch",
+   "value": 10.5
+  },
+  {
+   "description": "Each slot",
+   "id": "slot.width",
+   "value": 8.0
+  },
+  {
+   "description": "Front ramp's start behind the cell's rear edge: the finger rests straight, so it cannot creep",
+   "id": "tooth.behind",
+   "value": 0.6
+  },
+  {
+   "description": "Tooth below the finger",
+   "id": "tooth.depth",
+   "value": 1.2
+  },
+  {
+   "description": "Its back ramp, which rides in over the floor",
+   "id": "tooth.lead",
+   "value": 2.75
+  },
+  {
+   "description": "Its front ramp, front to back: steep, about 52 degrees, for about 20 N to pull out",
+   "id": "tooth.ramp",
+   "value": 0.93
+  },
+  {
+   "description": "",
+   "expr": "cell.depth + tooth.behind",
+   "id": "tooth.x",
+   "value": 100.6
+  },
+  {
+   "description": "The face's top edge, which the pull grows out of",
+   "id": "top.bar",
+   "value": 3.0
+  }
+ ]
+}

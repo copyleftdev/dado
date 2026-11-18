@@ -1,0 +1,37 @@
+== 1. Integrity ==
+PASS  cell mesh is closed and consistently wound: 872 triangles, every edge used once each way: True
+PASS  cell mesh volume against the kernel's: mesh 73056.3 mm3, kernel 73059.9 mm3, 0.005% apart
+== 2. Measured dimensions ==
+PASS  cell overall size: measured [73.7, 100.0, 48.7], drawn [73.69999999999999, 100.0, 48.7]
+PASS  cell body: spans 67.00 across, 42.00 up, 100.00 deep
+PASS  cell thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+NOTE  cell wall: 16% of faces have exactly 3.00 mm behind them; the rest are rails, lips, skids, ledges and the fingers
+NOTE  the sleeve as an extrusion: its section is constant front to back; what is local is cut, not added: the joints end 9 mm short of the front, the ledges 2.6 mm, and the latches are slots, teeth and notches
+== 3. Clearances in the joint, measured between two copies ==
+PASS  stacked: gaps along the joint's own direction: touching at the lips: True; smallest gaps elsewhere [0.5, 3.6, 3.643, 3.667] mm
+PASS  side by side: gaps along the joint's own direction: touching at the lips: True; smallest gaps elsewhere [0.5, 3.6, 3.643, 3.667] mm
+PASS  stacked: play across the joint: smallest sideways gaps [0.8, 3.8] mm (meant to be 0.8)
+PASS  side by side: play up and down in the joint: smallest gaps [1.6] mm (meant to be 1.6)
+== 5. Will it go together as made? (200,000 simulated joints of each kind) ==
+PASS  stacking joint, printed nylon, +/-0.30 mm: slides freely 99.78%, fingers work 99.78%, latch holds by 0.2 mm or more 99.71%
+PASS  side joint, printed nylon, +/-0.30 mm: slides freely 99.78%, fingers work 99.78%, latch holds by 0.2 mm or more 99.73%
+PASS  stacking joint, moulded, +/-0.10 mm: slides freely 100.00%, fingers work 100.00%, latch holds by 0.2 mm or more 100.00%
+PASS  side joint, moulded, +/-0.10 mm: slides freely 100.00%, fingers work 100.00%, latch holds by 0.2 mm or more 100.00%
+PASS  stacking joint: latch engagement as drawn: each tooth is pushed back 0.6 mm when centred and drops 0.6 mm into its notch
+PASS  stacking joint: finger bent 0.6 mm (centred): strain 0.62% (kept under 2.5%), room to bend 2.0 mm; pushes back 0.21 N
+PASS  stacking joint: finger bent 1.4 mm (at the end of the play): strain 1.46% (kept under 2.5%), room to bend 2.0 mm; pushes back 0.48 N
+PASS  stacking joint: finger bent 1.8 mm (at the end of the play, worst made): strain 1.88% (kept under 2.5%), room to bend 2.0 mm; pushes back 0.62 N
+PASS  side joint: latch engagement as drawn: each tooth is pushed back 0.6 mm when centred and drops 0.6 mm into its notch
+PASS  side joint: finger bent 0.6 mm (centred): strain 0.49% (kept under 2.5%), room to bend 3.2 mm; pushes back 0.24 N
+PASS  side joint: finger bent 2.2 mm (at the end of the play): strain 1.80% (kept under 2.5%), room to bend 3.2 mm; pushes back 0.88 N
+PASS  side joint: finger bent 2.6 mm (at the end of the play, worst made): strain 2.13% (kept under 2.5%), room to bend 3.2 mm; pushes back 1.04 N
+== 6. Standing up ==
+PASS  stack of 1 on its skids: stands on a strip 61.0 mm wide under a body 67 mm wide; tips past 53.2 degrees
+PASS  stack of 2 on its skids: stands on a strip 61.0 mm wide under a body 67 mm wide; tips past 33.8 degrees
+PASS  stack of 3 on its skids: stands on a strip 61.0 mm wide under a body 67 mm wide; tips past 24.0 degrees
+PASS  stack of 4 on its skids: stands on a strip 61.0 mm wide under a body 67 mm wide; tips past 18.5 degrees
+== 7. Strength of the lips (nylon PA12, about 48 MPa) ==
+PASS  5 cells hung from one joint: 8.6 N; 0.64 MPa at the root of each flange, safety factor 75
+PASS  20 cells hung from one joint: 34.4 N; 2.56 MPa at the root of each flange, safety factor 19
+
+{'PASS': 27, 'FAIL': 0, 'NOTE': 2}

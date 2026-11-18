@@ -1,0 +1,229 @@
+{
+ "part": "shelf",
+ "unit": "mm",
+ "parameters": [
+  {
+   "description": "A row of slots across the face",
+   "id": "air.height",
+   "value": 7.0
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack - top.bar - air.height",
+   "id": "air.low",
+   "value": 21.5
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack - top.bar",
+   "id": "air.top",
+   "value": 28.5
+  },
+  {
+   "description": "The plate ends this far short of the bay's back",
+   "id": "back.clear",
+   "value": 3.0
+  },
+  {
+   "description": "Bay, front to back",
+   "id": "bay.depth",
+   "value": 100.0
+  },
+  {
+   "description": "Inside the bay, floor to roof",
+   "id": "bay.height",
+   "value": 32.0
+  },
+  {
+   "description": "Inside the bay, across",
+   "id": "bay.width",
+   "value": 202.2
+  },
+  {
+   "description": "Each finger's near edge from the centre line",
+   "id": "finger.apart",
+   "value": 30.0
+  },
+  {
+   "description": "Where the fingers leave the plate, from the front",
+   "id": "finger.root",
+   "value": 86.0
+  },
+  {
+   "description": "Cut either side of a finger to free it",
+   "id": "finger.slot",
+   "value": 1.0
+  },
+  {
+   "description": "",
+   "expr": "bay.depth + tooth.behind + tooth.ramp + tooth.lead + 0.1",
+   "id": "finger.tip",
+   "value": 104.38
+  },
+  {
+   "description": "Each finger",
+   "id": "finger.width",
+   "value": 8.0
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack",
+   "id": "front.height",
+   "value": 31.5
+  },
+  {
+   "description": "The face; it stops on the ends of the bay's ledges",
+   "id": "front.thickness",
+   "value": 2.6
+  },
+  {
+   "description": "Sunk, so a label's edges are protected",
+   "id": "label.depth",
+   "value": 0.4
+  },
+  {
+   "description": "Its upper edge",
+   "id": "label.high",
+   "value": 20.0
+  },
+  {
+   "description": "Its lower edge",
+   "id": "label.low",
+   "value": 10.0
+  },
+  {
+   "description": "A flat for a label",
+   "id": "label.width",
+   "value": 44.0
+  },
+  {
+   "description": "",
+   "expr": "(bay.width - side.slack) / 2",
+   "id": "mid",
+   "value": 100.85
+  },
+  {
+   "description": "Cut from each back corner",
+   "id": "nose.taper",
+   "value": 2.0
+  },
+  {
+   "description": "",
+   "expr": "bay.depth - back.clear",
+   "id": "plate.length",
+   "value": 97.0
+  },
+  {
+   "description": "Leaves 0.5 under the bay's ledges",
+   "id": "plate.thickness",
+   "value": 1.8
+  },
+  {
+   "description": "",
+   "expr": "bay.width - side.slack",
+   "id": "plate.width",
+   "value": 201.7
+  },
+  {
+   "description": "The rail's ends in from the face's sides",
+   "id": "pull.inset",
+   "value": 2.0
+  },
+  {
+   "description": "A lip under its edge",
+   "id": "pull.lip",
+   "value": 1.5
+  },
+  {
+   "description": "The pull: a rail along the face's top edge",
+   "id": "pull.reach",
+   "value": 6.0
+  },
+  {
+   "description": "Face lower than the bay's roof",
+   "id": "roof.slack",
+   "value": 0.5
+  },
+  {
+   "description": "Shelf narrower than the bay, in all",
+   "id": "side.slack",
+   "value": 0.5
+  },
+  {
+   "description": "Slot to slot, as on a carrier: seventeen of them",
+   "id": "slot.pitch",
+   "value": 10.5
+  },
+  {
+   "description": "Each slot",
+   "id": "slot.width",
+   "value": 8.0
+  },
+  {
+   "description": "Strap slots this far either side of centre",
+   "id": "strap.a",
+   "value": 54.0
+  },
+  {
+   "description": "And this far",
+   "id": "strap.b",
+   "value": 75.0
+  },
+  {
+   "description": "Second row",
+   "id": "strap.back",
+   "value": 58.0
+  },
+  {
+   "description": "And this far",
+   "id": "strap.c",
+   "value": 84.0
+  },
+  {
+   "description": "First row of strap slots from the front",
+   "id": "strap.front",
+   "value": 18.0
+  },
+  {
+   "description": "Strap slots, front to back: for a 20 mm strap",
+   "id": "strap.length",
+   "value": 22.0
+  },
+  {
+   "description": "Strap slots, across",
+   "id": "strap.width",
+   "value": 4.0
+  },
+  {
+   "description": "Front ramp's start behind the bay's rear edge",
+   "id": "tooth.behind",
+   "value": 0.6
+  },
+  {
+   "description": "Tooth below the finger",
+   "id": "tooth.depth",
+   "value": 1.2
+  },
+  {
+   "description": "Its back ramp",
+   "id": "tooth.lead",
+   "value": 2.75
+  },
+  {
+   "description": "Its front ramp",
+   "id": "tooth.ramp",
+   "value": 0.93
+  },
+  {
+   "description": "",
+   "expr": "bay.depth + tooth.behind",
+   "id": "tooth.x",
+   "value": 100.6
+  },
+  {
+   "description": "The face's top edge, which the pull grows out of",
+   "id": "top.bar",
+   "value": 3.0
+  }
+ ]
+}

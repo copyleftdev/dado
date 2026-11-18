@@ -1,0 +1,485 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin:0">
+<title>Dado Identity</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one quiet column on a studio-grey ground; the product's own colours are the only colour on the page. */
+:root {
+  --bg: #E9EAE6; --ink: #1F2224; --muted: #5C605D; --line: #C8CAC4; --panel: #F3F4F1; --stage: #C4C5BE; --hole: #14161A;
+  --graphite: #24272A; --putty: #88867E; --bone: #E1DED4; --metal: #9BA1A4;
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17191B; --ink: #E7E7E2; --muted: #9A9D98; --line: #303336; --panel: #1E2123; --stage: #7F817B; --hole: #0B0C0E; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #17191B; --ink: #E7E7E2; --muted: #9A9D98; --line: #303336; --panel: #1E2123; --stage: #7F817B; --hole: #0B0C0E; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 40px 72px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 72px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h2 { font-size: clamp(26px, 4vw, 36px); line-height: 1.1; }
+h3 { font-size: 19px; line-height: 1.25; }
+p { margin: 0; max-width: 64ch; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 19px; color: var(--ink); max-width: 56ch; }
+.muted { color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 24px; }
+.stage { background: var(--stage); border-radius: 4px; }
+svg { display: block; width: 100%; height: auto; }
+
+.hero { gap: 28px; }
+.mark-row { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; }
+.wordmark { font-family: var(--display); font-weight: 700; font-size: clamp(84px, 19vw, 190px); line-height: 0.82; letter-spacing: -0.055em; }
+.glyph { width: clamp(64px, 12vw, 116px); flex: none; }
+.hero .stage { padding: clamp(16px, 4vw, 40px); }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px 40px; }
+.two > * { min-width: 0; }
+dl { margin: 0; display: grid; gap: 14px; }
+dt { font-family: var(--display); font-weight: 600; font-size: 18px; }
+dd { margin: 0; color: var(--muted); }
+.alts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.alt { border-top: 1px solid var(--line); padding-top: 12px; }
+.alt b { font-family: var(--display); font-size: 22px; font-weight: 600; }
+.parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 24px; font-family: var(--mono); font-size: 13px; }
+.parts span { display: block; color: var(--muted); font-family: var(--body); font-size: 14px; }
+
+.swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; }
+.sw { display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 12px; }
+.sw i { display: block; height: 64px; border-radius: 3px; }
+.sw b { font-family: var(--display); font-size: 15px; font-weight: 600; }
+.schemes { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 28px 24px; }
+.scheme { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.scheme .stage { padding: 18px; }
+.scheme p { font-size: 15px; color: var(--muted); }
+
+.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 32px 24px; }
+.frame { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.frame .stage { aspect-ratio: 16 / 10; max-width: 100%; display: flex; align-items: center; justify-content: center; padding: 14px; overflow: hidden; }
+.frame .stage svg { max-height: 100%; }
+.frame .n { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: 0.06em; }
+.frame .say { font-family: var(--display); font-size: 20px; font-weight: 600; line-height: 1.2; }
+.frame p { font-size: 15px; color: var(--muted); }
+.frame .t { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+.act { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+.closer { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 36px 28px; }
+.shot { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.shot .stage { padding: 16px; }
+.shot ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; counter-reset: k; }
+.shot li { counter-increment: k; display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: 15px; color: var(--muted); }
+.shot li::before { content: counter(k); font-family: var(--mono); font-size: 11px; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; margin-top: 2px; }
+.shot li b { color: var(--ink); font-weight: 600; }
+.cam { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.config { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 760px) { .config { grid-template-columns: minmax(0, 1fr); } }
+.config .stage { padding: 20px; }
+.controls { display: grid; gap: 18px; }
+.ctl { display: grid; gap: 8px; }
+.ctl > span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button { font: inherit; font-size: 14px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 7px 12px; cursor: pointer; }
+button:hover { border-color: var(--ink); }
+button:disabled { opacity: 0.4; cursor: default; }
+.row[hidden] { display: none; }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+button.dot { width: 34px; height: 34px; padding: 0; border-radius: 50%; }
+button.dot[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+.step { font-family: var(--mono); min-width: 2ch; text-align: center; font-size: 16px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+td { padding: 7px 0; border-top: 1px solid var(--line); }
+td:last-child { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px 40px; }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; color: var(--muted); }
+.notes li::marker { color: var(--line); }
+footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Name and identity proposal</span>
+    <div class="mark-row">
+      <div class="wordmark">dado</div>
+      <svg class="glyph" id="glyph" viewBox="0 0 24 24" role="img" aria-label="The Dado mark: a rail held in a slot"></svg>
+    </div>
+    <p class="lede">One computer in one cell. Slide a second on and it holds. Keep going.</p>
+    <div class="stage"><svg id="hero" role="img" aria-label="Three Dado cells side by side in clay, moss and slate"></svg></div>
+  </section>
+
+  <section>
+    <span class="eyebrow">The name</span>
+    <h2>A dado is a slot that something slides into.</h2>
+    <div class="two">
+      <dl>
+        <div><dt>In joinery</dt><dd>A dado is the groove cut across a board so another piece slides in and stays. That is the product's whole mechanism: a rail, a slot, one direction of travel.</dd></div>
+        <div><dt>In architecture</dt><dd>The dado is the plain block of a pedestal, between base and cap. Our parts are a base, a cell and a cap.</dd></div>
+        <div><dt>In Italian and Spanish</dt><dd>Dado means a die: a small cube. One unit, made to be more than one.</dd></div>
+      </dl>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <p>Four letters, two syllables, the same forwards as a shape: d, a, d, o. It reads in lower case like a row of cells with one open.</p>
+        <p class="muted">The mark is the joint itself, seen end on: the rail of one cell held in the lips of the next. Nothing about it is decoration. It is the section the part is made from.</p>
+        <p class="muted">Lines to try: <b style="color:var(--ink)">Starts at one.</b> &nbsp; <b style="color:var(--ink)">One slot. Any size.</b> &nbsp; <b style="color:var(--ink)">Slide to grow.</b></p>
+      </div>
+    </div>
+    <div class="alts">
+      <div class="alt"><b>Kumi</b><p class="muted">From Japanese joinery that locks without fasteners. Warm and quick to say, but it borrows a tradition the product doesn't come from.</p></div>
+      <div class="alt"><b>Ashlar</b><p class="muted">Finely cut stone laid with thin, even joints, which is how a wall of these looks. Precise, but heavy, and harder to spell.</p></div>
+      <div class="alt"><b>Course</b><p class="muted">One row of bricks in a wall. Honest about growth, but it disappears into ordinary sentences.</p></div>
+    </div>
+    <div>
+      <span class="eyebrow">What the parts are called</span>
+      <div class="parts" style="margin-top:12px">
+        <div>dado cell<span>the sleeve</span></div>
+        <div>dado carrier<span>holds the Pi, slides in</span></div>
+        <div>dado base<span>under each column</span></div>
+        <div>dado cap<span>finishes top and sides</span></div>
+        <div>dado bay<span>the place of several cells, for a switch or a hub</span></div>
+        <div>dado shelf<span>slides into a bay, holds the device</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Colour</span>
+    <h2>The sleeve stays quiet. The face carries the colour.</h2>
+    <div class="two">
+      <p>Every face colour has the same lightness and the same strength; only the hue changes. Put any of them next to any other and neither shouts, so a wall can be one colour, three, or nine and still read as one object. Matte throughout: these are colours for a surface that scatters light, not one that shines.</p>
+      <p class="muted">Three neutrals for sleeves, bases and caps. Six hues for faces, spaced round the wheel so that neighbours make a run, every other one makes a triad, and opposites make a signal.</p>
+    </div>
+    <div class="swatches" id="swatches"></div>
+    <div class="schemes" id="schemes"></div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Beyond the Pi</span>
+    <h2>A bay takes the place of several cells, on the same joints.</h2>
+    <div class="two">
+      <p>A cluster needs a switch, and switches and hubs come in no standard size. So a bay is not fitted to anything. It is the cell's own section, stretched: as wide as three or four cells and as tall as one or two, with a rail and a pair of lips wherever those cells would have had them. It slides on, latches and takes caps exactly as a cell does.</p>
+      <p class="muted">Inside, a shelf slides and latches like a carrier, behind the same closed face. The device is strapped to it through slots at three widths, with its ports at the open back, beside the Pis' own. One eight-port switch serves seven Pis and an uplink.</p>
+    </div>
+    <div class="stage" style="padding:clamp(16px,4vw,36px)"><svg id="crown" role="img" aria-label="Six cells in two rows with a bay across the top"></svg></div>
+    <div class="schemes" id="bays"></div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Storyboard</span>
+    <h2>Three acts: unfold it, look closer, make it yours.</h2>
+    <p class="muted">The film opens the product up, then slows down on the details that make it work, then hands the viewer the parts. Every motion in it is one the real product makes: parts only ever travel along the axis they slide on.</p>
+    <div class="act">Act one. Unfold: from one line to a wall, about forty seconds</div>
+    <div class="board" id="board"></div>
+  </section>
+
+  <section>
+    <div class="act">Act two. Look closer: the camera goes in, the parts ease apart, and thin lines name what matters</div>
+    <p class="muted">Five held shots. In each the camera pushes in, the assembly opens along its sliding axis, and leader lines draw on one at a time with a short label. The numbers below are where those lines land and what each one says.</p>
+    <div class="closer" id="closer"></div>
+  </section>
+
+  <section>
+    <div class="act">Act three. Make it yours: the film stops and the viewer takes over</div>
+    <h2>Mix and match.</h2>
+    <p class="muted">The last frame of the film is the first frame of this. The wall the viewer just watched becomes theirs to change: how many, how tall, which colours. The list beside it is exactly what would go in the box. Try it.</p>
+    <div class="config">
+      <div class="stage"><svg id="preview" role="img" aria-label="Preview of the configured cluster"></svg></div>
+      <div class="controls">
+        <div class="ctl"><span>Start from</span><div class="row" id="presets"></div></div>
+        <div class="ctl"><span>Size</span>
+          <div class="row"><button id="colsDown" aria-label="Fewer columns">&minus;</button><span class="step" id="colsN">3</span><button id="colsUp" aria-label="More columns">+</button><span class="muted">wide</span>
+          <button id="rowsDown" aria-label="Fewer rows" style="margin-left:10px">&minus;</button><span class="step" id="rowsN">3</span><button id="rowsUp" aria-label="More rows">+</button><span class="muted">high</span></div></div>
+        <div class="ctl"><span>Sleeves, bases and caps</span><div class="row" id="sleeves"></div></div>
+        <div class="ctl"><span>Faces</span><div class="row" id="looks"></div><div class="row" id="hues"></div></div>
+        <div class="ctl"><span>Network</span><div class="row" id="bayKinds"></div><p class="muted" style="font-size:14px" id="bayNote"></p></div>
+        <table id="box"></table>
+        <p class="muted" style="font-size:14px" id="facts"></p>
+      </div>
+    </div>
+    <div class="two">
+      <dl>
+        <div><dt>One</dt><dd>A cell, a carrier, a base and its caps. The way in: one Pi on a desk, finished on every side.</dd></div>
+        <div><dt>Trio</dt><dd>Three in a row on three bases. The smallest cluster that feels like one.</dd></div>
+        <div><dt>Nine</dt><dd>Three by three. The picture on the box, and the one the film ends on.</dd></div>
+      </dl>
+      <dl>
+        <div><dt>Add a cell</dt><dd>A cell and a carrier, in any face colour. Every pack after the first is this.</dd></div>
+        <div><dt>Faces</dt><dd>Carriers alone, so a cluster can change its colours or its roles without changing its sleeves.</dd></div>
+        <div><dt>Not priced</dt><dd>These are shapes for offers, not offers. Nothing here has a price, and none is implied.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">For the build</span>
+    <h2>What the three.js piece needs.</h2>
+    <div class="notes">
+      <div><h3>Geometry</h3><ul>
+        <li>The real parts, exported from the CAD as meshes: cell, carrier, base, three caps.</li>
+        <li>Raspberry Pi's own model of the Pi 5 (MIT licensed), full detail for the close shots and a lighter one for the wall.</li>
+        <li>Beat 1 uses the sleeve's actual section outline, which this page draws from the CAD.</li>
+      </ul></div>
+      <div><h3>Material and light</h3><ul>
+        <li>Fully rough, no metal, no gloss: one soft key from upper left, a low fill, soft contact shadow.</li>
+        <li>The Pi keeps its own green and metal; it is the only shiny thing in the film.</li>
+        <li>Faces change colour by cross-fade, never by cut.</li>
+      </ul></div>
+      <div><h3>Motion</h3><ul>
+        <li>One axis: everything that joins moves front to back, and eases to a stop with a small settle.</li>
+        <li>The camera turns slowly and never cuts during a slide.</li>
+        <li>Give a still frame for viewers who ask for reduced motion: beat 6.</li>
+      </ul></div>
+      <div><h3>Not yet true</h3><ul>
+        <li>The name has not been checked against trade marks.</li>
+        <li>Printed nylon is normally grey, white or dyed black. These six hues are a direction; whether a bureau can hold them batch to batch is untested.</li>
+        <li>Nothing has been printed. The film shows the design, not a product you can hold.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <footer>Drawn from the CAD of 18 November 2026: cell 67 by 42 by 100 mm, 3.6 mm between neighbours.</footer>
+</div>
+
+<script>
+const DATA = {"profile": "M0.00,0.00 L3.00,0.00 L3.00,3.60 L6.00,3.60 L6.00,0.00 L24.70,0.00 L24.70,3.60 L29.70,3.60 L29.70,2.20 L26.70,2.20 L26.70,0.00 L40.30,0.00 L40.30,2.20 L37.30,2.20 L37.30,3.60 L42.30,3.60 L42.30,0.00 L61.00,0.00 L61.00,3.60 L64.00,3.60 L64.00,0.00 L67.00,0.00 L67.00,-18.00 L68.90,-18.00 L68.90,-13.40 L70.10,-13.40 L70.10,-28.60 L68.90,-28.60 L68.90,-24.00 L67.00,-24.00 L67.00,-42.00 L36.50,-42.00 L36.50,-43.90 L39.50,-43.90 L39.50,-45.10 L27.50,-45.10 L27.50,-43.90 L30.50,-43.90 L30.50,-42.00 L0.00,-42.00 L0.00,-32.20 L-3.60,-32.20 L-3.60,-25.60 L-2.20,-25.60 L-2.20,-30.20 L0.00,-30.20 L0.00,-11.80 L-2.20,-11.80 L-2.20,-16.40 L-3.60,-16.40 L-3.60,-9.80 L0.00,-9.80 Z", "cavity": "M3.00,-3.00 L64.00,-3.00 L64.00,-5.30 L62.80,-5.30 L62.80,-6.50 L64.00,-6.50 L64.00,-39.00 L3.00,-39.00 L3.00,-6.50 L4.20,-6.50 L4.20,-5.30 L3.00,-5.30 Z", "faces": [{"name": "Clay", "h": 35, "hex": "#CD8B7A"}, {"name": "Ochre", "h": 80, "hex": "#BA9960"}, {"name": "Moss", "h": 135, "hex": "#88AB75"}, {"name": "Teal", "h": 195, "hex": "#57AFAF"}, {"name": "Slate", "h": 250, "hex": "#75A3D2"}, {"name": "Lilac", "h": 310, "hex": "#AF90C6"}], "neutrals": [{"name": "Graphite", "hex": "#24272A", "l": 0.27}, {"name": "Putty", "hex": "#88867E", "l": 0.62}, {"name": "Bone", "hex": "#E1DED4", "l": 0.9}]};
+const C = { graphite: "var(--graphite)", putty: "var(--putty)", bone: "var(--bone)", hole: "var(--hole)", metal: "var(--metal)" };
+const F = Object.fromEntries(DATA.faces.map(f => [f.name.toLowerCase(), f.hex]));
+const PX = 70.6, PZ = 45.6;
+
+// One cell seen from the front, in millimetres. o.dx, o.dy move its face; o.empty leaves the carrier out.
+function cell(x, y, sleeve, face, o = {}) {
+  let s = `<g transform="translate(${x},${y})"><rect width="67" height="42" rx="2" fill="${sleeve}"/><rect x="3" y="3" width="61" height="36" fill="${C.hole}"/>`;
+  if (o.empty) return s + "</g>";
+  s += `<g transform="translate(${3.25 + (o.dx || 0)},${3.5 + (o.dy || 0)})"><rect width="60.5" height="35.5" fill="${face}"/>`;
+  if (o.back) {
+    // The back wall: five slots for air out, and the ports through one window.
+    for (let k = 0; k < 5; k++) s += `<rect x="${5.25 + k * 10.5}" y="3" width="8" height="7" fill="${C.hole}"/>`;
+    s += `<rect x="3.25" y="12.5" width="54" height="18.4" fill="${C.hole}"/>`;
+    s += `<rect x="40.1" y="16.05" width="15.9" height="13.3" fill="${C.metal}"/><rect x="21.9" y="13.75" width="14.5" height="15.6" fill="${C.metal}"/><rect x="4" y="13.75" width="14.5" height="15.6" fill="${C.metal}"/>`;
+    return s + "</g></g>";
+  }
+  // The face: a pull, five tall slots with the fan behind them, a label flat, a slot for the card.
+  s += `<rect x="2" width="56.5" height="3" fill="#fff" opacity="0.16"/>`;
+  for (let k = 0; k < 5; k++) s += `<rect x="${5.25 + k * 10.5}" y="3" width="8" height="18" fill="${C.hole}"/>`;
+  s += `<rect x="8.25" y="22.5" width="44" height="6" fill="#000" opacity="0.10"/>`;
+  s += `<rect x="23" y="30.3" width="14.5" height="2.6" fill="${C.hole}"/>`;
+  return s + "</g></g>";
+}
+// A wall on its bases with caps: faceAt(col,row) gives each face's colour, or null for an empty cell.
+function wall(cols, rows, sleeve, faceAt, o = {}) {
+  const w = cols * PX - 3.6, h = rows * PZ - 3.6, top = 5.6, base = o.bare ? 0 : 25.6;
+  let s = "";
+  for (let c = 0; c < cols; c++) {
+    if (!o.bare) { s += `<rect x="${c * PX}" y="${top - 5.6}" width="67" height="2" fill="${sleeve}"/><rect x="${c * PX}" y="${top + h + 3.6}" width="67" height="22" rx="2" fill="${sleeve}"/>`; }
+    for (let r = 0; r < rows; r++) {
+      const f = faceAt(c, r);
+      s += cell(c * PX, top + (rows - 1 - r) * PZ, sleeve, f || C.hole, f ? (o.shift && o.shift(c, r)) || {} : { empty: true });
+    }
+  }
+  return { body: s, w, h: top + h + (o.bare ? 0 : 3.6 + 22) };
+}
+function svg(el, w, h, body, pad = 0) {
+  el.setAttribute("viewBox", `${-pad} ${-pad} ${w + 2 * pad} ${h + 2 * pad}`);
+  el.innerHTML = body;
+}
+function make(w, h, body, pad = 0) {
+  return `<svg viewBox="${-pad} ${-pad} ${w + 2 * pad} ${h + 2 * pad}" role="img">${body}</svg>`;
+}
+
+// The mark: the lower cell's rail (in colour) held in the upper cell's lips.
+function joint(colour, ink) {
+  return `<rect x="2" y="2" width="20" height="3" fill="${ink}"/><rect x="2" y="5" width="3" height="10" fill="${ink}"/><rect x="19" y="5" width="3" height="10" fill="${ink}"/>`
+    + `<rect x="2" y="12" width="7.5" height="3" fill="${ink}"/><rect x="14.5" y="12" width="7.5" height="3" fill="${ink}"/>`
+    + `<rect x="6" y="7" width="12" height="3" fill="${colour}"/><rect x="10.5" y="10" width="3" height="9" fill="${colour}"/><rect x="2" y="19" width="20" height="3" fill="${colour}"/>`;
+}
+svg(document.getElementById("glyph"), 24, 24, joint(F.clay, "var(--ink)"));
+
+{ const m = wall(3, 1, C.graphite, c => [F.clay, F.moss, F.slate][c]);
+  svg(document.getElementById("hero"), m.w, m.h, m.body, 6); }
+
+// Swatches.
+{ const all = DATA.neutrals.map(n => ({ ...n, note: "sleeve" })).concat(DATA.faces.map(f => ({ ...f, note: "face" })));
+  document.getElementById("swatches").innerHTML = all.map(s =>
+    `<div class="sw"><i style="background:${s.hex}"></i><b>${s.name}</b><span>${s.hex}</span><span class="muted">${s.note}</span></div>`).join(""); }
+
+// Six ways to colour the same nine.
+const order = ["clay", "ochre", "moss", "teal", "slate", "lilac"];
+const schemes = [
+  ["Monolith", "Graphite with bone faces. The default: one object, nine doors.", C.graphite, () => C.bone],
+  ["One voice", "A single hue across the wall. Calm, and it makes a brand colour of whichever you pick.", C.graphite, () => F.teal],
+  ["Run", "Neighbouring hues stepped across the columns. The wall reads as a gradient without any face being louder.", C.graphite, (c, r) => F[order[(c + r) % 6]]],
+  ["Roles", "Three hues a third of the wheel apart, one per job: control, compute, storage. Colour as a legend.", C.graphite, (c) => [F.ochre, F.teal, F.lilac][c]],
+  ["Signal", "One clay face in a slate field. Opposites on the wheel: the eye finds the odd one at once.", C.graphite, (c, r) => (c === 1 && r === 1 ? F.clay : F.slate)],
+  ["Daylight", "Bone sleeves, moss faces. The same parts for a bright room.", C.bone, () => F.moss],
+];
+document.getElementById("schemes").innerHTML = schemes.map(([name, text, sleeve, f]) => {
+  const m = wall(3, 3, sleeve, f);
+  return `<div class="scheme"><div class="stage">${make(m.w, m.h, m.body, 4)}</div><h3>${name}</h3><p>${text}</p></div>`;
+}).join("");
+
+// Storyboard frames.
+const line = `fill="none" stroke="var(--graphite)" stroke-width="0.7" stroke-linejoin="round"`;
+const thin = `fill="none" stroke="var(--graphite)" stroke-width="0.35" stroke-linejoin="round" opacity="0.55"`;
+const prof = `<path d="${DATA.profile}" ${line}/><path d="${DATA.cavity}" ${line}/>`;
+const frames = [
+  ["A line.", "Dark ground. One line draws itself: the cell's section, exactly as it is in the CAD. Rails, lips and skids appear as the pen passes them.", "0 to 4 s",
+    make(74, 49, `<g transform="translate(3.6,45.2)">${prof}</g>`, 6)],
+  ["Pulled.", "The line is pulled towards us into a sleeve a hundred millimetres deep. The camera swings a quarter turn as it grows. Matte graphite arrives with the depth.", "4 to 8 s",
+    make(108, 72, `<g transform="translate(34,26.4)"><path d="${DATA.profile}" ${thin}/><path d="${DATA.cavity}" ${thin}/></g><g ${thin}><path d="M3.6,71.4 L34,26.4 M70.6,71.4 L101,26.4 M3.6,29.4 L34,-15.6 M70.6,29.4 L101,-15.6"/></g><g transform="translate(3.6,71.4)">${prof}</g>`, 8)],
+  ["One board.", "A Raspberry Pi settles onto its carrier, ports to the back: four screws turn. The carrier slides into the sleeve and stops flush. The face takes its first colour.", "8 to 14 s",
+    make(67, 60, cell(0, 0, C.graphite, C.hole, { empty: true }) + `<g opacity="0.96">${cell(0, 0, "none", F.clay, { dy: 16 }).replace('fill="none"', 'fill="none"').replace(`<rect x="3" y="3" width="61" height="36" fill="${C.hole}"/>`, "")}</g><path d="M33.5,54 L33.5,46 M30.5,49 L33.5,46 L36.5,49" ${line}/>`, 6)],
+  ["It slides.", "Close on the joint. A second cell's lips pass over the first cell's rail; a small tooth rides the rail and drops into its notch. One sound: a soft click.", "14 to 19 s",
+    make(24, 24, joint(F.moss, "var(--graphite)") + `<circle cx="12" cy="8.5" r="0.9" fill="var(--graphite)"/>`, 3)],
+  ["And again.", "One, two, four, nine. Each cell arrives along its rail and settles. A base slides under each column; caps close the top and the sides.", "19 to 26 s",
+    (() => { let s = "", x = 0; for (const [c, r] of [[1, 1], [2, 1], [2, 2], [3, 3]]) { const m = wall(c, r, C.graphite, () => C.bone, { bare: true }); s += `<g transform="translate(${x},${(3 - r) * PZ})">${m.body}</g>`; x += m.w + 16; } return make(x - 16, 3 * PZ + 2, s, 6); })()],
+  ["Any colour. Same weight.", "The faces change through the schemes without a cut: monolith, one voice, run, roles. Nothing else moves. This is the still for reduced motion.", "26 to 32 s",
+    (() => { const m = wall(3, 3, C.graphite, (c, r) => F[order[(c + r) % 6]]); return make(m.w, m.h, m.body, 6); })()],
+  ["Pull one.", "One face turns to the signal colour. A hand takes its pull and the carrier comes out, board and all, while the other eight keep working. It goes back.", "32 to 37 s",
+    (() => { const m = wall(3, 3, C.graphite, (c, r) => (c === 1 && r === 1 ? F.clay : F.slate), { shift: (c, r) => (c === 1 && r === 1 ? { dx: 5, dy: 6 } : null) }); return make(m.w, m.h, m.body, 6); })()],
+  ["Starts at one.", "The camera draws back until the wall is a small block. It folds down to a single joint, seen end on, which is the mark. The name sets beside it.", "37 to 41 s",
+    make(92, 28, `<g transform="translate(0,2)">${joint(F.clay, "var(--graphite)")}</g><text x="30" y="23" font-family="Familjen Grotesk, Helvetica Neue, Arial, sans-serif" font-weight="700" font-size="27" letter-spacing="-1.4" fill="var(--graphite)">dado</text>`, 4)],
+];
+document.getElementById("board").innerHTML = frames.map(([say, text, t, art], i) =>
+  `<div class="frame"><div class="stage">${art}</div><span class="n">Beat ${i + 1}</span><span class="say">${say}</span><p>${text}</p><span class="t">${t}</span></div>`).join("");
+
+// Act two: three annotated views. Each mark is a point on the drawing and a place for its number.
+function callouts(marks, k = 1) {
+  return marks.map(([x, y, tx, ty], i) =>
+    `<path d="M${x},${y} L${tx},${ty}" stroke="var(--graphite)" stroke-width="0.3" fill="none"/><circle cx="${x}" cy="${y}" r="0.7" fill="var(--graphite)"/>`
+    + `<circle cx="${tx}" cy="${ty}" r="${2.6 * k}" fill="var(--graphite)"/><text x="${tx}" y="${ty + 1.15 * k}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="${3.2 * k}" fill="var(--bone)">${i + 1}</text>`).join("");
+}
+const board = "#3C9458";
+const shots = [
+  ["The face", "Camera: straight on, level with the face, pushing in until one cell fills the frame.",
+    make(110, 60, cell(18, 9, C.graphite, F.clay) + `<rect x="${18 + PX}" y="9" width="7" height="42" fill="${C.graphite}"/>`
+      + callouts([[52, 14, 52, 3], [38, 22, 8, 22], [34, 38, 8, 40], [52, 44.1, 52, 57], [83.5, 24, 105, 18], [86.8, 40, 105, 44]]), 0),
+    [["Pull", "a rail along the whole top edge. Fingers pull; the thumb rests on the sleeve's rim."],
+     ["Air in", "five tall slots, with a 25 mm fan behind the middle three."],
+     ["Label", "a flat 44 mm wide, sunk so a label's edges are protected."],
+     ["Card", "one slot low in the face, so the card comes out without taking the board off."],
+     ["Rim", "3 mm of sleeve frames every face."],
+     ["Reveal", "3.6 mm between neighbours. The joint lives in it, set back out of sight."]]],
+  ["The joint", "Camera: end on to the gap between two cells, very close. The upper cell lifts half a millimetre and settles.",
+    make(60, 44, `<g transform="translate(14,2) scale(1.6)">${joint(F.moss, "var(--graphite)")}</g>`
+      + callouts([[33.2, 15.4, 7, 9], [20, 26, 7, 30], [43.5, 23, 54, 14], [33.2, 21.8, 54, 34]]), 0),
+    [["Rail", "a T on the top and one side of every cell, part of the same section as the sleeve."],
+     ["Lips", "a pair on the bottom and the other side. They are also what a cell stands on."],
+     ["Play", "0.8 mm sideways, so a wall goes together even when parts vary."],
+     ["Hold", "the joint holds along its own direction only: 0.5 mm of clearance, and a sprung tooth that drops into a notch when the cell is home."]]],
+  ["The carrier", "Camera: from the side, the carrier drawn halfway out of its sleeve, the sleeve fading to an outline.",
+    (() => { const z = v => 46 - v; return make(128, 58,
+      `<rect x="9" y="${z(42)}" width="100" height="45" fill="none" stroke="var(--graphite)" stroke-width="0.35" stroke-dasharray="1.5 1.2"/>`
+      + `<rect x="9" y="${z(4.8)}" width="97" height="1.8" fill="${F.clay}"/><rect x="9" y="${z(38.5)}" width="2.6" height="35.5" fill="${F.clay}"/><rect x="3" y="${z(38.5)}" width="6" height="3" fill="${F.clay}"/>`
+      + `<rect x="103.4" y="${z(38.5)}" width="2.6" height="33.7" fill="${F.clay}"/><rect x="95" y="${z(3)}" width="18.4" height="1.8" fill="${F.clay}"/><path d="M109.6,${z(3)} L111,${z(1.8)} L113.3,${z(3)} Z" fill="${F.clay}" transform="translate(0,1.8)"/>`
+      + `<rect x="19.95" y="${z(7.8)}" width="3" height="3" fill="${F.clay}"/><rect x="77.95" y="${z(7.8)}" width="3" height="3" fill="${F.clay}"/>`
+      + `<rect x="17.95" y="${z(9.15)}" width="85" height="1.35" fill="${board}"/><rect x="85" y="${z(25.35)}" width="21" height="16.2" fill="${C.metal}"/><rect x="24" y="${z(22.85)}" width="58" height="13.7" fill="none" stroke="var(--graphite)" stroke-width="0.35" stroke-dasharray="1.5 1.2"/>`
+      + `<rect x="11.6" y="${z(37.5)}" width="6" height="25" fill="var(--graphite)" opacity="0.8"/>`
+      + callouts([[6, z(37), 6, 53.5], [21.5, z(6.3), 30, 53.5], [60, z(8.5), 60, 53.5], [66, z(16), 84, 53.5], [14.6, z(28), 32, z(33)], [111.5, z(2), 123.5, 40]], 1.35), 0); })(),
+    [["Pull and face", "one piece with the plate, so pulling the face brings everything."],
+     ["Posts", "four, on the Pi's own hole pattern. They line up with Raspberry Pi's model exactly."],
+     ["The board", "a Raspberry Pi 5, 1.35 mm thick, its ports through the back wall."],
+     ["Cooler", "room above the board for the Active Cooler and a power-over-Ethernet HAT."],
+     ["Fan", "a 25 mm fan, 6 mm thick, snaps into a cradle behind the face and draws air in over the board."],
+     ["Latch", "two fingers whose teeth drop behind the sleeve's rear edge and then rest straight."]]],
+  ["The back", "Camera: swings round behind one cell. A single network cable slides into the Ethernet port.",
+    make(110, 60, cell(21.5, 9, C.graphite, F.clay, { back: true })
+      + `<path d="M64.7,34.2 H74 q6,0 6,6 V56" fill="none" stroke="var(--bone)" stroke-width="3"/><rect x="66.5" y="31.2" width="9" height="6" fill="var(--putty)"/>`
+      + callouts([[80, 48, 98, 48], [34, 34, 8, 34], [55, 19, 55, 3]]), 0),
+    [["One cable", "power over Ethernet: power and network together, in at the back."],
+     ["Ports", "Ethernet and four USB, flush with the back wall and clear of the latch fingers below."],
+     ["Air out", "five slots above the ports. Air goes straight through, front to back."]]],
+  ["The bay", "Camera: three cells in a row. A bay slides on across all three; its shelf comes in with a switch on it, then draws out.",
+    (() => { const m = crowned(1, C.graphite, (c) => [F.clay, F.ochre, F.moss][c], F.slate); return make(m.w + 40, m.h + 8,
+      `<g transform="translate(20,6)">${m.body}</g>` + callouts([[26, 14, 8, 6], [124, 30, 124, 4], [200, 44, 242, 52]], 2.2), 0); })(),
+    [["The bay", "as wide as three cells, with their rails and lips in the same places."],
+     ["The shelf", "slides and latches like a carrier, behind the same closed face."],
+     ["A switch", "strapped to the shelf through slots at three widths, ports to the back. Nothing is fitted to one model."]]],
+];
+document.getElementById("closer").innerHTML = shots.map(([name, cam, art, items]) =>
+  `<div class="shot"><h3>${name}</h3><div class="stage">${art}</div><span class="cam">${cam}</span><ol>${items.map(([b, t]) => `<li><span><b>${b}:</b> ${t}</span></li>`).join("")}</ol></div>`).join("");
+
+// Act three: the configurator. Sizes, masses and power are from the CAD and the earlier figures.
+const state = { cols: 3, rows: 3, sleeve: "Graphite", look: "Run", hue: "teal", bay: "None" };
+const BAYS = { "Bay": [3, 1, 7, 247.33 + 50.4], "Tall bay": [3, 2, 10, 340.37 + 72.75], "Rack bay": [4, 2, 12, 491.05 + 97.48] };
+const sleeveHex = Object.fromEntries(DATA.neutrals.map(n => [n.name, n.hex]));
+const looks = {
+  "Monolith": () => (state.sleeve === "Bone" ? sleeveHex.Graphite : sleeveHex.Bone),
+  "One voice": () => F[state.hue],
+  "Run": (c, r) => F[order[(c + r) % 6]],
+  "Roles": (c) => [F.ochre, F.teal, F.lilac][c % 3],
+  "Signal": (c, r) => (c === Math.floor((state.cols - 1) / 2) && r === Math.floor((state.rows - 1) / 2) ? F.clay : F.slate),
+};
+const presets = { "One": [1, 1], "Trio": [3, 1], "Nine": [3, 3], "Twelve": [4, 3] };
+function pressed(id, items, current, set, dot) {
+  const el = document.getElementById(id);
+  el.innerHTML = items.map(([key, colour]) => dot
+    ? `<button class="dot" data-k="${key}" aria-label="${key}" aria-pressed="${key === current}" style="background:${colour}"></button>`
+    : `<button data-k="${key}" aria-pressed="${key === current}">${key}</button>`).join("");
+  el.onclick = e => { const b = e.target.closest("button"); if (b) { set(b.dataset.k); draw(); } };
+}
+function draw() {
+  const { cols, rows } = state, n = cols * rows;
+  const kind = BAYS[state.bay], crown = kind && cols % kind[0] === 0 ? Math.min(cols / kind[0], state.bay === "Rack bay" ? 1 : 2) : 0;
+  const high = rows + (crown ? kind[1] : 0);
+  const paint = (c, r) => looks[state.look](c, r);
+  const m = crown ? crowned(rows, sleeveHex[state.sleeve], paint, k => paint(1 + kind[0] * k, rows), cols, kind)
+    : wall(cols, rows, sleeveHex[state.sleeve], paint);
+  svg(document.getElementById("preview"), m.w, m.h, m.body, 6);
+  pressed("bayKinds", ["None", ...Object.keys(BAYS)].map(k => [k]), state.bay, k => { state.bay = k; });
+  document.getElementById("bayNote").textContent = !kind ? "A bay across the top holds a switch or a hub, with its ports to the back."
+    : !crown ? (state.bay === "Rack bay" ? "A rack bay is four cells wide: it needs four columns." : "A bay is three cells wide: it needs three or six columns.")
+    : state.bay === "Tall bay" ? "Two rows high: taller gear, or one rack unit up to 200 mm wide."
+    : state.bay === "Rack bay" ? "Takes ten-inch rack gear, one unit tall, with its ears on."
+    : n > 7 * crown ? `An eight-port switch serves seven Pis and an uplink. These ${n} need ${Math.ceil(n / 7)} switches; there is room for ${crown}.`
+    : `Room for ${crown === 1 ? "one eight-port switch" : "two eight-port switches"}: enough ports for these ${n} Pis and an uplink.`;
+  document.getElementById("colsN").textContent = cols;
+  document.getElementById("rowsN").textContent = rows;
+  pressed("presets", Object.keys(presets).map(k => [k]), Object.keys(presets).find(k => presets[k][0] === cols && presets[k][1] === rows), k => { [state.cols, state.rows] = presets[k]; });
+  pressed("sleeves", DATA.neutrals.map(x => [x.name, x.hex]), state.sleeve, k => { state.sleeve = k; }, true);
+  pressed("looks", Object.keys(looks).map(k => [k]), state.look, k => { state.look = k; });
+  const hues = document.getElementById("hues");
+  hues.hidden = state.look !== "One voice";
+  pressed("hues", DATA.faces.map(f => [f.name.toLowerCase(), f.hex]), state.hue, k => { state.hue = k; }, true);
+  const parts = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[state.bay + (crown > 1 ? "s" : ""), crown], ["Shelves", crown]] : [])];
+  document.getElementById("box").innerHTML = parts.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
+  const grams = 1.01 * (n * (73.06 + 15.86) + cols * (64.31 + 17.38) + high * (10.74 + 11.08) + (crown ? crown * kind[3] : 0));
+  const wide = cols * PX - 3.6 + 11.2, tall = high * PZ + 28.6;
+  document.getElementById("facts").textContent =
+    `${Math.round(wide)} mm wide, ${Math.round(tall)} tall, 110 deep. About ${(grams / 1000).toFixed(grams < 1000 ? 2 : 1)} kg of printed parts. `
+    + `With a Pi in every cell: about ${(n * 6.2).toFixed(0)} W at typical work, ${(n * 14.3).toFixed(0)} W flat out, over ${n} network cable${n > 1 ? "s" : ""}.`;
+}
+const bump = (key, by, lo, hi) => () => { state[key] = Math.min(hi, Math.max(lo, state[key] + by)); draw(); };
+document.getElementById("colsDown").onclick = bump("cols", -1, 1, 6);
+document.getElementById("colsUp").onclick = bump("cols", 1, 1, 6);
+document.getElementById("rowsDown").onclick = bump("rows", -1, 1, 4);
+document.getElementById("rowsUp").onclick = bump("rows", 1, 1, 4);
+draw();
+
+// A bay seen from the front: n places across, m up, under a roof of the given thickness.
+function bay(x, y, sleeve, face, n, m, roof) {
+  const w = n * PX - 3.6, h = m * PZ - 3.6, fw = w - 6.5, fh = h - 3 - roof - 0.5, slots = Math.floor((fw - 16) / 10.5) + 1;
+  let s = `<g transform="translate(${x},${y})"><rect width="${w}" height="${h}" rx="2" fill="${sleeve}"/><rect x="3" y="${roof}" width="${w - 6}" height="${h - 3 - roof}" fill="${C.hole}"/>`;
+  s += `<g transform="translate(3.25,${roof + 0.5})"><rect width="${fw}" height="${fh}" fill="${face}"/><rect x="2" width="${fw - 4}" height="3" fill="#fff" opacity="0.16"/>`;
+  for (let k = 0; k < slots; k++) s += `<rect x="${fw / 2 - ((slots - 1) / 2) * 10.5 - 4 + k * 10.5}" y="3" width="8" height="7" fill="${C.hole}"/>`;
+  return s + `<rect x="${fw / 2 - 22}" y="${fh - 20}" width="44" height="10" fill="#000" opacity="0.10"/></g></g>`;
+}
+// Three columns of cells on their bases with a bay across the top, and caps over it.
+function crowned(rows, sleeve, faceAt, bayFace, cols = 3, [wide, up, roof] = [3, 1, 7]) {
+  let s = "";
+  for (let k = 0; k < cols / wide; k++) s += bay(k * wide * PX, 5.6, sleeve, typeof bayFace === "function" ? bayFace(k) : bayFace, wide, up, roof);
+  const top = 5.6 + up * PZ;  // the cells start under the bay, however many rows high it is
+  for (let c = 0; c < cols; c++) {
+    s += `<rect x="${c * PX}" y="0" width="67" height="2" fill="${sleeve}"/><rect x="${c * PX}" y="${top + rows * PZ}" width="67" height="22" rx="2" fill="${sleeve}"/>`;
+    for (let r = 0; r < rows; r++) s += cell(c * PX, top + (rows - 1 - r) * PZ, sleeve, faceAt(c, r));
+  }
+  return { body: s, w: cols * PX - 3.6, h: top + rows * PZ + 22 };
+}
+{ const m = crowned(2, C.graphite, (c, r) => F[order[(c + r) % 6]], F.slate);
+  svg(document.getElementById("crown"), m.w, m.h, m.body, 6); }
+document.getElementById("bays").innerHTML = [
+  ["Bay", 3, 1, 7, F.slate, "Three wide, one high. 201.7 by 30.2 mm on its shelf: desktop switches and hubs up to 29 mm tall. Carries one row of cells above it."],
+  ["Tall bay", 3, 2, 10, F.teal, "Three wide, two high. 201.7 by 72.8 mm: taller gear, or one rack unit up to 200 mm wide. Carries three rows above it."],
+  ["Rack bay", 4, 2, 12, F.ochre, "Four wide, two high. 272.3 by 70.8 mm: ten-inch rack gear, one unit tall, with its ears on. Carries two rows above it."],
+].map(([name, n, m, roof, face, text]) =>
+  `<div class="scheme"><div class="stage">${make(4 * PX - 3.6, 2 * PZ - 3.6, bay(0, (2 - m) * PZ, C.graphite, face, n, m, roof), 4)}</div><h3>${name}</h3><p>${text}</p></div>`).join("");
+</script>
+</body></html>
