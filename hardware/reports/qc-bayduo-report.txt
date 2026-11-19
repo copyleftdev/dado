@@ -1,0 +1,48 @@
+==== bayduo: 2 across, 2 up ====
+== 1. Sound ==
+PASS  bayduo mesh is closed and consistently wound: 1416 triangles, every edge used once each way: True
+PASS  bayduo mesh volume against the kernel's: mesh 191613.4 mm3, kernel 191617.0 mm3, 0.002% apart
+PASS  orin mesh is closed and consistently wound: 2816 triangles, every edge used once each way: True
+PASS  orin mesh volume against the kernel's: mesh 44288.2 mm3, kernel 44289.4 mm3, 0.003% apart
+PASS  bayduo thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  orin thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.8, 2.1, 2.2, 2.4, 2.45]
+== 2. The lattice ==
+PASS  fills the place of 2 by 2 cells: 137.6 by 87.6 mm; 2 pitches and 2 rises less a gap each way is 137.6 by 87.6
+PASS  every joint dimension is the cell's: differing: none
+== 3. Joined to cells: seated without touching, held when pulled ==
+PASS  on a row of 2 cells: 2 joint(s); points of one part inside the other: 0
+PASS  on a row of 2 cells, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306] points
+PASS  2 cells on it: 2 joint(s); points of one part inside the other: 0
+PASS  2 cells on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306] points
+PASS  2 caps on it: 2 joint(s); points of one part inside the other: 0
+PASS  2 caps on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306] points
+PASS  2 cell(s) at its rail side: 2 joint(s); points of one part inside the other: 0
+PASS  2 cell(s) at its rail side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320] points
+PASS  2 cell(s) at its lips side: 2 joint(s); points of one part inside the other: 0
+PASS  2 cell(s) at its lips side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320] points
+== 4. The shelf in the bay ==
+PASS  seated: points of the shelf inside the bay's walls, floor, ledges or roof: 0
+PASS  latch teeth: they start 0.66 mm behind the bay's rear edge, below its floor
+PASS  pushed 0.6 mm past its seat: its face meets the ends of the bay's ledges (9 points)
+PASS  lifted 1 mm: held down by the ledges (949 points)
+PASS  the face under the roof: 0.50 mm between them
+== 5. What goes on it ==
+NOTE  room on the shelf: 131.1 mm wide, 76.8 tall; the back is open, so a device may stand out behind
+PASS  a post under each of the board's four holes: 92 x 58 mm apart, as drilled; the posts' centres are within 0.000 mm of them
+PASS  the board on the tray: 15.55 mm spare each side, for the header pins and camera cables at its ends; 14.4 mm between it and the face
+PASS  its sockets at the open back: the board's edge is 4.0 mm inside the bay's rear; the sockets stand about 2 mm past the edge (measured off NVIDIA's figure, not dimensioned there)
+PASS  room under the board: posts 6.0 mm, the board's underside parts reach 4.30: 1.70 spare
+PASS  nothing but the posts where the board and its underside parts go: points of the tray there: 0
+PASS  the latch fingers under the board: to pass the bay's floor a finger lifts 1.2 mm at its tip, about 0.36 under the board's edge, where 1.70 is free
+PASS  room above the cooler: at least 34.9 mm (15 wanted, my figure, for a fan that draws from above): the kit is 34.77 +/- 1.09 mm tall on its stand, and that whole height is counted from the posts, so the true room is more
+PASS  why the bay is two rows tall: a one-row sleeve has at most 36.0 mm inside; the kit on these posts needs 43.7
+NOTE  cooling: not modelled. The board can draw about 25 W; air comes in through 55 slots in the face (31 cm2) and leaves by the open back
+NOTE  power: the board takes 9 to 20 V at its barrel socket (a 19 V supply comes with it), not the Pis' 5 V; it has a header for a power-over-Ethernet module, which is a separate part
+NOTE  the screws: four M2.5 thread-forming screws into 2.1 mm pilot holes 6 mm deep; untried in print
+NOTE  not checked: the board is not modelled as a solid here (NVIDIA publishes no model I could use), so parts on it are checked only by NVIDIA's two height limits
+== 6. Load on the roof ==
+PASS  1 row(s) of cells on it: about 3.9 N; the 6 mm roof sags about 0.04 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+PASS  2 row(s) of cells on it: about 7.8 N; the 6 mm roof sags about 0.08 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+PASS  3 row(s) of cells on it: about 11.8 N; the 6 mm roof sags about 0.11 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
+
+{'PASS': 34, 'FAIL': 0, 'NOTE': 5}

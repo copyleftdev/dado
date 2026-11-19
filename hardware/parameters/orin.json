@@ -1,0 +1,246 @@
+{
+ "part": "orin",
+ "unit": "mm",
+ "parameters": [
+  {
+   "description": "A row of slots across the face",
+   "id": "air.height",
+   "value": 7.0
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack - top.bar - air.height",
+   "id": "air.low",
+   "value": 68.1
+  },
+  {
+   "description": "Row of air slots to row: the lowest clears the label flat by 2.1",
+   "id": "air.step",
+   "value": 11.5
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack - top.bar",
+   "id": "air.top",
+   "value": 75.1
+  },
+  {
+   "description": "The plate ends this far short of the bay's back",
+   "id": "back.clear",
+   "value": 3.0
+  },
+  {
+   "description": "Bay, front to back",
+   "id": "bay.depth",
+   "value": 100.0
+  },
+  {
+   "description": "Inside the bay, floor to roof",
+   "id": "bay.height",
+   "value": 78.6
+  },
+  {
+   "description": "Inside the bay, across",
+   "id": "bay.width",
+   "value": 131.6
+  },
+  {
+   "description": "The board's edge of sockets, from the tray's front: they end inside the bay",
+   "id": "board.back",
+   "value": 96.0
+  },
+  {
+   "description": "Each finger's near edge from the centre line",
+   "id": "finger.apart",
+   "value": 30.0
+  },
+  {
+   "description": "Where the fingers leave the plate, from the front",
+   "id": "finger.root",
+   "value": 86.0
+  },
+  {
+   "description": "Cut either side of a finger to free it",
+   "id": "finger.slot",
+   "value": 1.0
+  },
+  {
+   "description": "",
+   "expr": "bay.depth + tooth.behind + tooth.ramp + tooth.lead + 0.1",
+   "id": "finger.tip",
+   "value": 104.38
+  },
+  {
+   "description": "Each finger",
+   "id": "finger.width",
+   "value": 8.0
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack",
+   "id": "front.height",
+   "value": 78.1
+  },
+  {
+   "description": "The face; it stops on the ends of the bay's ledges",
+   "id": "front.thickness",
+   "value": 2.6
+  },
+  {
+   "description": "Mounting holes, across (NVIDIA's drill file)",
+   "id": "hole.across",
+   "value": 92.0
+  },
+  {
+   "description": "Mounting holes, front to back (NVIDIA's drill file)",
+   "id": "hole.along",
+   "value": 58.0
+  },
+  {
+   "description": "Mounting holes from the board's socket edge (NVIDIA's drill file)",
+   "id": "hole.back",
+   "value": 17.0
+  },
+  {
+   "description": "Sunk, so a label's edges are protected",
+   "id": "label.depth",
+   "value": 0.4
+  },
+  {
+   "description": "Its upper edge",
+   "id": "label.high",
+   "value": 20.0
+  },
+  {
+   "description": "Its lower edge",
+   "id": "label.low",
+   "value": 10.0
+  },
+  {
+   "description": "A flat for a label",
+   "id": "label.width",
+   "value": 44.0
+  },
+  {
+   "description": "",
+   "expr": "(bay.width - side.slack) / 2",
+   "id": "mid",
+   "value": 65.55
+  },
+  {
+   "description": "Cut from each back corner",
+   "id": "nose.taper",
+   "value": 2.0
+  },
+  {
+   "description": "Pilot hole for an M2.5 thread-forming screw, the depth of the post",
+   "id": "pilot",
+   "value": 2.1
+  },
+  {
+   "description": "",
+   "expr": "bay.depth - back.clear",
+   "id": "plate.length",
+   "value": 97.0
+  },
+  {
+   "description": "Leaves 0.5 under the bay's ledges",
+   "id": "plate.thickness",
+   "value": 1.8
+  },
+  {
+   "description": "",
+   "expr": "bay.width - side.slack",
+   "id": "plate.width",
+   "value": 131.1
+  },
+  {
+   "description": "Posts the board rests on",
+   "id": "post.diameter",
+   "value": 7.0
+  },
+  {
+   "description": "Room under the board: its parts reach 4.30 below it",
+   "id": "post.height",
+   "value": 6.0
+  },
+  {
+   "description": "",
+   "expr": "board.back - hole.back - hole.along",
+   "id": "post.x",
+   "value": 21.0
+  },
+  {
+   "description": "",
+   "expr": "mid - hole.across / 2",
+   "id": "post.y",
+   "value": 19.549999999999997
+  },
+  {
+   "description": "The rail's ends in from the face's sides",
+   "id": "pull.inset",
+   "value": 2.0
+  },
+  {
+   "description": "A lip under its edge",
+   "id": "pull.lip",
+   "value": 1.5
+  },
+  {
+   "description": "The pull: a rail along the face's top edge",
+   "id": "pull.reach",
+   "value": 6.0
+  },
+  {
+   "description": "Face lower than the bay's roof",
+   "id": "roof.slack",
+   "value": 0.5
+  },
+  {
+   "description": "Shelf narrower than the bay, in all",
+   "id": "side.slack",
+   "value": 0.5
+  },
+  {
+   "description": "Slot to slot, as on a carrier: seventeen of them",
+   "id": "slot.pitch",
+   "value": 10.5
+  },
+  {
+   "description": "Each slot",
+   "id": "slot.width",
+   "value": 8.0
+  },
+  {
+   "description": "Front ramp's start behind the bay's rear edge",
+   "id": "tooth.behind",
+   "value": 0.6
+  },
+  {
+   "description": "Tooth below the finger",
+   "id": "tooth.depth",
+   "value": 1.2
+  },
+  {
+   "description": "Its back ramp",
+   "id": "tooth.lead",
+   "value": 2.75
+  },
+  {
+   "description": "Its front ramp",
+   "id": "tooth.ramp",
+   "value": 0.93
+  },
+  {
+   "description": "",
+   "expr": "bay.depth + tooth.behind",
+   "id": "tooth.x",
+   "value": 100.6
+  },
+  {
+   "description": "The face's top edge, which the pull grows out of",
+   "id": "top.bar",
+   "value": 3.0
+  }
+ ]
+}

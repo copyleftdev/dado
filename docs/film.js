@@ -17,8 +17,8 @@ const HUES = ["clay", "ochre", "moss", "teal", "slate", "lilac"];
 // The rear shot was added after the rest was timed: for REAR seconds from 79
 // the film's own clock T holds still while the camera goes round the back.
 // The bay's shot follows it the same way, for BAY seconds more.
-const REAR = 8, BAY = 21, HOLD = REAR + BAY, TOTAL = 88 + HOLD, CONFIG_AT = 85.5, PX_PER_S = 115;
-const B0 = 79 + REAR, B1 = B0 + BAY, B2 = B0 + 11;  // B2: the first bay leaves, its taller and wider kin follow
+const REAR = 8, BAY = 27, HOLD = REAR + BAY, TOTAL = 88 + HOLD, CONFIG_AT = 85.5, PX_PER_S = 115;
+const B0 = 79 + REAR, B1 = B0 + BAY, B2 = B0 + 11, B3 = B2 + 9.4;  // B2: the first bay leaves, its taller and wider kin follow; B3: the Jetson bay
 const still = new URLSearchParams(location.search).get("t");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -85,7 +85,7 @@ async function part(name, creased) {
   }
   return { g, lines };
 }
-const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "pi-far", "pi"];
+const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "bayduo", "orin", "pi-far", "pi"];
 const [man, ...loaded] = await Promise.all([
   fetch("assets/manifest.json").then((r) => r.json()),
   ...names.map((n) => part(n, !n.startsWith("pi"))),
@@ -160,17 +160,25 @@ const bays = [0, 1].map(() => {
   return { group, inner, face, arr: 0 };
 });
 // The taller and wider bays, each with its shelf shut.
-const kin = (bay, shelf, n, hex) => Array.from({ length: n }, () => {
+const kin = (bay, shelf, n, hex, load) => Array.from({ length: n }, () => {
   const group = new THREE.Group(), face = matte(hex);
-  group.add(solid(G[bay], M.sleeve, M.sleeveLine), solid(G[shelf], face, M.faceLine));
+  group.add(solid(G[bay], M.sleeve, M.sleeveLine), solid(G[shelf], face, M.faceLine), ...(load ? load() : []));
   group.visible = false; scene.add(group);
   return { group, face, arr: 0 };
+});
+// A stand-in for the Jetson's board on its posts: board, cooler and sockets
+// as plain blocks, at NVIDIA's outline and heights. Not a model of it.
+const jetsonBoard = () => [[100, 1.57, 79, -68.8, 11.6, -56.5, 0x2f6a45, 0.6, 0], [58, 18, 39, -68.8, 30.4, -37.5, 0x1d1f22, 0.7, 0],
+  [84, 14, 15, -68.8, 19.4, -89.5, 0x9ba1a4, 0.5, 0.3]].map(([w, h, d, x, y, z, color, roughness, metalness]) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color, roughness, metalness }));
+  m.position.set(x, y, z); m.castShadow = true; return m;
 });
 // Each kind of bay: its pool, how many cells wide and how many rows high.
 const CROWNS = {
   bay: { pool: bays, wide: 3, high: 1 },
   tall: { pool: kin("baytall", "shelftall", 2, PAL.teal), wide: 3, high: 2 },
   rack: { pool: kin("bayrack", "shelfrack", 1, PAL.ochre), wide: 4, high: 2 },
+  jetson: { pool: kin("bayduo", "orin", 3, PAL.moss, jetsonBoard), wide: 2, high: 2 },
 };
 const bayCount = () => { const k = CROWNS[cfg.bay]; return k && cfg.cols % k.wide === 0 ? Math.min(cfg.cols / k.wide, k.pool.length) : 0; };
 const bayRows = () => (bayCount() ? CROWNS[cfg.bay].high : 0);
@@ -260,7 +268,8 @@ const CAPS = [
   [70.6, 78.2, "Act two · Look closer", "The carrier.", ""],
   [79.3, 86.7, "Act two · Look closer", "The back.", "Ports, air and power all leave from behind. Power over Ethernet makes it one cable a cell."],
   [B0 + 0.3, B2 - 0.4, "Act two · Look closer", "The bay.", "A switch or a hub takes the place of three cells, on the same joints. The cables stay behind."],
-  [B2 + 0.1, B1 - 0.3, "Act two · Look closer", "Taller. Wider.", "The same idea at two more sizes, for gear that is not a desktop switch."],
+  [B2 + 0.1, B3 - 0.4, "Act two · Look closer", "Taller. Wider.", "The same idea at two more sizes, for gear that is not a desktop switch."],
+  [B3 + 0.1, B1 - 0.3, "Act two · Look closer", "Not only Pis.", "A bay two cells wide and two rows high takes a Jetson Orin Nano developer kit, on its own tray."],
   [79.6 + HOLD, 85.2 + HOLD, "Act three", "Make it yours.", "Pick a size and its colours. The list is what would be in the box."],
 ].map(([a, b, kicker, head, body]) => {
   const el = document.createElement("div");
@@ -295,7 +304,8 @@ const NOTES = [
   [B0 + 4.2, B2 - 2.6, [-104, 45, 75.6], "shelf", [280, -200], "A switch", "Strapped to the shelf through slots at three widths. Nothing is fitted to one model."],
   [B0 + 4.2, B2 - 2.6, [-24, 0, 62], "shelf", [250, 120], "The shelf", "Slides and latches like a carrier, behind the same closed face."],
   [B2 + 0.9, B2 + 3.3, [-196, 0, 120], "", [-190, -70], "Tall bay", "Two rows high: taller gear, or one rack unit up to 200 mm wide."],
-  [B2 + 5.6, B1 - 2.0, [-270, 0, 120], "", [-170, -70], "Rack bay", "Four cells wide: ten-inch rack gear, one unit tall, with its ears on."],
+  [B2 + 5.6, B2 + 8.0, [-270, 0, 120], "", [-170, -70], "Rack bay", "Four cells wide: ten-inch rack gear, one unit tall, with its ears on."],
+  [B3 + 2.0, B1 - 2.0, [-126, 0, 120], "", [-190, -70], "Jetson bay", "The board on four posts at NVIDIA’s own hole spacing, with 35 mm of air above its cooler."],
 ].map(([a, b, at, rides, off, head, body], i, all) => {
   const el = document.createElement("div");
   el.className = "label" + (off[0] < 0 ? " left" : "");
@@ -363,7 +373,7 @@ function frame(dt) {
     // The bay's shot borrows two cells to stand beside the first.
     if (!config && (i === 2 || i === 4)) arr = Math.max(arr, segc(B0 + 0.1 + i * 0.15, B0 + 1.7 + i * 0.15) * (1 - segc(B1 - 1.3, B1 - 0.1)));
     // And a fourth, for the rack bay.
-    if (!config && u.c === 3 && u.r === 0) arr = segc(B2 + 3.4, B2 + 4.8) * (1 - segc(B1 - 1.3, B1 - 0.1));
+    if (!config && u.c === 3 && u.r === 0) arr = segc(B2 + 3.4, B2 + 4.8) * (1 - segc(B3 - 1.1, B3 + 0.1));
     u.arr = arr;
     u.group.visible = arr > 0.001 && (i > 0 || T >= 5);
     place(u.group, -u.c * PX, -(1 - eo(arr)) * 360 + (i === 1 && study ? backB : 0), u.r * PZ + lift * LIFT);
@@ -393,15 +403,17 @@ function frame(dt) {
     b.inner.position.z = shelfOut; b.inner.visible = config || clock > B0 + 3.2;
     b.face.color.lerp(tmp.setHex(config ? look("config", 1 + 3 * k, cfg.rows) : PAL.slate), config ? rate * 1.4 : 1);
   });
-  for (const kind of ["tall", "rack"]) {
-    const { pool: made, wide } = CROWNS[kind];
-    const film = kind === "tall" ? segc(B2 - 0.4, B2 + 1.2) * (1 - segc(B2 + 3.1, B2 + 4.1)) : segc(B2 + 4.4, B2 + 6) * (1 - segc(B1 - 1.9, B1 - 0.7));
+  const SHOTS = { tall: [B2 - 0.4, B2 + 1.2, B2 + 3.1, B2 + 4.1, PAL.teal], rack: [B2 + 4.4, B2 + 6, B3 - 1.3, B3 - 0.1, PAL.ochre],
+    jetson: [B3, B3 + 1.6, B1 - 1.9, B1 - 0.7, PAL.moss] };
+  for (const kind of ["tall", "rack", "jetson"]) {
+    const { pool: made, wide } = CROWNS[kind], [a0, a1, z0, z1, hex] = SHOTS[kind];
+    const film = segc(a0, a1) * (1 - segc(z0, z1));
     made.forEach((b, k) => {
       b.arr = config ? b.arr + ((cfg.bay === kind && k < crowned ? 1 : 0) - b.arr) * rate : k ? 0 : film;
       b.group.visible = b.arr > 0.002;
       place(b.group, -k * wide * PX, -(1 - eo(b.arr)) * 360, config ? LIFT + eased.rows * PZ : PZ);
       if (config) b.face.color.lerp(tmp.setHex(look("config", 1 + wide * k, cfg.rows)), rate * 1.4);
-      else b.face.color.setHex(kind === "tall" ? PAL.teal : PAL.ochre);
+      else b.face.color.setHex(hex);
     });
   }
   const show = (p, on, a, b) => { p.arr = config ? p.arr + ((on ? 1 : 0) - p.arr) * rate : on ? seg(a, b) : 0; p.m.visible = p.arr > 0.002; return eo(p.arr); };
@@ -421,7 +433,7 @@ function frame(dt) {
   }
   const overBay = config ? 0 : io(segc(B0 - 0.6, B0 + 1.4)) * (1 - io(segc(B1 - 1.2, B1 + 0.6)));
   if (overBay > 0) {
-    const grown = io(segc(B2 - 0.6, B2 + 1)), wider = io(segc(B2 + 3.2, B2 + 4.8));
+    const grown = io(segc(B2 - 0.6, B2 + 1)), wider = io(segc(B2 + 3.2, B2 + 4.8)) * (1 - io(segc(B3 - 0.8, B3 + 0.8)));
     const b = { x: mix(-104, -138, wider), y: 10, z: mix(44, 64, grown), az: 32 - 8 * segc(B0, B1), el: 17, d: mix(720, 860, grown) + 90 * wider };
     for (const n in want) want[n] = mix(want[n], b[n], overBay);
   }
@@ -487,20 +499,21 @@ function panel() {
   $("hues").hidden = cfg.look !== "voice";
   choices("hues", HUES.map((h) => [h]), cfg.hue, (k) => { cfg.hue = k; }, true);
   const crown = bayCount(), kind = CROWNS[cfg.bay], high = rows + bayRows();
-  choices("bays", [["none", "None"], ["bay", "Bay"], ["tall", "Tall bay"], ["rack", "Rack bay"]], cfg.bay, (k) => { cfg.bay = k; });
+  choices("bays", [["none", "None"], ["bay", "Bay"], ["tall", "Tall bay"], ["rack", "Rack bay"], ["jetson", "Jetson bay"]], cfg.bay, (k) => { cfg.bay = k; });
   $("bayNote").textContent = !kind ? "A bay across the top holds a switch or a hub, with its ports to the back."
-    : !crown ? `A ${cfg.bay === "rack" ? "rack bay is four cells wide: it needs four columns" : "bay is three cells wide: it needs three or six columns"}.`
+    : !crown ? `A ${cfg.bay === "rack" ? "rack bay is four cells wide: it needs four columns" : cfg.bay === "jetson" ? "Jetson bay is two cells wide: it needs two, four or six columns" : "bay is three cells wide: it needs three or six columns"}.`
+    : cfg.bay === "jetson" ? `Two rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson Orin Nano developer kit, on a tray with posts at the board’s own holes.`
     : cfg.bay === "tall" ? "Two rows high: taller gear, or one rack unit up to 200 mm wide."
     : cfg.bay === "rack" ? "Takes ten-inch rack gear, one unit tall, with its ears on."
     : n > 7 * crown ? `An eight-port switch serves seven Pis and an uplink. These ${n} need ${Math.ceil(n / 7)} switches; there is room for ${crown}.`
     : `Room for ${crown === 1 ? "one eight-port switch" : "two eight-port switches"}: enough ports for these ${n} Pis and an uplink.`;
-  const bayName = { bay: "Bays", tall: "Tall bays", rack: "Rack bays" }[cfg.bay], bayGrams = { bay: 247.33 + 50.4, tall: 340.37 + 72.75, rack: 491.05 + 97.48 }[cfg.bay] || 0;
-  $("box").innerHTML = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[bayName, crown], ["Shelves", crown]] : [])]
+  const bayName = { bay: "Bays", tall: "Tall bays", rack: "Rack bays", jetson: "Jetson bays" }[cfg.bay], bayGrams = { bay: 247.33 + 50.4, tall: 340.37 + 72.75, rack: 491.05 + 97.48, jetson: 191.62 + 44.29 }[cfg.bay] || 0;
+  $("box").innerHTML = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[bayName, crown], [cfg.bay === "jetson" ? "Orin trays" : "Shelves", crown]] : [])]
     .map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
   const grams = 1.01 * (n * (73.06 + 15.86) + cols * (64.31 + 17.38) + high * (10.74 + 11.08) + crown * bayGrams);
   $("facts").textContent = `${Math.round(cols * PX - man.gap + 2 * CAP)} mm wide, ${Math.round(high * PZ + 28.6)} tall, 110 deep. `
     + `About ${(grams / 1000).toFixed(grams < 1000 ? 2 : 1)} kg of printed parts. With a Pi in every cell: about ${(n * 6.2).toFixed(0)} W at typical work, `
-    + `${(n * 14.3).toFixed(0)} W flat out.`;
+    + `${(n * 14.3).toFixed(0)} W flat out.` + (crown && cfg.bay === "jetson" ? ` Each Jetson adds up to 25 W.` : "");
 }
 const bump = (k, by, lo, hi) => () => { cfg[k] = Math.min(hi, Math.max(lo, cfg[k] + by)); panel(); };
 $("colsDown").onclick = bump("cols", -1, 1, 6); $("colsUp").onclick = bump("cols", 1, 1, 6);

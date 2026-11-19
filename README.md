@@ -21,12 +21,15 @@ Dado is an open-hardware enclosure for Raspberry Pi 5 clusters. Each Pi lives in
 | Bay | The place of three cells, for a switch or a hub | 208.2 × 42 × 100 | [`bay.step`](hardware/step/bay.step), [`shelf.step`](hardware/step/shelf.step) |
 | Tall bay | Three wide, two high, for taller gear | 208.2 × 87.6 × 100 | [`baytall.step`](hardware/step/baytall.step), [`shelftall.step`](hardware/step/shelftall.step) |
 | Rack bay | Four wide, two high, for ten-inch rack gear one unit tall | 278.8 × 87.6 × 100 | [`bayrack.step`](hardware/step/bayrack.step), [`shelfrack.step`](hardware/step/shelfrack.step) |
+| Jetson bay | Two wide, two high, for an NVIDIA Jetson Orin Nano developer kit on its own tray | 137.6 × 87.6 × 100 | [`bayduo.step`](hardware/step/bayduo.step), [`orin.step`](hardware/step/orin.step) |
 
 Cells sit 70.6 mm apart across and 45.6 mm apart up. Every dimension of every part, with a sentence saying why it is what it is, is in [`hardware/parameters`](hardware/parameters). The reasoning behind the design is in [SPEC.md](SPEC.md).
 
 ![Nine Dado cells in six colours](docs/img/wall.png)
 
 ![A bay across three cells, its shelf drawn out with a switch on it](docs/img/bay.png)
+
+![The Jetson bay on two cells, its tray drawn out](docs/img/jetson.png)
 
 ## How it works
 
@@ -54,6 +57,7 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - Raspberry Pi's own model of the Pi 5 sits on the carrier's posts with every port through its window and nothing touching. The tightest port clears by 0.61 mm.
 - Joints and latches were simulated across 200,000 parts at printing tolerance.
 - Roofs of the bays were calculated for the load of the rows above them.
+- The Jetson tray's posts sit under the four mounting holes in NVIDIA's own drill file, with 1.7 mm spare under the board and at least 34.9 mm above its cooler.
 
 ## What has not been checked
 
@@ -62,6 +66,7 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - **The fan's power is undecided.** Its lead has a clear path, but where it takes 5 V from is not settled.
 - **A PoE HAT's height is unverified.** There is 13.6 mm above the board's tallest part to the cell's roof.
 - **The single-height bay carries one row of cells above it,** not three. The tall bay carries three.
+- **The Jetson bay was checked against NVIDIA's published sizes, not a model of the board.** Its cooling is not modelled (the board can draw about 25 W), and it takes 9 to 20 V at a barrel socket, not the Pis' 5 V.
 - **Wire management stops at "out the back".** A cable spine was started and set aside.
 - **Tall walls need a deeper base** than the desk-scale one here.
 

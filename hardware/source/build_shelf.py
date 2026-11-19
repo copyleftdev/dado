@@ -14,7 +14,7 @@ RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
 # Which bay it is for: inside width and height of that bay, slots in its
 # face, and how far either side of centre its three pairs of strap slots are.
 KINDS = {"shelf": (202.2, 32.0, 17, (54, 75, 84)), "shelftall": (202.2, 74.6, 17, (54, 75, 84)),
-         "shelfrack": (272.8, 72.6, 23, (84, 100, 115))}
+         "shelfrack": (272.8, 72.6, 23, (84, 100, 115)), "shelfduo": (131.6, 78.6, 11, (30, 45, 58))}
 DOC = sys.argv[1] if len(sys.argv) > 1 else "shelf"
 
 

@@ -24,7 +24,7 @@ def samples(pos, tri):
 cell_p = params("cell")
 PX, PZ, E = cell_p["body.width"] + cell_p["gap"], cell_p["body.height"] + cell_p["gap"], 0.02
 M, S = {}, {}
-for d in ("cell", "trimtop", "bay", "baytall", "bayrack", "shelf", "shelftall", "shelfrack"):
+for d in ("cell", "trimtop", "bay", "baytall", "bayrack", "bayduo", "shelf", "shelftall", "shelfrack", "orin"):
     M[d] = scene(f".ringwright/{d}/view/scene.rwv")
     S[d] = samples(*M[d])
 
@@ -66,7 +66,69 @@ KINDS = {
         ("ten-inch rack gear between its ears (222.25 wide, one unit)", 222.25, 100.0, 44.45, True),
         ("the same with its ears on (254 wide)", 254.0, 100.0, 44.45, True),
         ("two units of rack gear (88.9 tall)", 222.25, 100.0, 88.9, False)]),
+    "bayduo": ("orin", 2, 2, []),
 }
+
+
+def orin(bay_p, tray_p, room_h):
+    """The Jetson Orin Nano developer kit's board on its tray. The board's
+    sizes are NVIDIA's: the carrier board specification SP-11324-001 v1.3
+    (figures 4-1 and 4-2) and the drill file of the P3768 A04 reference
+    design. Board frame: x across, y towards the edge opposite the sockets,
+    from the hole nearest the sockets."""
+    holes = np.array([(0, 0), (92, 0), (0, 58), (92, 58)], float)
+    lo, hi, below, kit, kit_tol = np.array([-4.0, -17.0]), np.array([96.0, 62.0]), 4.30, 34.77, 1.09
+    t, top = tray_p["plate.thickness"], tray_p["plate.thickness"] + tray_p["post.height"]
+    back, mid = tray_p["board.back"], tray_p["plate.width"] / 2
+    on_tray = lambda b: np.stack([back - (b[:, 1] - lo[1]), mid + (lo[0] + hi[0]) / 2 - b[:, 0]], 1)
+    want = on_tray(holes)
+    pos = M["orin"][0]
+    rim = pos[np.abs(pos[:, 2] - top) < 1e-3][:, :2]
+    got = np.array([rim[np.linalg.norm(rim - w, axis=1) < 6].mean(0) if (np.linalg.norm(rim - w, axis=1) < 6).any()
+                    else [np.nan, np.nan] for w in want])
+    off = np.linalg.norm(got - want, axis=1)
+    report("PASS" if np.nanmax(off) < 0.05 and not np.isnan(off).any() else "FAIL", "a post under each of the board's four holes",
+           f"92 x 58 mm apart, as drilled; the posts' centres are within {np.nanmax(off):.3f} mm of them")
+    edge = on_tray(np.array([lo, hi]))
+    x0, x1, y0, y1 = edge[1, 0], edge[0, 0], edge[:, 1].min(), edge[:, 1].max()
+    spare = min(y0, tray_p["plate.width"] - y1)
+    report("PASS" if spare > 5 and x0 > tray_p["front.thickness"] + 5 else "FAIL", "the board on the tray",
+           f"{spare:.2f} mm spare each side, for the header pins and camera cables at its ends; "
+           f"{x0 - tray_p['front.thickness']:.1f} mm between it and the face")
+    behind = bay_p["body.depth"] - x1
+    report("PASS" if behind >= 2.5 else "FAIL", "its sockets at the open back",
+           f"the board's edge is {behind:.1f} mm inside the bay's rear; the sockets stand about 2 mm past the edge "
+           f"(measured off NVIDIA's figure, not dimensioned there)")
+    report("PASS" if tray_p["post.height"] - below >= 1.0 else "FAIL", "room under the board",
+           f"posts {tray_p['post.height']:.1f} mm, the board's underside parts reach {below:.2f}: {tray_p['post.height'] - below:.2f} spare")
+    s = S["orin"]
+    under = (s[:, 0] > x0) & (s[:, 0] < x1) & (s[:, 1] > y0) & (s[:, 1] < y1) & (s[:, 2] > top - below) & (s[:, 2] < top + 1.57)
+    post = (np.linalg.norm(s[:, None, :2] - want[None], axis=2) < tray_p["post.diameter"] / 2 + 0.05).any(1)
+    hits = int((under & ~post).sum())
+    report("PASS" if hits == 0 else "FAIL", "nothing but the posts where the board and its underside parts go",
+           f"points of the tray there: {hits}")
+    lift = tray_p["tooth.depth"] * ((x1 - tray_p["finger.root"]) / (tray_p["finger.tip"] - tray_p["finger.root"])) ** 2
+    report("PASS" if lift < tray_p["post.height"] - below else "FAIL", "the latch fingers under the board",
+           f"to pass the bay's floor a finger lifts {tray_p['tooth.depth']:.1f} mm at its tip, about {lift:.2f} under the board's "
+           f"edge, where {tray_p['post.height'] - below:.2f} is free")
+    stack = tray_p["post.height"] + kit + kit_tol
+    report("PASS" if room_h - stack >= 15 else "FAIL", "room above the cooler",
+           f"at least {room_h - stack:.1f} mm (15 wanted, my figure, for a fan that draws from above): the kit is {kit} +/- {kit_tol} mm "
+           f"tall on its stand, and that whole height is counted from the posts, so the true room is more")
+    report("PASS" if stack > bay_p["body.height"] / 2 - bay_p["gap"] / 2 - bay_p["wall"] - 3 else "FAIL",
+           "why the bay is two rows tall",
+           f"a one-row sleeve has at most {(bay_p['body.height'] - bay_p['gap']) / 2 - 2 * bay_p['wall']:.1f} mm inside; "
+           f"the kit on these posts needs {t + stack:.1f}")
+    report("NOTE", "cooling", "not modelled. The board can draw about 25 W; air comes in through 55 slots in the face "
+           f"({55 * tray_p['slot.width'] * tray_p['air.height'] / 100:.0f} cm2) and leaves by the open back")
+    report("NOTE", "power", "the board takes 9 to 20 V at its barrel socket (a 19 V supply comes with it), not the Pis' 5 V; "
+           "it has a header for a power-over-Ethernet module, which is a separate part")
+    report("NOTE", "the screws", "four M2.5 thread-forming screws into 2.1 mm pilot holes 6 mm deep; untried in print")
+    report("NOTE", "not checked", "the board is not modelled as a solid here (NVIDIA publishes no model I could use), "
+           "so parts on it are checked only by NVIDIA's two height limits")
+
+
+KINDS = {k: v for k, v in KINDS.items() if len(sys.argv) < 2 or k in sys.argv[1:]}
 for bay, (shelf, n, m, devices) in KINDS.items():
     bay_p, shelf_p = params(bay), params(shelf)
     S[shelf] = np.vstack([S[shelf], scatter(*M[shelf], 60000)])
@@ -122,6 +184,8 @@ for bay, (shelf, n, m, devices) in KINDS.items():
     room_w = shelf_p["plate.width"]
     room_h = bay_p["body.height"] - bay_p["roof"] - w - shelf_p["plate.thickness"] - E
     report("NOTE", "room on the shelf", f"{room_w:.1f} mm wide, {room_h:.1f} tall; the back is open, so a device may stand out behind")
+    if shelf == "orin":
+        orin(bay_p, shelf_p, room_h)
     for name, dw, dd, dh, expected in devices:
         fits = dw <= room_w and dh <= room_h
         out = max(dd - (shelf_p["plate.length"] - shelf_p["front.thickness"]), 0)

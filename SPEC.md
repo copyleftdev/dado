@@ -36,8 +36,17 @@ The board sits with its ports through the carrier's back wall and its card end 6
 | Bay | 3 by 1 | 7 | 201.7 by 30.2 | 1 |
 | Tall bay | 3 by 2 | 10 | 201.7 by 72.8 | 3 |
 | Rack bay | 4 by 2 | 12 | 272.3 by 70.8 | 2 |
+| Jetson bay | 2 by 2 | 6 | 131.1 by 76.8 | 3 |
 
 Roof loads are beam calculations allowing 0.25 of sag, with 200 g assumed for each loaded cell. Desktop switches and hubs have no standard size, so a shelf holds its device with straps through slots at three widths.
+
+### The Jetson bay
+
+A board too big for a cell takes a bay of its own. The NVIDIA Jetson Orin Nano developer kit is 34.77 ± 1.09 tall with its cooler, and a one-row sleeve has 36 inside, so its bay is two rows high as well as two cells wide.
+
+Its tray is a shelf with four posts in place of strap slots, and five rows of air slots in its face. From NVIDIA's carrier board specification (SP-11324-001 v1.3) and the drill file of the P3768 reference design: board 100 by 79 and 1.57 thick, parts up to 4.30 below it; four mounting holes 2.75 across on a 92 by 58 pattern, 4 in from each side and from the edge opposite the sockets, 17 in from the socket edge.
+
+The board goes on without the stand it ships on, on posts 6 tall, with its sockets at the open back and 4 inside the bay's rear. Screws are M2.5 thread-forming, into pilot holes 2.1 across.
 
 ## Tolerances
 

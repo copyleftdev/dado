@@ -9,4 +9,6 @@ These are in the repository, or loaded by the site, and belong to others.
 | three.js r186 | loaded by the site from jsDelivr, not stored here | The three.js authors, MIT licence. |
 | Familjen Grotesk, Instrument Sans, JetBrains Mono | loaded by the site from Google Fonts, not stored here | Their designers, SIL Open Font License 1.1. |
 
+The Jetson tray uses measurements taken from NVIDIA's published carrier board specification and reference design files for the Jetson Orin Nano developer kit. None of NVIDIA's files or drawings are in this repository. "NVIDIA" and "Jetson" are trade marks of NVIDIA Corporation. Dado is not affiliated with or endorsed by NVIDIA.
+
 "Raspberry Pi" is a trade mark of Raspberry Pi Ltd. Dado is not affiliated with or endorsed by Raspberry Pi Ltd. The MIT licence text used for third-party material is in [LICENSES/MIT.txt](LICENSES/MIT.txt).
