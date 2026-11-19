@@ -407,9 +407,12 @@ function retile() {
 load("pi-far").then((geo) => { pi.far = board(geo, 6); retile(); });
 addEventListener("keydown", (e) => {
   if (!look.part || e.target.matches?.("input")) return;
-  if (e.key === "Escape") location.hash = "";
+  if (e.key === "Escape") { if (home) location.href = home; else location.hash = ""; }
   if (e.key === "ArrowRight") $("next").click();
   if (e.key === "ArrowLeft") $("prev").click();
 });
+// Come from the film's own tiles, "All parts" and Escape go back to them, not to this page's.
+const home = new URLSearchParams(location.search).get("from") === "film" ? "index.html#parts" : "";
+if (home) $("toAll").href = home;
 route(true);
 window.dado = { PARTS, look, camera };

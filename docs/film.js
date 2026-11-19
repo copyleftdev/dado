@@ -19,6 +19,9 @@ const HUES = ["clay", "ochre", "moss", "teal", "slate", "lilac"];
 // the film's own clock T holds still while the camera goes round the back.
 // The bay's shot follows it the same way, for BAY seconds more.
 const REAR = 8, BAY = 40, HOLD = REAR + BAY, TOTAL = 88 + HOLD, CONFIG_AT = 85.5, PX_PER_S = 115;
+// Act four comes after the configurator: for APART seconds from TOTAL the wall comes apart and one of each part
+// settles into a grid of tiles. END is where the film now stops.
+const APART = 7, END = TOTAL + APART;
 const B0 = 79 + REAR, B1 = B0 + BAY, B2 = B0 + 11, B3 = B2 + 9.4, B4 = B3 + 6.2, B5 = B4 + 6.2;  // B2: the first bay leaves, its taller and wider kin follow; B3: the Jetson bay; B4: the AGX bay; B5: the spacers
 const still = new URLSearchParams(location.search).get("t");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -198,6 +201,23 @@ for (const k in CROWNS) {
 const bayCount = () => Wall.crowns(cfg);
 const bayRows = () => (CROWNS[cfg.bay] ? CROWNS[cfg.bay].high : 0);
 
+// Act four's tiles: one of every part, in the order and colours of the parts page. Each turns about its own middle.
+const SPECIMENS = [["cell", "Cell"], ["carrier", "Carrier", PAL.clay], ["base", "Base"], ["trimtop", "Top cap"], ["trimrail", "Side cap, over a rail"],
+  ["trimlip", "Side cap, into lips"], ["bay", "Bay"], ["shelf", "Shelf", PAL.slate], ["baytall", "Tall bay"], ["shelftall", "Tall shelf", PAL.teal],
+  ["bayrack", "Rack bay"], ["shelfrack", "Rack shelf", PAL.ochre], ["bayduo", "Jetson bay"], ["orin", "Orin tray", PAL.moss], ["bayagx", "AGX bay"],
+  ["agx", "AGX tray", PAL.lilac], ["spacerrow", "Row spacer"], ["spacercol", "Column spacer"], ["spacercross", "Cross"], ["basehalf", "Half base"],
+  ["trimtophalf", "Half top cap"]].map(([id, name, hex]) => {
+  const geo = G[id]; geo.g.computeBoundingBox();
+  const centre = geo.g.boundingBox.getCenter(new THREE.Vector3()), radius = geo.g.boundingBox.getSize(new THREE.Vector3()).length() / 2;
+  const mesh = solid(geo, hex ? matte(hex) : M.sleeve, hex ? M.faceLine : M.sleeveLine);
+  mesh.castShadow = false; mesh.position.copy(centre).negate();
+  const group = new THREE.Group(); group.add(mesh); group.visible = false; scene.add(group);
+  const link = document.createElement("a");
+  link.className = "tile"; link.href = `parts.html?from=film#${id}`; link.innerHTML = `<b>${name}</b>`;
+  $("tiles").append(link);
+  return { id, group, link, centre, radius };
+});
+
 // The section, drawn before anything is solid: the kernel's own edges.
 const loops = man.section.map((pts) => {
   const g = new LineGeometry();
@@ -291,6 +311,7 @@ const CAPS = [
   [B4 + 0.1, B5 - 0.4, "Act two · Look closer", "Room to breathe.", "A Jetson AGX Orin developer kit has its fan in its top face, so its bay stands three rows high."],
   [B5 + 0.1, B1 - 0.3, "Act two · Look closer", "Half a place.", "Spacers put room between rows or between columns, for air and for cables. Two of them make one place, so the wall stays in step."],
   [79.6 + HOLD, 85.2 + HOLD, "Act three", "Make it yours.", "Pick a size and its colours. The list is what would be in the box."],
+  [TOTAL + 2.2, END + 9, "Act four", "Every part.", "Twenty-one parts make the whole system. Pick one to turn it over and cut it open."],
 ].map(([a, b, kicker, head, body]) => {
   const el = document.createElement("div");
   el.className = "cap";
@@ -353,6 +374,8 @@ const place = (obj, x, y, z) => obj.position.set(x, z, -y);
 
 function frame(dt) {
   const config = T >= CONFIG_AT, study = T >= 52.5 && T < 79, act3 = T >= 79;
+  // Past the configurator the wall is let go, and how far its parts have come apart runs from 0 to 1.
+  const gone = clock > TOTAL + 0.3, apart = segc(TOTAL + 0.3, TOTAL + 4.6);
   const rate = 1 - Math.exp(-dt * 5), jump = config && !wasConfig ? 1 : rate;
   wasConfig = config;
 
@@ -383,7 +406,7 @@ function frame(dt) {
   // the wall's size, and how far it has risen onto its bases
   const cols = config ? cfg.cols : 3, rows = config ? cfg.rows : 3;
   eased.cols = mix(eased.cols, cols, config ? rate : 1); eased.rows = mix(eased.rows, rows, config ? rate : 1);
-  const lines = config ? Wall.spaced(cfg) : { rows: [], cols: [] };
+  const lines = config && !gone ? Wall.spaced(cfg) : { rows: [], cols: [] };
   pushed.col.forEach((v, c) => { pushed.col[c] = mix(v, lines.cols.filter((k) => k < c).length, config ? rate : 1); });
   pushed.row.forEach((v, r) => { pushed.row[r] = mix(v, lines.rows.filter((k) => k < r).length, config ? rate : 1); });
   const colX = (c) => -(c * PX + pushed.col[c] * PX / 2), rowZ = (r) => r * PZ + pushed.row[r] * PZ / 2, allRows = pushed.row[7] * PZ / 2;
@@ -392,7 +415,7 @@ function frame(dt) {
 
   units.forEach((u, i) => {
     let arr = 0, out = 0;
-    if (config) arr = u.arr + ((u.c < cols && u.r < rows ? 1 : 0) - u.arr) * rate;
+    if (config) arr = u.arr + ((!gone && u.c < cols && u.r < rows ? 1 : 0) - u.arr) * rate;
     else if (i > 8) arr = 0;
     else if (study) arr = i === 0 ? 1 : i === 1 ? 1 - seg(70, 71.4) : 0;
     else if (i === 0) arr = 1;
@@ -421,7 +444,7 @@ function frame(dt) {
     u.face.color.copy(u.tint);
   });
 
-  const crowned = config ? bayCount() : 0, extra = config ? bayRows() : 0;
+  const crowned = config && !gone ? bayCount() : 0, extra = config ? bayRows() : 0;
   eased.bay = mix(eased.bay, extra, config ? rate : 1);
   const shelfOut = config ? 0 : mix(420, 92, eo(segc(B0 + 3.2, B0 + 4.8))) * (1 - io(segc(B2 - 2.7, B2 - 1.9)));
   bays.forEach((b, k) => {
@@ -446,7 +469,7 @@ function frame(dt) {
     });
   }
   const show = (p, on, a, b) => { p.arr = config ? p.arr + ((on ? 1 : 0) - p.arr) * rate : on ? seg(a, b) : 0; p.m.visible = p.arr > 0.002; return eo(p.arr); };
-  const rise = act3 ? 82.4 : 30, cap = act3 ? 83.4 : 31.6, wallUp = !study && T >= 24;
+  const rise = act3 ? 82.4 : 30, cap = act3 ? 83.4 : 31.6, wallUp = !study && T >= 24 && !gone;
   bases.forEach((p, c) => place(p.m, colX(c), (1 - show(p, wallUp && c < cols, rise + c * 0.25, rise + 1.7 + c * 0.25)) * 320, -2.6));
   tops.forEach((p, c) => place(p.m, colX(c), -(1 - show(p, wallUp && c < cols, cap + c * 0.2, cap + 1.3 + c * 0.2)) * 140, LIFT + (eased.rows + eased.bay) * PZ + allRows));
   rails.forEach((p, r) => place(p.m, -(eased.cols * PX + pushed.col[6] * PX / 2), -(1 - show(p, wallUp && r < rows + extra, cap + 0.4 + r * 0.2, cap + 1.7 + r * 0.2)) * 140, LIFT + rowZ(r)));
@@ -472,6 +495,7 @@ function frame(dt) {
 
   // camera
   const want = config ? wallCam() : filmCam(T);
+  if (gone) { want.az = 0; want.el = 6; }  // the tiles are seen square on
   if (!config && T > 80.5) { const w = wallCam(), k = io(seg(80.5, 85.3)); for (const n in want) want[n] = mix(want[n], w[n], k); }
   const rear = io(segc(78.6, 80.8)) * (1 - io(segc(79 + REAR - 1.4, 79 + REAR + 0.8)));
   if (rear > 0) {
@@ -488,11 +512,36 @@ function frame(dt) {
   cable.position.z = -((1 - eo(segc(80.2, 81.6))) * 150 + io(segc(79 + REAR - 1.6, 79 + REAR - 0.4)) * 150);
   for (const n in cam) cam[n] = mix(cam[n], want[n], config && jump !== 1 ? rate : 1);
   aim(cam, config ? 1 : Math.max(1, (study || rear > 0.5 || overBay > 0.5 ? 1.75 : 1.25) / (innerWidth / innerHeight)));
-  const aside = config ? 1 : io(seg(80.5, 85.3));
+  const aside = gone ? 0 : config ? 1 : io(seg(80.5, 85.3));
   if (aside > 0) {
     const wide = innerWidth > 760;
     camera.setViewOffset(innerWidth, innerHeight, wide ? aside * 0.15 * innerWidth : 0, wide ? 0 : aside * 0.22 * innerHeight, innerWidth, innerHeight);
   } else if (camera.view) camera.clearViewOffset();
+
+  // Act four: one of each part leaves the wall for its tile. A tile is a frame on the page; its part is placed in
+  // the scene where the camera sees it inside that frame, so the two stay together whatever the window's shape.
+  $("tiles").style.visibility = apart > 0.001 ? "visible" : "hidden";
+  if (apart > 0.001) {
+    const W = innerWidth, H = innerHeight, phone = W < 760, gut = phone ? 12 : 20;
+    const across = W > 1180 ? 7 : phone ? 3 : 6, down = Math.ceil(SPECIMENS.length / across);
+    const top = phone ? 64 : 78, foot = phone ? 228 : 232, cw = (W - 2 * gut) / across, ch = (H - top - foot) / down, label = phone ? 20 : 26;
+    const far = 900, perPx = (2 * far * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / H;
+    const forward = camera.getWorldDirection(new THREE.Vector3()), from = v(wallCam().x, 50, wallCam().z);
+    const settled = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.36, -0.62, 0)).premultiply(camera.quaternion);
+    const frames = clamp01((apart - 0.72) / 0.28);
+    SPECIMENS.forEach((sp, i) => {
+      const k = io(clamp01((apart - i * 0.016) / (1 - 20 * 0.016))), left = gut + (i % across) * cw + 4, up = top + Math.floor(i / across) * ch + 4;
+      const w = cw - 8, h = ch - 8, cx = left + w / 2, cy = up + (h - label) / 2;
+      const ray = new THREE.Vector3((cx / W) * 2 - 1, 1 - (cy / H) * 2, 0.5).unproject(camera).sub(camera.position).normalize();
+      const spot = camera.position.clone().addScaledVector(ray, far / ray.dot(forward));
+      const size = (Math.min(w - 10, h - label - 8) * perPx * 1.12) / (2 * sp.radius);  // the ball round a part is bigger than the part looks
+      sp.group.visible = true;
+      sp.group.position.copy(from).add(sp.centre).lerp(spot, k);
+      sp.group.quaternion.identity().slerp(settled, k);
+      sp.group.scale.setScalar(mix(1, size, k));
+      Object.assign(sp.link.style, { left: `${left}px`, top: `${up}px`, width: `${w}px`, height: `${h}px`, opacity: frames, pointerEvents: frames > 0.9 ? "auto" : "none" });
+    });
+  } else for (const sp of SPECIMENS) sp.group.visible = false;
 
   // words
   const fade = (a, b, e = 0.5) => Math.min(segc(a, a + e), 1 - segc(b - e, b));
@@ -521,7 +570,7 @@ function frame(dt) {
     n.el.style.left = `${left ? lx - w : lx}px`; n.el.style.top = `${ly}px`;
   }
   const panel = $("panel");
-  if (panel.hidden === config) { panel.hidden = !config; }
+  if (panel.hidden === (config && !gone)) { panel.hidden = !(config && !gone); }
   $("play").hidden = config;
   renderer.render(scene, camera);
 }
@@ -561,7 +610,7 @@ $("colsDown").onclick = step(Wall.stepCols, -1); $("colsUp").onclick = step(Wall
 $("rowsDown").onclick = step(Wall.stepRows, -1); $("rowsUp").onclick = step(Wall.stepRows, 1);
 panel();
 let grab = null;
-canvas.addEventListener("pointerdown", (e) => { if (T >= CONFIG_AT) grab = { x: e.clientX, az: orbit }; });
+canvas.addEventListener("pointerdown", (e) => { if (T >= CONFIG_AT && clock < TOTAL) grab = { x: e.clientX, az: orbit }; });
 addEventListener("pointermove", (e) => { if (grab) orbit = Math.max(-70, Math.min(70, grab.az - (e.clientX - grab.x) * 0.25)); });
 addEventListener("pointerup", () => { grab = null; });
 
@@ -570,12 +619,14 @@ function size() {
   renderer.setSize(innerWidth, innerHeight, false);
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   for (const l of loops) l.line.material.resolution.set(innerWidth, innerHeight);
-  $("track").style.height = still === null ? `${TOTAL * PX_PER_S + innerHeight}px` : "0";
+  $("track").style.height = still === null ? `${END * PX_PER_S + innerHeight}px` : "0";
 }
 addEventListener("resize", size); size();
 const span = () => document.documentElement.scrollHeight - innerHeight;
-// Coming back from the parts, the page opens where it was left: on the configurator.
-if (location.hash === "#make" && still === null) { history.scrollRestoration = "manual"; scrollTo(0, span()); }
+// Coming back from a part, the page opens where it was left: on the configurator, or on the tiles after it.
+const reach = (t) => scrollTo(0, (t / END) * span());
+if (still === null && (location.hash === "#make" || location.hash === "#parts")) { history.scrollRestoration = "manual"; reach(location.hash === "#make" ? TOTAL - 0.4 : END); }
+$("toParts").onclick = (e) => { e.preventDefault(); scrollTo({ top: span(), behavior: reduced ? "auto" : "smooth" }); };
 // The score: a looping instrumental, made with ElevenLabs Music. A browser
 // plays sound only after a click, so it starts from a button, and fades.
 const score = new Audio("assets/score.mp3");
@@ -612,7 +663,7 @@ renderer.setAnimationLoop(() => {
   level += ((sound ? 0.7 : 0) - level) * (1 - Math.exp(-dt * 2.5));
   score.volume = Math.min(1, Math.max(0, level));
   if (!sound && level < 0.01 && !score.paused) score.pause();
-  const goal = (scrollY / Math.max(1, span())) * TOTAL;
+  const goal = (scrollY / Math.max(1, span())) * END;
   clock = still !== null ? +still : reduced ? goal : clock + (goal - clock) * (1 - Math.exp(-dt * 7));
   T = clock <= 79 ? clock : clock < 79 + HOLD ? 79 : clock - HOLD;
   frame(dt);
