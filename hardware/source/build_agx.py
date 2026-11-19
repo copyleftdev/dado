@@ -6,7 +6,8 @@ The kit is a closed box with its fan in its top face, so nothing may cover
 it: no straps. It stands between two low fences and two pairs of stops, held
 by its own weight (872.5 g). It is 110 mm deep and a bay is 100, so the
 plate carries on past the bay's back and the kit's sockets stand behind it.
-The latch fingers are tongues cut into that longer plate.
+The latch fingers and their heads are cut out of that longer plate's two
+edges, where the bay's side walls end.
 
 The kit's sizes are NVIDIA's (Carrier Board Specification SP-10900-001
 v1.1, figures 5-3 and 5-4): 110 x 110 x 71.65 mm.
@@ -33,7 +34,8 @@ s.P.update({
     "fence.front": (14, "Where the side fences start, from the front"),
     "fence.back": (96, "Where they end: short of the bay's back"),
     "stop.height": (4, "The two rear stops"),
-    "stop.width": (15, "Each rear stop, across: clear of the latch fingers between them"),
+    "stop.width": (15, "Each rear stop, across"),
+    "tail.gap": (0.6, "Cut behind each finger's head, to free it from the plate that carries on"),
 })
 s.D.update({
     "plate.length": "kit.front + kit.depth + kit.slack + fence.thick",
@@ -51,12 +53,9 @@ L, WD = s.L, s.WD
 
 
 def outline():
-    """The plate, with a notch behind each finger so its tip is free."""
-    t, g = "nose.taper", "finger.slot"
-    pts = [(0, 0), (f"{L} - {t}", 0), (L, t)]
-    for lo, hi in s.FINGERS:
-        pts += [(L, f"{lo} - {g}"), ("finger.tip", f"{lo} - {g}"), ("finger.tip", f"{hi} + {g}"), (L, f"{hi} + {g}")]
-    return pts + [(L, f"{WD} - {t}"), (f"{L} - {t}", WD), (0, WD)]
+    """The plate: a plain outline. The fingers and their heads are cut out of it."""
+    t = "nose.taper"
+    return [(0, 0), (f"{L} - {t}", 0), (L, t), (L, f"{WD} - {t}"), (f"{L} - {t}", WD), (0, WD)]
 
 
 def cuts():
@@ -64,15 +63,30 @@ def cuts():
     for name, lo, hi in shelf_cuts():
         if name.startswith("strap."):
             continue
-        if name.startswith("slot"):  # the slots beside a finger end at its tip
-            hi = ["finger.tip + 1", hi[1], hi[2]]
+        if name.startswith("slot") and name.endswith("b"):  # the inner slot runs to the cut behind the head
+            hi = ["finger.tip + tail.gap", hi[1], hi[2]]
         out.append((name, lo, hi))
+    for k in range(2):
+        # A gap before each head and a cut behind it, both open to the plate's edge.
+        a, b = s.across(k, "-1", "finger.low")
+        out.append((f"gap{k}", [s.B, a, "-1"], [f"{s.B} + head.gap", b, "plate.thickness + 1"]))
+        a, b = s.across(k, "-1", "finger.high + finger.room")
+        out.append((f"tail{k}", ["finger.tip", a, "-1"], ["finger.tip + tail.gap", b, "plate.thickness + 1"]))
     top = [c for c in out if c[0].startswith("air")]
     for r in range(1, ROWS):
         for name, lo, hi in top:
             out.append((f"{name}.row{r}", [lo[0], lo[1], f"{lo[2]} - {r} * air.step"],
                         [hi[0], hi[1], f"{hi[2]} - {r} * air.step"]))
     return out
+
+
+def latch_cut_area():
+    """Plate taken to free the two fingers: the slot outside each, the gap before its head, the slot
+    inside it as far as its tip, and the cut behind its head."""
+    v = s.V
+    one = v["finger.slot"] * (v["latch.back"] - v["finger.root"]) + v["head.gap"] * v["finger.low"]
+    one += v["finger.room"] * (v["finger.tip"] - v["finger.root"]) + v["tail.gap"] * (v["finger.high"] + v["finger.room"])
+    return 2 * one
 
 
 # Each: its name, its box on the plate (x0, y0, x1, y1) and its height.
@@ -100,11 +114,11 @@ def expected_volume():
     n = lambda e: s.num(e, v)
     xy = [(n(x), n(y)) for x, y in outline()]
     area = abs(sum(a * d - c * b for (a, b), (c, d) in zip(xy, xy[1:] + xy[:1]))) / 2
-    vol = (area - 4 * v["finger.slot"] * (v["finger.tip"] - v["finger.root"])) * t
+    vol = (area - latch_cut_area()) * t
     front = v["plate.width"] * (v["front.height"] - t) - ROWS * s.SLOTS * v["slot.width"] * v["air.height"]
     vol += front * v["front.thickness"] - v["label.width"] * (v["label.high"] - v["label.low"]) * v["label.depth"]
     vol += (v["plate.width"] - 2 * v["pull.inset"]) * (v["top.bar"] * v["pull.reach"] + 1.5 * v["pull.lip"])
-    vol += 2 * v["finger.width"] * (v["tooth.ramp"] + v["tooth.lead"]) * v["tooth.depth"] / 2
+    vol += s.latch_volume()
     return vol + sum((n(x1) - n(x0)) * (n(y1) - n(y0)) * n(h) for _, (x0, y0, x1, y1), h in RIBS)
 
 

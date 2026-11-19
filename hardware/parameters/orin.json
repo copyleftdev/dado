@@ -50,17 +50,34 @@
    "value": 96.0
   },
   {
-   "description": "Each finger's near edge from the centre line",
-   "id": "finger.apart",
-   "value": 30.0
+   "description": "",
+   "expr": "finger.inset + finger.slot + finger.width",
+   "id": "finger.high",
+   "value": 6.45
+  },
+  {
+   "description": "The strip of plate left between a finger's outer slot and the plate's edge, as on a carrier",
+   "id": "finger.inset",
+   "value": 3.25
+  },
+  {
+   "description": "",
+   "expr": "finger.inset + finger.slot",
+   "id": "finger.low",
+   "value": 4.25
+  },
+  {
+   "description": "Cut on a finger's inner side: room for it to be pressed in by a tooth's depth and more",
+   "id": "finger.room",
+   "value": 1.6
   },
   {
    "description": "Where the fingers leave the plate, from the front",
    "id": "finger.root",
-   "value": 86.0
+   "value": 82.0
   },
   {
-   "description": "Cut either side of a finger to free it",
+   "description": "Cut between a finger and that strip",
    "id": "finger.slot",
    "value": 1.0
   },
@@ -68,12 +85,12 @@
    "description": "",
    "expr": "bay.depth + tooth.behind + tooth.ramp + tooth.lead + 0.1",
    "id": "finger.tip",
-   "value": 104.38
+   "value": 103.64999999999999
   },
   {
-   "description": "Each finger",
+   "description": "Each finger, across: this is what bends, in the plane of the plate",
    "id": "finger.width",
-   "value": 8.0
+   "value": 2.2
   },
   {
    "description": "",
@@ -85,6 +102,11 @@
    "description": "The face; it stops on the ends of the bay's ledges",
    "id": "front.thickness",
    "value": 2.6
+  },
+  {
+   "description": "Between the plate and a finger's head",
+   "id": "head.gap",
+   "value": 0.4
   },
   {
    "description": "Mounting holes, across (NVIDIA's drill file)",
@@ -120,6 +142,17 @@
    "description": "A flat for a label",
    "id": "label.width",
    "value": 44.0
+  },
+  {
+   "description": "",
+   "expr": "bay.depth - latch.clear",
+   "id": "latch.back",
+   "value": 97.0
+  },
+  {
+   "description": "A finger's head starts this far short of the bay's back, and a gap",
+   "id": "latch.clear",
+   "value": 3.0
   },
   {
    "description": "",
@@ -192,6 +225,16 @@
    "value": 6.0
   },
   {
+   "description": "A rib along each finger and its head, above the plate, to stiffen it sideways",
+   "id": "rib.height",
+   "value": 1.8
+  },
+  {
+   "description": "How far the rib runs onto the plate ahead of the finger's root",
+   "id": "rib.root",
+   "value": 3.0
+  },
+  {
    "description": "Face lower than the bay's roof",
    "id": "roof.slack",
    "value": 0.5
@@ -217,7 +260,7 @@
    "value": 0.6
   },
   {
-   "description": "Tooth below the finger",
+   "description": "Tooth beyond the plate's edge",
    "id": "tooth.depth",
    "value": 1.2
   },
@@ -227,9 +270,9 @@
    "value": 2.75
   },
   {
-   "description": "Its front ramp",
+   "description": "Its front face, front to back: nearly square, as on a carrier",
    "id": "tooth.ramp",
-   "value": 0.93
+   "value": 0.2
   },
   {
    "description": "",

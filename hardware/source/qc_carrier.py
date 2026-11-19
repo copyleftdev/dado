@@ -9,10 +9,14 @@ from qclib import inside, integrity, kernel_volume, ray_hits, report, results, s
 rng = np.random.default_rng(20261118)
 WALL, DEPTH, CAV_W, CAV_H = 3.0, 100.0, 61.0, 36.0
 PLATE, PLATE_W, PLATE_L, FRONT_T, FRONT_H = 1.8, 60.5, 97.0, 2.6, 35.5
-TOOTH, RAMP, BEHIND = 1.2, 0.93, 0.6  # tooth depth, its front ramp, ramp start behind the rear edge
+TOOTH, RAMP, BEHIND = 1.2, 0.2, 0.6  # tooth depth, its front face, the face's start behind the rear edge
 PULL = 6.0  # the pull rail's reach in front of the carrier's face
 BOARD_TOP = PLATE + 3.0 + 1.35
 TOOTH_X = DEPTH + BEHIND  # where the teeth begin, from the carrier's front
+# The latch: each finger bends sideways, in the plane of the plate.
+FINGER_T, FINGER_ROOT, RIB, HEAD_GAP = 2.2, 82.0, 1.8, 0.4  # a finger across, where it leaves the plate, its rib, the gap before its head
+FINGER_MID = (PLATE_W - 56) / 2 + 1 + 1 + FINGER_T / 2  # a finger's centre line from the plate's edge
+SIDE = (CAV_W - PLATE_W) / 2  # the gap each side when the carrier is centred
 
 cell, cell_tri = scene(".ringwright/cell/view/scene.rwv")
 car, car_tri = scene(".ringwright/carrier/view/scene.rwv")
@@ -51,8 +55,8 @@ integrity("carrier", car, car_tri, kernel_volume("carrier"))
 
 print("== 2. Measured dimensions ==")
 lo, hi = car.min(0), car.max(0)
-want_lo = np.array([-PULL, 0, -TOOTH])
-want_hi = np.array([DEPTH + BEHIND + RAMP + 2.75 + 0.1, PLATE_W, FRONT_H])
+want_lo = np.array([-PULL, -TOOTH, 0])
+want_hi = np.array([DEPTH + BEHIND + RAMP + 2.75 + 0.1, PLATE_W + TOOTH, FRONT_H])
 ok = np.allclose(lo, want_lo, atol=0.01) and np.allclose(hi, want_hi, atol=0.01)
 report("PASS" if ok else "FAIL", "carrier extent",
        f"measured {lo.round(3).tolist()} to {hi.round(3).tolist()}; drawn {want_lo.tolist()} to {want_hi.tolist()}")
@@ -71,7 +75,7 @@ worst = max(sum(c) for c in clash([(SEAT, slack, lift) for slack in (0.02, 0.25,
 report("PASS" if worst == 0 else "FAIL", "seated, at every extreme of its slack",
        f"6 poses; collisions anywhere, teeth included: {worst}")
 report("PASS" if worst == 0 else "FAIL", "the latch rests unloaded",
-       f"seated against the stop, the teeth stand {BEHIND} mm behind the cell's rear edge and touch nothing")
+       f"seated against the stop, the teeth stand {BEHIND} mm behind the rear ends of the cell's side walls and touch nothing")
 face = car[car[:, 0] > -0.01]
 front = to_cell(face, SEAT)[:, 1].min()
 report("PASS" if abs(front) < 0.05 else "FAIL", "front flush with the cell", f"{front:+.2f} mm from the cell's front plane; "
@@ -82,14 +86,14 @@ report("PASS", "front in the cell's mouth", f"{side:.2f} mm each side, {CAV_H - 
 print("== 4. Going in, coming out ==")
 got = clash([(push, 0.25, 0.02) for push in np.arange(-96, -2, 2.0)])
 report("PASS" if max(b for _, b in got) == 0 else "FAIL", "sliding in",
-       f"{len(got)} steps; teeth riding on the floor in {sum(1 for a, _ in got if a)}; "
+       f"{len(got)} steps; teeth riding on the side walls in {sum(1 for a, _ in got if a)}; "
        f"collisions elsewhere {max(b for _, b in got)}")
 steps = (0.2, 0.4, 0.5)
 *freely, held, over, up = clash([(-d, 0.25, 0.02) for d in steps]
                                 + [(-(BEHIND + 0.5), 0.25, 0.02), (0.5, 0.25, 0.02), (SEAT, 0.25, 1.0)])
 free = max(d for d, c in zip(steps, freely) if sum(c) == 0)
 report("PASS" if held[0] > 0 and held[1] == 0 else "FAIL", f"pulled {BEHIND + 0.5:.1f} mm out",
-       f"the teeth meet the rear edge ({held[0]} samples) and nothing else touches; "
+       f"the teeth meet the walls' rear ends ({held[0]} samples) and nothing else touches; "
        f"before that it moves freely at least {free} mm")
 report("PASS" if over[1] > 0 else "FAIL", "pushed 0.5 mm past its seat", f"its face meets the ends of the cell's ledges ({over[1]} samples)")
 report("PASS" if up[1] > 0 else "FAIL", "lifted 1 mm", f"hits the ledges ({up[1]} samples)")
@@ -151,30 +155,46 @@ for process, tol in (("printed nylon, +/-0.30 mm", 0.30), ("moulded, +/-0.10 mm"
     # edge: cell depth, stop, plate and tooth position each vary.
     clear = BEHIND + (g(0) + g(0) + g(0) + g(0))
     drops = clear > 0
-    depth = g(TOOTH)
+    # What a tooth catches by: its depth, less the gap beside the plate. The two fingers centre the carrier.
+    depth = g(TOOTH) - (g(CAV_W) - g(PLATE_W)) / 2
     good = fits & drops & (depth > 0.5)
     report("PASS" if good.mean() > 0.99 else "FAIL", process,
-           f"goes in {100 * fits.mean():.2f}%; the teeth drop behind the edge {100 * drops.mean():.2f}%; "
-           f"both, with a tooth of 0.5 mm or more {100 * good.mean():.2f}%; "
+           f"goes in {100 * fits.mean():.2f}%; the teeth drop behind the walls' ends {100 * drops.mean():.2f}%; "
+           f"both, with a tooth catching by 0.5 mm or more {100 * good.mean():.2f}%; "
            f"play in and out up to {np.percentile(clear, 99):.1f} mm")
 
 print("== 7. The fingers (nylon PA12, modulus 1,700 MPa assumed) ==")
-E_MOD, t, b, L_F = 1700.0, PLATE, 8.0, 100.0 - 86.0
-inertia = b * t ** 3 / 12
-for label, bend in (("sliding in, as drawn", TOOTH), ("sliding in, worst made", TOOTH + 0.3), ("seated", 0.0)):
-    strain = 3 * t * bend / (2 * L_F ** 2)
-    force = 3 * E_MOD * inertia * bend / L_F ** 3
+# Each finger is a beam from its root to its head, bending sideways: its width is what bends, and the
+# plate and its rib together are its depth. The head is stiff and carries the tooth further back.
+E_MOD, t, b = 1700.0, FINGER_T, PLATE + RIB
+L_F = PLATE_L + HEAD_GAP - FINGER_ROOT  # root to head
+reach = TOOTH_X + RAMP - (PLATE_L + HEAD_GAP)  # head's front to where the tooth bears
+lever = FINGER_MID + TOOTH / 2  # the tooth's bearing point out from the finger's centre line
+stiff = E_MOD * b * t ** 3 / 12
+give_side = (L_F ** 3 / 3 + L_F ** 2 * reach / 2) / stiff  # the tooth pushed in, per newton sideways on it
+give_pull = lever * (L_F ** 2 / 2 + L_F * reach) / stiff  # the same, per newton along the carrier: it turns the head
+caught = TOOTH - SIDE
+for label, bend in (("sliding in, centred", caught), ("sliding in, hard against one wall", TOOTH),
+                    ("sliding in, centred, worst made", caught + 0.3), ("hard against one wall and worst made", TOOTH + 0.3),
+                    ("seated", 0.0)):
+    force = bend / give_side
+    strain = force * (L_F + reach) * (t / 2) / stiff
     report("PASS" if strain < 0.025 else "FAIL", f"finger bent {bend:.2f} mm ({label})",
            f"strain {100 * strain:.2f}% (kept under 2.5%); each pushes with {force:.2f} N")
-# Pulling out bends the fingers from straight to the whole tooth, up a ramp of
-# TOOTH in RAMP, with friction. The hold is greatest as the tooth clears.
-mu, slope = 0.3, TOOTH / RAMP
-normal = 3 * E_MOD * inertia * (0.5 * TOOTH) / L_F ** 3  # each finger, on average
-pull = 2 * normal * (slope + mu) / (1 - mu * slope)
-weight = (14.0 * 1.01 / 1000 + 0.046 + 0.03 + 0.01) * 9.81
-report("PASS" if pull > 15 else "FAIL", "force to pull the carrier out",
-       f"about {pull:.1f} N on average over the ramps, twice that at the top (friction 0.3 assumed), against {weight:.1f} N for "
+# Pulling out: the walls' ends bear on the teeth's front faces, which are nearly square. Each tooth stands
+# out to one side of its finger, so the pull turns the head and draws the tooth in, against friction on
+# the face; the carrier comes out when the tooth has been drawn in by what it was caught by.
+mu = 0.3
+across, along_face = RAMP / math.hypot(RAMP, TOOTH), TOOTH / math.hypot(RAMP, TOOTH)  # the face's normal: mostly along the carrier
+fx, fy = along_face + mu * across, across - mu * along_face  # on the tooth, per newton of bearing: backward, and inward
+bearing = caught / (fx * give_pull + fy * give_side)
+pull = 2 * bearing * fx
+weight = (16.1 * 1.01 / 1000 + 0.046 + 0.03 + 0.01) * 9.81
+report("PASS" if pull > 10 else "FAIL", "force to pull the carrier out",
+       f"about {pull:.1f} N (friction 0.3 assumed; {2 * caught / (along_face * give_pull) :.1f} N with none), against {weight:.1f} N for "
        f"a loaded carrier's own weight")
+report("NOTE", "the hold is less than the carrier before this one", "which held about 22 N on a tooth under each finger. A tooth to one "
+       "side of its finger frees itself under a pull; 12 to 14 N was accepted on 2026-11-19 for a carrier that prints flat")
 report("NOTE", "unplugging a network cable", f"a plug with its tab pressed comes out for less than the {pull:.0f} N "
        f"the latch holds; one yanked with the tab up will still draw the carrier out")
 report("NOTE", "the pull", f"a rail {PULL:.0f} mm proud along the whole top edge, with a 1.5 mm lip under it; "

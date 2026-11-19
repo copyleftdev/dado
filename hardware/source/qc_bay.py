@@ -79,10 +79,10 @@ def agx(bay_p, tray_p, room_h):
     gaps = {"each fence": (mid - kit / 2) - tray_p["side.lo"], "the front stop": x0 - tray_p["front.stop"], "the rear stops": tray_p["back.stop"] - x1}
     report("PASS" if all(0.3 <= g <= 0.8 for g in gaps.values()) else "FAIL", "the kit between its fences and stops",
            "; ".join(f"{g:.2f} mm to {k}" for k, g in gaps.items()))
-    # A rear stop is solid plate; a finger beside it must stay free to lift.
-    clear = (mid - tray_p["finger.apart"] - tray_p["finger.width"] - tray_p["finger.slot"]) - (tray_p["side.lo"] + tray_p["stop.width"])
-    report("PASS" if clear >= 1.0 else "FAIL", "the rear stops clear of the latch fingers",
-           f"{clear:.2f} mm between each stop and the slot that frees the finger beside it (1.0 wanted)")
+    # A fence stands on the plate beside each finger's inner slot; a finger pressed in by its whole tooth must not reach it.
+    clear = (tray_p["side.lo"] - tray_p["fence.thick"]) - tray_p["finger.high"] - tray_p["tooth.depth"]
+    report("PASS" if clear >= 0.3 else "FAIL", "the fences clear of the latch fingers",
+           f"{clear:.2f} mm between each fence and its finger when the finger is pressed in by its whole tooth (0.3 wanted)")
     names, caught = ["forward", "back", "to one side", "to the other"], []
     for dx, dy in [(-1.0, 0), (1.0, 0), (0, 1.0), (0, -1.0)]:
         moved = (s[:, 0] > x0 + dx) & (s[:, 0] < x1 + dx) & (np.abs(s[:, 1] - mid - dy) < kit / 2) & (s[:, 2] > t + 0.02) & (s[:, 2] < t + 3)
@@ -102,8 +102,7 @@ def agx(bay_p, tray_p, room_h):
     out = x1 - bay_p["body.depth"]
     report("NOTE", "it stands out behind", f"the kit is {kit:.0f} mm deep and a bay {bay_p['body.depth']:.0f}: its sockets are {out:.1f} mm behind the bay's rear, "
            f"and the plate carries on {tray_p['plate.length'] - bay_p['body.depth']:.0f} mm past it to carry them")
-    report("NOTE", "the latch fingers", "they lie under the kit and lift 1.2 mm to release; that needs the kit's feet to hold it at least "
-           "that far off the plate, and NVIDIA gives no height for them")
+    report("NOTE", "the latch fingers", "they lie along the plate's two edges, outside the fences, and bend sideways: nothing of the kit is over them")
     load = (grams + 1.01 * (kernel_volume("bayagx") + kernel_volume("agx")) / 1000) / 2
     report("PASS" if load < 9 * 200 else "FAIL", "weight on what stands below",
            f"bay, tray and kit put about {load:.0f} g on each of the two columns under them; the bottom cell of a ten-high wall carries {9 * 200} g")
@@ -151,10 +150,9 @@ def orin(bay_p, tray_p, room_h):
     hits = int((under & ~post).sum())
     report("PASS" if hits == 0 else "FAIL", "nothing but the posts where the board and its underside parts go",
            f"points of the tray there: {hits}")
-    lift = tray_p["tooth.depth"] * ((x1 - tray_p["finger.root"]) / (tray_p["finger.tip"] - tray_p["finger.root"])) ** 2
-    report("PASS" if lift < tray_p["post.height"] - below else "FAIL", "the latch fingers under the board",
-           f"to pass the bay's floor a finger lifts {tray_p['tooth.depth']:.1f} mm at its tip, about {lift:.2f} under the board's "
-           f"edge, where {tray_p['post.height'] - below:.2f} is free")
+    beside = y0 - (tray_p["finger.high"] + tray_p["finger.room"])
+    report("PASS" if beside >= 1.0 else "FAIL", "the latch fingers beside the board",
+           f"they bend sideways along the plate's edges; the board's edge is {beside:.2f} mm inside the slot that frees each (1.0 wanted)")
     stack = tray_p["post.height"] + kit + kit_tol
     report("PASS" if room_h - stack >= 15 else "FAIL", "room above the cooler",
            f"at least {room_h - stack:.1f} mm (15 wanted, my figure, for a fan that draws from above): the kit is {kit} +/- {kit_tol} mm "
@@ -215,15 +213,23 @@ for bay, (shelf, n, m, devices) in KINDS.items():
     print("== 4. The shelf in the bay ==")
     w = bay_p["wall"]
     place = lambda p, out=0.0, lift=E: np.stack([-(w + 0.25 + p[:, 1]), p[:, 0] - out, w + lift + p[:, 2]], 1)
-    teeth = S[shelf][:, 2] < -0.05
+    teeth = (S[shelf][:, 1] < -0.05) | (S[shelf][:, 1] > shelf_p["plate.width"] + 0.05)
     # The shelf in the bay, asked of Ringwright: turned to face the bay's mouth, then set on its floor.
-    # Its teeth hang below the floor on springs and are left out.
+    # Its teeth stand out sideways on springs, behind the bay's side walls: what they press on is counted apart.
     def seated(out=0.0, lift=E):
-        return Case(Placed(bay), Placed(shelf, (-(w + 0.25), -out, w + lift), (("z", 90),)), None, [box(z=(-FAR, w + lift - 0.05))])
-    hits, over, lifted = (f.points for f in overlaps([seated(), seated(out=-0.6), seated(lift=1.0)]))
-    report("PASS" if hits == 0 else "FAIL", "seated", f"points of the shelf inside the bay's walls, floor, ledges or roof: {hits}")
+        behind = [box(y=(-out + shelf_p["tooth.x"] - 0.05, FAR))]
+        return Case(Placed(bay), Placed(shelf, (-(w + 0.25), -out, w + lift), (("z", 90),)), None, behind)
+    pull = shelf_p["tooth.behind"] + 0.5
+    slide = [seated(out=float(o)) for o in np.arange(96, 2, -2.0)]
+    rest, over, lifted, pulled, *slid = overlaps([seated(), seated(out=-0.6), seated(lift=1.0), seated(out=pull)] + slide)
+    hits, over, lifted = rest.points + rest.ignored, over.points, lifted.points
+    report("PASS" if hits == 0 else "FAIL", "seated", f"points of the shelf inside the bay's walls, floor, ledges or roof, teeth included: {hits}")
+    report("PASS" if max(f.points for f in slid) == 0 else "FAIL", "sliding in",
+           f"{len(slid)} steps; teeth riding on the side walls in {sum(1 for f in slid if f.ignored)}; collisions elsewhere {max(f.points for f in slid)}")
+    report("PASS" if pulled.ignored > 0 and pulled.points == 0 else "FAIL", f"pulled {pull:.1f} mm out",
+           f"the teeth meet the walls' rear ends ({pulled.ignored} points) and nothing else touches")
     behind = S[shelf][teeth][:, 0].min() - bay_p["body.depth"]
-    report("PASS" if 0 < behind < 1.5 else "FAIL", "latch teeth", f"they start {behind:.2f} mm behind the bay's rear edge, below its floor")
+    report("PASS" if 0 < behind < 1.5 else "FAIL", "latch teeth", f"they start {behind:.2f} mm behind the rear ends of the bay's side walls, beyond the plate's edges")
     report("PASS" if over > 0 else "FAIL", "pushed 0.6 mm past its seat", f"its face meets the ends of the bay's ledges ({over} points)")
     report("PASS" if lifted > 0 else "FAIL", "lifted 1 mm", f"held down by the ledges ({lifted} points)")
     roof_gap = bay_p["body.height"] - bay_p["roof"] - w - shelf_p["front.height"]

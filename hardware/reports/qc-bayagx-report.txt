@@ -2,42 +2,44 @@
 == 1. Sound ==
 PASS  bayagx mesh is closed and consistently wound: 1692 triangles, every edge used once each way: True
 PASS  bayagx mesh volume against the kernel's: mesh 223993.0 mm3, kernel 223996.6 mm3, 0.002% apart
-PASS  agx mesh is closed and consistently wound: 2272 triangles, every edge used once each way: True
-PASS  agx mesh volume against the kernel's: mesh 60375.3 mm3, kernel 60375.3 mm3, 0.000% apart
+PASS  agx mesh is closed and consistently wound: 2332 triangles, every edge used once each way: True
+PASS  agx mesh volume against the kernel's: mesh 61070.0 mm3, kernel 61070.0 mm3, 0.000% apart
 PASS  bayagx thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
-PASS  agx thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.7, 1.8, 2.0, 2.2, 2.4]
+PASS  agx thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.61, 1.7, 1.8, 2.0, 2.2]
 == 2. The lattice ==
 PASS  fills the place of 2 by 3 cells: 137.6 by 133.2 mm; 2 pitches and 3 rises less a gap each way is 137.6 by 133.2
 PASS  every joint dimension is the cell's: differing: none
 == 3. Joined to cells: seated without touching, held when pulled ==
 PASS  on a row of 2 cells: 2 joint(s); points of one part inside the other: 0
-PASS  on a row of 2 cells, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306] points
+PASS  on a row of 2 cells, pulled apart 1.2 mm: lips meet the rail's head at every joint: [45277, 45277] points
 PASS  2 cells on it: 2 joint(s); points of one part inside the other: 0
-PASS  2 cells on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306] points
+PASS  2 cells on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [36549, 36549] points
 PASS  2 caps on it: 2 joint(s); points of one part inside the other: 0
-PASS  2 caps on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [306, 306] points
+PASS  2 caps on it, pulled apart 1.2 mm: lips meet the rail's head at every joint: [36549, 36549] points
 PASS  3 cell(s) at its rail side: 3 joint(s); points of one part inside the other: 0
-PASS  3 cell(s) at its rail side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320, 326] points
+PASS  3 cell(s) at its rail side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [46953, 46953, 46953] points
 PASS  3 cell(s) at its lips side: 3 joint(s); points of one part inside the other: 0
-PASS  3 cell(s) at its lips side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [320, 320, 319] points
+PASS  3 cell(s) at its lips side, pulled apart 1.2 mm: lips meet the rail's head at every joint: [46953, 46953, 46957] points
 == 4. The shelf in the bay ==
-PASS  seated: points of the shelf inside the bay's walls, floor, ledges or roof: 0
-PASS  latch teeth: they start 0.67 mm behind the bay's rear edge, below its floor
-PASS  pushed 0.6 mm past its seat: its face meets the ends of the bay's ledges (4 points)
-PASS  lifted 1 mm: held down by the ledges (651 points)
+PASS  seated: points of the shelf inside the bay's walls, floor, ledges or roof, teeth included: 0
+PASS  sliding in: 47 steps; teeth riding on the side walls in 47; collisions elsewhere 0
+PASS  pulled 1.1 mm out: the teeth meet the walls' rear ends (112 points) and nothing else touches
+PASS  latch teeth: they start 0.66 mm behind the rear ends of the bay's side walls, beyond the plate's edges
+PASS  pushed 0.6 mm past its seat: its face meets the ends of the bay's ledges (269 points)
+PASS  lifted 1 mm: held down by the ledges (17530 points)
 PASS  the face under the roof: 0.50 mm between them
 == 5. What goes on it ==
 NOTE  room on the shelf: 131.1 mm wide, 122.4 tall; the back is open, so a device may stand out behind
 PASS  nothing of the tray where the kit stands: points of the tray there: 0
 PASS  the kit between its fences and stops: 0.50 mm to each fence; 0.50 mm to the front stop; 0.50 mm to the rear stops
-PASS  the rear stops clear of the latch fingers: 1.50 mm between each stop and the slot that frees the finger beside it (1.0 wanted)
-PASS  pushed 1 mm any way along the tray: it meets a fence or a stop: {'forward': 294, 'back': 107, 'to one side': 231, 'to the other': 235} points. Nothing holds it down but its 872 g
+PASS  the fences clear of the latch fingers: 0.40 mm between each fence and its finger when the finger is pressed in by its whole tooth (0.3 wanted)
+PASS  pushed 1 mm any way along the tray: it meets a fence or a stop: {'forward': 303, 'back': 91, 'to one side': 220, 'to the other': 237} points. Nothing holds it down but its 872 g
 PASS  room above the fan: 50.7 mm, where 21 is wanted: a gap a quarter of the fan's width lets in as much air as the fan's own opening. The fan is about 84 mm across, measured off NVIDIA's figure
 PASS  why the bay is three rows tall: a two-row bay would leave 5.1 mm above the fan
 NOTE  room at its sides: 10.8 mm each side between the kit's side vents and the bay's walls; whether that is enough is not modelled
 PASS  fences below the vents: fences 5 mm tall; the kit's side vents start about 40 mm up (off NVIDIA's figure)
 NOTE  it stands out behind: the kit is 110 mm deep and a bay 100: its sockets are 18.5 mm behind the bay's rear, and the plate carries on 21 mm past it to carry them
-NOTE  the latch fingers: they lie under the kit and lift 1.2 mm to release; that needs the kit's feet to hold it at least that far off the plate, and NVIDIA gives no height for them
+NOTE  the latch fingers: they lie along the plate's two edges, outside the fences, and bend sideways: nothing of the kit is over them
 PASS  weight on what stands below: bay, tray and kit put about 580 g on each of the two columns under them; the bottom cell of a ten-high wall carries 1800 g
 NOTE  cooling: not modelled. The kit can draw 15 to 60 W; air comes in through 99 slots in the face (55 cm2) and leaves by the open back
 NOTE  power: the kit takes 19 V at a USB-C socket or 7 to 20 V at a barrel socket, from its own supply; not the Pis' 5 V
@@ -47,4 +49,4 @@ PASS  1 row(s) of cells on it: about 3.9 N; the 6 mm roof sags about 0.04 mm (0.
 PASS  2 row(s) of cells on it: about 7.8 N; the 6 mm roof sags about 0.08 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
 PASS  3 row(s) of cells on it: about 11.8 N; the 6 mm roof sags about 0.11 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
 
-{'PASS': 34, 'FAIL': 0, 'NOTE': 7}
+{'PASS': 36, 'FAIL': 0, 'NOTE': 7}

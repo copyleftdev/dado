@@ -169,17 +169,29 @@
    "value": 34.5
   },
   {
-   "description": "Each finger's near edge from the centre line: clear of the stop",
-   "id": "finger.apart",
-   "value": 11.0
+   "description": "",
+   "expr": "margin + 1 + finger.slot + finger.width",
+   "id": "finger.high",
+   "value": 6.45
   },
   {
-   "description": "Where the fingers leave the plate, from the front: 14 to the cell's rear edge",
+   "description": "",
+   "expr": "margin + 1 + finger.slot",
+   "id": "finger.low",
+   "value": 4.25
+  },
+  {
+   "description": "Cut on a finger's inner side: room for it to be pressed in by a tooth's depth and more",
+   "id": "finger.room",
+   "value": 1.6
+  },
+  {
+   "description": "Where the fingers leave the plate, from the front: clear of the rear posts",
    "id": "finger.root",
-   "value": 86.0
+   "value": 82.0
   },
   {
-   "description": "Cut either side of a finger to free it",
+   "description": "Cut between a finger and the strip of plate under the back wall's end post",
    "id": "finger.slot",
    "value": 1.0
   },
@@ -187,12 +199,12 @@
    "description": "",
    "expr": "cell.depth + tooth.behind + tooth.ramp + tooth.lead + 0.1",
    "id": "finger.tip",
-   "value": 104.38
+   "value": 103.64999999999999
   },
   {
-   "description": "Each finger, across; short and wide, for about 20 N of hold",
+   "description": "Each finger, across: this is what bends, in the plane of the plate",
    "id": "finger.width",
-   "value": 8.0
+   "value": 2.2
   },
   {
    "description": "",
@@ -204,6 +216,11 @@
    "description": "The face; it stops on the ends of the cell's ledges and sits flush with the cell",
    "id": "front.thickness",
    "value": 2.6
+  },
+  {
+   "description": "Between the plate's back edge and a finger's head",
+   "id": "head.gap",
+   "value": 0.4
   },
   {
    "description": "Mounting holes from the board's edges, at the card-slot end",
@@ -364,6 +381,16 @@
    "value": 6.0
   },
   {
+   "description": "A rib along each finger and its head, above the plate: it makes the finger stiffer to bend sideways without making it wider. It stops well under the board's solder side",
+   "id": "rib.height",
+   "value": 1.8
+  },
+  {
+   "description": "How far the rib runs onto the plate ahead of the finger's root",
+   "id": "rib.root",
+   "value": 3.0
+  },
+  {
    "description": "Front lower than the cell's roof",
    "id": "roof.slack",
    "value": 0.5
@@ -404,7 +431,7 @@
    "value": 0.6
   },
   {
-   "description": "Tooth below the finger",
+   "description": "Tooth beyond the plate's edge",
    "id": "tooth.depth",
    "value": 1.2
   },
@@ -414,9 +441,9 @@
    "value": 2.75
   },
   {
-   "description": "Its front ramp, front to back: steep, about 52 degrees, for about 20 N to pull out",
+   "description": "Its front face, front to back: nearly square. The tooth stands out to one side of its finger, so a pull turns the head and frees it; a square face is what makes that take a real pull",
    "id": "tooth.ramp",
-   "value": 0.93
+   "value": 0.2
   },
   {
    "description": "",

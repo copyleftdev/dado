@@ -53,6 +53,7 @@ Cells sit 70.6 mm apart across and 45.6 mm apart up. Each part can be turned ove
 The STEP files are ready to send to a print bureau or open in any CAD program.
 
 - **Process and material:** designed for powder-bed nylon (PA12, by MJF or SLS). The joints assume parts within ±0.30 mm.
+- **On a filament printer:** every part has a way up that needs little or no support. Sleeves, bases, caps and spacers stand on end; the carrier, shelves and trays lie flat on their plates, with support under the pull only. [`print_check.py`](hardware/source/print_check.py) holds each part to it, and lists which bed sizes take which parts: a 220 mm bed takes all but the rack bay and its shelf.
 - **What else a cell needs:** a Raspberry Pi 5, four M2.5 screws, and optionally the Active Cooler, a PoE HAT, and a 25 × 25 × 6 mm fan. A standard 10 mm thick fan does not fit under a HAT.
 - **Start small.** Print three cells, three carriers, a base and a set of caps first. That is enough to test every joint.
 
@@ -61,9 +62,9 @@ The STEP files are ready to send to a print bureau or open in any CAD program.
 Each part was built from a script that states its volume by hand; the CAD kernel had to agree within 0.05 % before the part was accepted. The script also states the part's overall size and its thinnest allowed wall, and the engine measures both on the finished body before accepting it. After that, each part went through a QC script. The reports are in [`hardware/reports`](hardware/reports).
 
 - Every mesh is closed and matches the kernel's volume.
-- The checks themselves were tested: 37 wrong numbers were planted one at a time across every part. The checks caught 36; the miss exposed a missing check, which was added and now catches it. See [`mutation-report.txt`](hardware/reports/mutation-report.txt).
+- The checks themselves were tested: 37 wrong numbers were planted one at a time across every part. The checks catch all 37. An earlier run missed one, which exposed a missing check, since added. See [`mutation-report.txt`](hardware/reports/mutation-report.txt).
 - Joints seat without touching and hold when pulled, in every position a part can take in a wall.
-- A carrier goes in, stops on its face, latches behind the cell, and is held down.
+- A carrier goes in, stops on its face, latches behind the cell's side walls, and is held down. Its latch holds about 13 N by calculation.
 - Raspberry Pi's own model of the Pi 5 sits on the carrier's posts with every port through its window and nothing touching. The tightest port clears by 0.61 mm.
 - Joints and latches were simulated across 200,000 parts at printing tolerance.
 - Roofs of the bays were calculated for the load of the rows above them.
@@ -80,7 +81,7 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - **A PoE HAT's height is unverified.** There is 13.6 mm above the board's tallest part to the cell's roof.
 - **The single-height bay carries one row of cells above it,** not three. The tall bay carries three.
 - **The Jetson bay was checked against NVIDIA's published sizes, not a model of the board.** Its cooling is not modelled (the board can draw about 25 W), and it takes 9 to 20 V at a barrel socket, not the Pis' 5 V.
-- **The AGX bay was checked against a plain box of NVIDIA's three outside sizes.** The kit's feet and underside are not in the drawing used, and the tray's latch fingers need 1.2 mm of room under the kit to release. Its cooling is not modelled (15 to 60 W), and it stands 18.5 mm out behind the bay.
+- **The AGX bay was checked against a plain box of NVIDIA's three outside sizes.** The kit's feet and underside are not in the drawing used. Its cooling is not modelled (15 to 60 W), and it stands 18.5 mm out behind the bay.
 - **Row spacers and crosses have no side joint.** They are too low to carry it, so they are held from above and below only. There is no side cap half a row high.
 - **A bay over column spacers is held only by the cells under it,** so the configurator puts columns of spacers between bays, never under one.
 - **Wire management is a route, not a fit.** Spacers give cables a tray and a shaft behind the wall; how tightly a lead bends from a port into them is not modelled, and neither is the air through their slots.

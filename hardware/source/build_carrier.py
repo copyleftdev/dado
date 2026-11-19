@@ -2,8 +2,17 @@
 """Builds the carrier: what a Raspberry Pi 5 is screwed to before it goes into
 the cell. A plate that slides on the cell's floor under its two ledges, a
 closed face that shuts the cell's mouth and stops on the ends of its ledges,
-two spring fingers at the back whose teeth drop behind the cell's rear edge
-and then rest straight, and a back wall the board's ports come out through.
+two spring fingers at the back whose teeth drop behind the rear ends of the
+cell's side walls and then rest straight, and a back wall the board's ports
+come out through.
+
+The latch lies in the plane of the plate, so nothing is below the plate's
+underside and the carrier prints lying flat. Each finger bends sideways. It
+runs inboard of the back wall's end post, which has to stand on the plate,
+and carries a head behind the wall that reaches out past the plate's edge
+to its tooth. The carrier before this one (build_carrier_v3.py) had teeth
+that pointed down behind the rear edge of the cell's floor, and no clean way
+up to print.
 
 The board sits with its ports to the back, so every cable leaves from behind
 and the face is a plain door: a pull, a row of air slots, a label flat, and a
@@ -68,12 +77,15 @@ P = {
     "pull.lip": (1.5, "A lip under its edge, for fingertips to catch"),
     "nose.taper": (2, "Cut from each back corner"),
     # The latch.
-    "finger.root": (86, "Where the fingers leave the plate, from the front: 14 to the cell's rear edge"),
-    "finger.width": (8, "Each finger, across; short and wide, for about 20 N of hold"),
-    "finger.apart": (11, "Each finger's near edge from the centre line: clear of the stop"),
-    "finger.slot": (1, "Cut either side of a finger to free it"),
-    "tooth.depth": (1.2, "Tooth below the finger"),
-    "tooth.ramp": (0.93, "Its front ramp, front to back: steep, about 52 degrees, for about 20 N to pull out"),
+    "finger.root": (82, "Where the fingers leave the plate, from the front: clear of the rear posts"),
+    "finger.width": (2.2, "Each finger, across: this is what bends, in the plane of the plate"),
+    "finger.slot": (1, "Cut between a finger and the strip of plate under the back wall's end post"),
+    "finger.room": (1.6, "Cut on a finger's inner side: room for it to be pressed in by a tooth's depth and more"),
+    "head.gap": (0.4, "Between the plate's back edge and a finger's head"),
+    "tooth.depth": (1.2, "Tooth beyond the plate's edge"),
+    "tooth.ramp": (0.2, "Its front face, front to back: nearly square. The tooth stands out to one side of its finger, so a pull turns the head and frees it; a square face is what makes that take a real pull"),
+    "rib.height": (1.8, "A rib along each finger and its head, above the plate: it makes the finger stiffer to bend sideways without making it wider. It stops well under the board's solder side"),
+    "rib.root": (3, "How far the rib runs onto the plate ahead of the finger's root"),
     "tooth.lead": (2.75, "Its back ramp, which rides in over the floor"),
     # The back wall: the ports come out through it, with a row of slots above them for air out.
     "back.thickness": (2.6, "Back wall; the ports end flush with its rear face"),
@@ -108,6 +120,8 @@ D = {
     "mid": "plate.width / 2",
     "back.x": "plate.length - back.thickness",
     "tooth.x": "cell.depth + tooth.behind",
+    "finger.low": "margin + 1 + finger.slot",
+    "finger.high": "margin + 1 + finger.slot + finger.width",
     "finger.tip": "cell.depth + tooth.behind + tooth.ramp + tooth.lead + 0.1",
     "air.top": "front.height - top.bar",
     "air.low": "front.height - top.bar - air.height",
@@ -177,20 +191,19 @@ POSTS = {"origin": [0, 0, "plate.thickness + post.height"], "x": [1, 0, 0], "y":
 L, WD = "plate.length", "plate.width"
 
 
-def finger_edges():
-    """Low and high edge of each finger, across."""
-    return [("mid - finger.apart - finger.width", "mid - finger.apart"),
-            ("mid + finger.apart", "mid + finger.apart + finger.width")]
+def mirrored(y):
+    return f"{WD} - ({y})"
 
 
 def outline():
-    """Counter-clockwise from the front low corner; the two fingers reach
-    past the back edge."""
-    t = "nose.taper"
-    pts = [(0, 0), (f"{L} - {t}", 0), (L, t)]
-    for lo, hi in finger_edges():
-        pts += [(L, lo), ("finger.tip", lo), ("finger.tip", hi), (L, hi)]
-    return pts + [(L, f"{WD} - {t}"), (f"{L} - {t}", WD), (0, WD)]
+    """Counter-clockwise from the front low corner. Behind the back edge each
+    finger carries a head that reaches out to the plate's edge."""
+    t, back = "nose.taper", f"{L} + head.gap"
+    lo, hi = "finger.low", "finger.high"
+    pts = [(0, 0), (f"{L} - {t}", 0), (L, t), (L, lo), (back, lo), (back, 0), ("finger.tip", 0), ("finger.tip", hi), (L, hi)]
+    far = [(L, t), (L, lo), (back, lo), (back, 0), ("finger.tip", 0), ("finger.tip", hi), (L, hi)]
+    pts += [(x, mirrored(y)) for x, y in reversed(far)]
+    return pts + [(f"{L} - {t}", WD), (0, WD)]
 
 
 def lightening():
@@ -211,14 +224,18 @@ def cuts():
         lo = f"mid - 2 * slot.pitch - slot.width / 2 + {k} * slot.pitch"
         out.append((f"air{k}", ["-1", lo, "intake.low"], ["front.thickness + 1", f"{lo} + slot.width", "air.top"]))
         out.append((f"vent{k}", ["back.x - 1", lo, "air.low"], [f"{L} + 1", f"{lo} + slot.width", "air.top"]))
-    for k, (lo, hi) in enumerate(finger_edges()):
-        # The slots stop at the plate's top: above them is the back wall.
-        for side, a, b in (("a", f"{lo} - finger.slot", lo), ("b", hi, f"{hi} + finger.slot")):
-            out.append((f"slot{k}{side}", ["finger.root", a, "-1"], [f"{L} + 1", b, "plate.thickness"]))
-        # The back wall opens over the finger and its slots, up into the
-        # ports' window, so no thin bridge is left between the two.
-        out.append((f"arch{k}", ["back.x - 1", f"{lo} - finger.slot - 0.25", "plate.thickness"],
-                    [f"{L} + 1", f"{hi} + finger.slot + 0.25", "band.high + 0.1"]))
+    for k in range(2):
+        side = (lambda y: y) if k == 0 else mirrored
+        span = lambda a, b: sorted([side(a), side(b)], key=lambda e: num(e, V))
+        # The slots stop at the plate's top: above them is the back wall. The outer one
+        # ends in the gap behind the plate, short of the head; the inner one runs out the back.
+        (a, b), (c, d) = span("finger.low - finger.slot", "finger.low"), span("finger.high", "finger.high + finger.room")
+        out.append((f"slot{k}a", ["finger.root", a, "-1"], [f"{L} + head.gap / 2", b, "plate.thickness"]))
+        out.append((f"slot{k}b", ["finger.root", c, "-1"], [f"{L} + 1", d, "plate.thickness"]))
+        # The back wall opens over the finger and its slots, from its end post up into
+        # the ports' window, so no thin bridge is left between the two.
+        (a, b) = span("finger.low - finger.slot", "finger.high + finger.room + 0.25")
+        out.append((f"arch{k}", ["back.x - 1", a, "plate.thickness"], [f"{L} + 1", b, "band.high + 0.1"]))
     # The ledges pass through the back wall as they do the front.
     for name, lo, hi in (("back.ledge.low", "-1", "ledge.reach + 0.2"),
                          ("back.ledge.high", f"{WD} - ledge.reach - 0.2", f"{WD} + 1")):
@@ -303,16 +320,24 @@ def features():
     f.append({"id": "pull.lip", "version": 1, "type": "boss", "target": ref("pull", "body"),
               "profile": ref("pull.lip.sketch", "lip"), "height": "pull.lip"})
     last = "pull.lip"
-    # The teeth: a wedge under each finger, drawn from the side and as wide
-    # as the finger. It starts a little inside the finger so the two are one.
-    wedge = [("tooth.x", 0.3), ("tooth.x + tooth.ramp + tooth.lead", 0.3),
-             ("tooth.x + tooth.ramp + tooth.lead", 0), ("tooth.x + tooth.ramp", "-tooth.depth"),
-             ("tooth.x", 0)]
-    for k, (lo, hi) in enumerate(finger_edges()):
-        side = {"origin": [0, hi, 0], "x": [1, 0, 0], "y": [0, 0, 1]}  # normal -Y
-        f.append(sketch(f"tooth{k}.sketch", {"wedge": wedge}, side))
+    # A rib along each finger, from the plate ahead of its root to the end of its head.
+    for k in range(2):
+        side = (lambda y: y) if k == 0 else mirrored
+        a, b = sorted([side("finger.low"), side("finger.high")], key=lambda e: num(e, V))
+        f.append(sketch(f"rib{k}.sketch", {"rib": box("finger.root - rib.root", a, "finger.tip", b)}, TOP))
+        f.append({"id": f"rib{k}", "version": 1, "type": "boss", "target": ref(last, "body"),
+                  "profile": ref(f"rib{k}.sketch", "rib"), "height": "rib.height"})
+        last = f"rib{k}"
+    # The teeth: a wedge on each head, drawn from above and as thick as the
+    # plate, pointing out past the plate's edge. It starts a little inside
+    # the head so the two are one.
+    wedge = [("tooth.x", 0.3), ("tooth.x", 0), ("tooth.x + tooth.ramp", "-tooth.depth"),
+             ("tooth.x + tooth.ramp + tooth.lead", 0), ("tooth.x + tooth.ramp + tooth.lead", 0.3)]
+    for k in range(2):
+        pts = wedge if k == 0 else [(x, mirrored(y)) for x, y in reversed(wedge)]
+        f.append(sketch(f"tooth{k}.sketch", {"wedge": pts}))
         f.append({"id": f"tooth{k}", "version": 1, "type": "boss", "target": ref(last, "body"),
-                  "profile": ref(f"tooth{k}.sketch", "wedge"), "height": "finger.width"})
+                  "profile": ref(f"tooth{k}.sketch", "wedge"), "height": "plate.thickness"})
         last = f"tooth{k}"
     return f, last
 
@@ -326,7 +351,7 @@ def expected_volume():
     v, n = V, lambda e: num(e, V)
     t = v["plate.thickness"]
     area = poly_area(outline()) - poly_area(lightening())
-    area -= 4 * v["finger.slot"] * (v["plate.length"] - v["finger.root"])
+    area -= 2 * (v["finger.slot"] + v["finger.room"]) * (v["plate.length"] - v["finger.root"])
     vol = area * t
     front = v["plate.width"] * (v["front.height"] - t)
     front -= 5 * v["slot.width"] * v["intake.height"] + v["card.width"] * (v["card.high"] - v["card.low"])
@@ -341,11 +366,12 @@ def expected_volume():
     vol += front * v["front.thickness"]
     post, hole = math.pi * (v["post.diameter"] / 2) ** 2, math.pi * (v["screw.hole"] / 2) ** 2
     vol += 4 * post * v["post.height"] - 4 * hole * (t + v["post.height"])
-    vol += 2 * v["finger.width"] * (v["tooth.ramp"] + v["tooth.lead"]) * v["tooth.depth"] / 2
+    vol += 2 * t * (v["tooth.ramp"] + v["tooth.lead"]) * v["tooth.depth"] / 2
+    vol += 2 * (v["finger.tip"] - v["finger.root"] + v["rib.root"]) * v["finger.width"] * v["rib.height"]
     # The back wall, less the openings over the fingers, its ledge notches,
     # the ports' window and the slots above it.
     back = v["plate.width"] * (v["front.height"] - t)
-    back -= 2 * (v["finger.width"] + 2 * v["finger.slot"] + 0.5) * (v["band.high"] - t)
+    back -= 2 * (v["finger.slot"] + v["finger.width"] + v["finger.room"] + 0.25) * (v["band.high"] - t)
     back -= 2 * (v["ledge.reach"] + 0.2) * (v["ledge.under"] + v["ledge.reach"] + 0.2 - t)
     back -= (v["board.width"] - 2) * (v["port.height"] + v["board.thickness"] + 0.8)
     back -= 5 * v["slot.width"] * v["air.height"]
@@ -370,7 +396,8 @@ def main():
           "operations": ops,
           "checks": [{"kind": "valid_solid", "body": "carrier.body"},
                      {"kind": "volume", "body": "carrier.body", "unit": "mm",
-                      "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("carrier.body", (lambda l, w: (l + V["pull.reach"], w, V["front.height"] + V["tooth.depth"]))(*spans(outline(), num, V)), 1.5)}
+                      "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("carrier.body", (lambda l, w: (l + V["pull.reach"], w + 2 * V["tooth.depth"], V["front.height"]))(*spans(outline(), num, V)), 1.5)
+                    + [{"kind": "overhang", "body": "carrier.body", "up": "z", "beyond_deg": 60, "area_at_most": 1100, "unit": "mm"}]}
     open("tx-carrier.json", "w").write(json.dumps(tx, indent=1))
     dry = rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:

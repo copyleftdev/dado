@@ -55,7 +55,7 @@ The NVIDIA Jetson AGX Orin developer kit is a closed box, 110 by 110 and 71.65 t
 
 Nothing may cover the fan, so the kit is not strapped. It stands between two fences 5 tall, a front stop and two rear stops, with 0.5 of slack to each, held by its own weight. Its front is 8.5 behind the tray's, so air from the face's nine rows of slots can pass.
 
-The kit is deeper than a bay. The tray's plate carries on 21 past the bay's back, the kit's sockets stand 18.5 behind it, and the latch fingers are tongues cut into the longer plate.
+The kit is deeper than a bay. The tray's plate carries on 21 past the bay's back, the kit's sockets stand 18.5 behind it, and the latch fingers and their heads are cut out of the longer plate's two edges, where the bay's side walls end.
 
 ## Spacers
 

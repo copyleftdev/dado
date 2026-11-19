@@ -22,7 +22,7 @@ BUILDS = {"cell": ("build_cell.py",), "carrier": ("build_carrier.py",), "base": 
           **{d: ("build_shelf.py", d) for d in ("shelf", "shelftall", "shelfrack")},
           "orin": ("build_orin.py",), "agx": ("build_agx.py",),
           **{d: ("build_spacer.py", d) for d in ("spacerrow", "spacercol", "spacercross")}}
-SUITES = ["fit_check.py", "qc.py", "qc_carrier.py", "qc_base.py", "qc_trim.py", "qc_bay.py", "qc_spacer.py", "pi5_fit.py", "qa.py"]
+SUITES = ["fit_check.py", "qc.py", "qc_carrier.py", "qc_base.py", "qc_trim.py", "qc_bay.py", "qc_spacer.py", "pi5_fit.py", "print_check.py", "qa.py"]
 
 
 def number(param, value):
@@ -51,7 +51,7 @@ DEFECTS = {
     "carrier: plate too thick": ("build_carrier.py", number("plate.thickness", 2.4), "binds under the ledges"),
     "carrier: too wide": ("build_carrier.py", number("side.slack", -0.4), "wider than the cell's inside"),
     "carrier: fan too high": ("build_carrier.py", number("fan.low", 14), "fan and its cradle would strike the cell's roof"),
-    "carrier: teeth too far forward": ("build_carrier.py", number("tooth.behind", -2.0), "teeth sit on the floor, short of the rear edge"),
+    "carrier: teeth too far forward": ("build_carrier.py", number("tooth.behind", -2.0), "teeth press on the side walls, short of their rear ends"),
     "carrier: posts too short": ("build_carrier.py", number("post.height", 1.5), "board 1.5 mm low: ports miss their window"),
     # The bases.
     "base: seat notches too shallow for the teeth": ("build_base.py", number("cell.reach", 0.2), "notches too narrow for a cell's teeth"),
@@ -67,14 +67,14 @@ DEFECTS = {
     # What slides into them.
     "shelf: too wide": ("build_shelf.py", number("side.slack", -0.6), "wider than the bay's inside"),
     "shelf: plate too thick": ("build_shelf.py", number("plate.thickness", 2.5), "binds under the bay's ledges"),
-    "shelf: teeth too far forward": ("build_shelf.py", number("tooth.behind", -2.0), "teeth sit on the floor, short of the rear edge"),
+    "shelf: teeth too far forward": ("build_shelf.py", number("tooth.behind", -2.0), "teeth press on the side walls, short of their rear ends"),
     "shelf: made for a lower bay": ("build_shelf.py", text('"shelftall": (202.2, 74.6,', '"shelftall": (202.2, 70.6,'), "its face leaves 4 mm open under the roof"),
     "Jetson tray: holes too close": ("build_orin.py", number("hole.across", 86), "6 mm off NVIDIA's hole pattern"),
     "Jetson tray: posts too short": ("build_orin.py", number("post.height", 3), "the board's underside parts reach 4.3 mm"),
     "Jetson tray: board too far back": ("build_orin.py", number("board.back", 106), "the board's sockets stand out of the back of the bay"),
     "AGX tray: no room for the kit": ("build_agx.py", number("kit.slack", -0.5), "fences 1 mm closer together than the kit is wide"),
     "AGX tray: made for a lower bay": ("build_agx.py", number("bay.height", 120), "its face leaves 4 mm open under the roof"),
-    "AGX tray: stops too wide": ("build_agx.py", number("stop.width", 44), "the rear stops stand on the latch fingers"),
+    "AGX tray: fences too thick": ("build_agx.py", number("fence.thick", 3.6), "each fence stands over the slot that frees a latch finger"),
     # The spacers.
     "column spacer: more than half": ("build_spacer.py", text('"spacercol": (0.5, 1,', '"spacercol": (0.55, 1,'), "two of them and their gaps are wider than a place"),
     "row spacer: more than half": ("build_spacer.py", text('"spacerrow": (1, 0.5,', '"spacerrow": (1, 0.6,'), "two of them and their gaps are higher than a row"),
@@ -98,7 +98,8 @@ def fails(text):
 
 
 def one(name):
-    env = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", QA_QUICK="1", RINGWRIGHT_VIEWER="/nowhere/ringwright-view")
+    env = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", QA_QUICK="1", RINGWRIGHT_VIEWER="/nowhere/ringwright-view",
+               RINGWRIGHT_TIMEOUT_MS="300000")  # many copies build at once: none may fail for want of time
     with tempfile.TemporaryDirectory() as tmp:
         for f in glob.glob(os.path.join(HERE, "*.py")) + [os.path.join(HERE, "pi5.rwv")]:
             shutil.copy(f, tmp)

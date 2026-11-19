@@ -1,0 +1,31 @@
+== 1. Each part, the way up it prints ==
+PASS  cell, -y up: 40 mm2 overhangs (allowed 45); 745 mm2 rests on the bed
+PASS  bay, -y up: 73 mm2 overhangs (allowed 80); 2498 mm2 rests on the bed
+PASS  baytall, -y up: 97 mm2 overhangs (allowed 105); 3435 mm2 rests on the bed
+PASS  bayrack, -y up: 113 mm2 overhangs (allowed 120); 4947 mm2 rests on the bed
+PASS  bayduo, -y up: 80 mm2 overhangs (allowed 85); 1942 mm2 rests on the bed
+PASS  bayagx, -y up: 103 mm2 overhangs (allowed 110); 2273 mm2 rests on the bed
+PASS  trimtop, -y up: 8 mm2 overhangs (allowed 10); 178 mm2 rests on the bed
+PASS  trimrail, -y up: 13 mm2 overhangs (allowed 15); 111 mm2 rests on the bed
+PASS  trimlip, -y up: 10 mm2 overhangs (allowed 12); 114 mm2 rests on the bed
+PASS  trimtophalf, -y up: 8 mm2 overhangs (allowed 10); 108 mm2 rests on the bed
+PASS  base, +y up: 99 mm2 overhangs (allowed 105); 1477 mm2 rests on the bed
+PASS  basehalf, +y up: 100 mm2 overhangs (allowed 105); 700 mm2 rests on the bed
+PASS  spacerrow, +y up: 87 mm2 overhangs (allowed 92); 1003 mm2 rests on the bed
+PASS  spacercol, +y up: 145 mm2 overhangs (allowed 153); 992 mm2 rests on the bed
+PASS  spacercross, +y up: 65 mm2 overhangs (allowed 70); 493 mm2 rests on the bed
+PASS  carrier, +z up: 832 mm2 overhangs (allowed 875); 4464 mm2 rests on the bed
+PASS  shelf, +z up: 1557 mm2 overhangs (allowed 1635); 18513 mm2 rests on the bed
+PASS  shelftall, +z up: 1557 mm2 overhangs (allowed 1635); 18513 mm2 rests on the bed
+PASS  shelfrack, +z up: 2106 mm2 overhangs (allowed 2215); 25361 mm2 rests on the bed
+PASS  orin, +z up: 1924 mm2 overhangs (allowed 2020); 12721 mm2 rests on the bed
+PASS  agx, +z up: 2839 mm2 overhangs (allowed 2985); 15750 mm2 rests on the bed
+NOTE  the carrier, shelves and Jetson trays: lie flat on their plates: their latches are in the plane of the plate. Most of what still overhangs is the pull, a rail 6 mm proud along the top of the face, which needs support; the rest is the tops of the slots and windows, which are bridges
+== 2. Which beds take each part, that way up ==
+NOTE  180 class (Bambu Lab A1 mini, Prusa MINI): takes 15 of 21 parts; too big: bay, baytall, bayrack, shelf, shelftall, shelfrack
+NOTE  220 class (Creality Ender-3 V3 SE): takes 19 of 21 parts; too big: bayrack, shelfrack
+NOTE  Prusa MK4S: takes 19 of 21 parts; too big: bayrack, shelfrack
+NOTE  256 class (Bambu Lab P1S, A1): takes 19 of 21 parts; too big: bayrack, shelfrack
+NOTE  350 class (Voron 2.4 350): takes 21 of 21 parts
+
+{'PASS': 21, 'FAIL': 0, 'NOTE': 6}

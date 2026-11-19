@@ -14,6 +14,7 @@ FAR = 1e6  # a box's side that is meant to have no end
 # These scripts stand seated parts a hair apart themselves (0.02 mm), so that touching is not
 # counted; anything inside at all is then a collision, as it was when they counted points by hand.
 TOUCHING = 1e-6
+TIMEOUT_MS = 180_000  # a call builds every part it names; on a busy machine that outlasts the engine's default
 CASES_PER_CALL = 60  # an assembly carries at most 64 checks
 
 
@@ -59,7 +60,7 @@ def _ask(cases):
             check["within"] = case.within
         checks.append(check)
     spec = {"schema_version": 1, "name": "fit", "unit": "mm", "parts": parts, "checks": checks}
-    out = json.loads(subprocess.run([RW, "assemble", "-"], input=json.dumps(spec), capture_output=True, text=True).stdout)
+    out = json.loads(subprocess.run([RW, "--timeout-ms", str(TIMEOUT_MS), "assemble", "-"], input=json.dumps(spec), capture_output=True, text=True).stdout)
     if not out["ok"]:
         raise SystemExit("ringwright assemble: " + json.dumps(out["failure"])[:2000])
     found = []
