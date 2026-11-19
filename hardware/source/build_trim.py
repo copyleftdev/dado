@@ -11,6 +11,7 @@ the cell's own code, so it slides on and latches the way a cell does:
 """
 import json, sys
 import build_cell as c
+from build_checks import measures, spans
 
 T = 2.0  # plate thickness
 W, H = c.W, c.H
@@ -79,7 +80,7 @@ def build(doc):
               "operations": ops,
               "checks": [{"kind": "valid_solid", "body": "trim.body"},
                          {"kind": "volume", "body": "trim.body", "unit": "mm",
-                          "at_least": want * 0.9995, "at_most": want * 1.0005}]}
+                          "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("trim.body", (lambda w, h: (w, c.V["body.depth"], h))(*spans(out, c.num, c.V)), 1.0)}
         open(f"tx-{doc}.json", "w").write(json.dumps(tx, indent=1))
         dry = c.rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
         if not dry["ok"]:

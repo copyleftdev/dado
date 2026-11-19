@@ -25,6 +25,7 @@ passes straight through. For cables:
 x runs across (negative, as in a cell), y from the front, z up."""
 import json, math, sys
 import build_cell as c
+from build_checks import measures, spans
 
 PITCH = c.P["body.width"][0] + c.P["gap"][0]
 RISE = c.P["body.height"][0] + c.P["gap"][0]
@@ -145,7 +146,7 @@ def run(ops, last, key, rounded):
     tx = {"schema_version": 1, "document": DOC, "base_revision": head, "operations": ops,
           "checks": [{"kind": "valid_solid", "body": "spacer.body"},
                      {"kind": "volume", "body": "spacer.body", "unit": "mm",
-                      "at_least": want * 0.9995, "at_most": want * 1.0005}]}
+                      "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("spacer.body", (lambda w, h: (w, c.V["body.depth"], h))(*spans(outline(), c.num, c.V)), 0.8)}
     open(f"tx-{DOC}-{key}.json", "w").write(json.dumps(tx, indent=1))
     dry = c.rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:

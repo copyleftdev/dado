@@ -14,6 +14,7 @@ board; a thicker fan would meet a HAT's front edge.
 Board dimensions are from Raspberry Pi's mechanical drawing and STEP model;
 x runs from the front, y across, z up."""
 import json, math, subprocess, sys
+from build_checks import measures, spans
 
 RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
 DOC = "carrier"
@@ -369,7 +370,7 @@ def main():
           "operations": ops,
           "checks": [{"kind": "valid_solid", "body": "carrier.body"},
                      {"kind": "volume", "body": "carrier.body", "unit": "mm",
-                      "at_least": want * 0.9995, "at_most": want * 1.0005}]}
+                      "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("carrier.body", (lambda l, w: (l + V["pull.reach"], w, V["front.height"] + V["tooth.depth"]))(*spans(outline(), num, V)), 1.5)}
     open("tx-carrier.json", "w").write(json.dumps(tx, indent=1))
     dry = rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:

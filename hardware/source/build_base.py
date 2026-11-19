@@ -10,6 +10,7 @@ the same kind, so joined bases act as one plinth. Its front is closed and
 its joints end short of the front, so from the front it is a plain block
 under each column."""
 import json, math, subprocess, sys
+from build_checks import measures, spans
 
 RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
 # "base" stands under a column of cells; "basehalf" under a column of column spacers.
@@ -272,7 +273,7 @@ def run(ops, last, key, rounded):
     tx = {"schema_version": 1, "document": DOC, "base_revision": head, "operations": ops,
           "checks": [{"kind": "valid_solid", "body": "base.body"},
                      {"kind": "volume", "body": "base.body", "unit": "mm",
-                      "at_least": want * 0.9995, "at_most": want * 1.0005}]}
+                      "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("base.body", (lambda w, h: (w, V["base.depth"], h))(*spans(outline(), num, V)), 1.0)}
     open(f"tx-{DOC}-{key}.json", "w").write(json.dumps(tx, indent=1))
     dry = rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:

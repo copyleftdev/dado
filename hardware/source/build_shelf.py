@@ -9,6 +9,7 @@ device sits with its ports at the open back, where the cables are.
 
 x runs from the front, y across, z up."""
 import json, sys, subprocess
+from build_checks import measures, spans
 
 RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
 # Which bay it is for: inside width and height of that bay, slots in its
@@ -188,7 +189,7 @@ def main():
     want = expected_volume()
     tx = {"schema_version": 1, "document": DOC, "base_revision": made["result"]["revision"], "operations": ops,
           "checks": [{"kind": "valid_solid", "body": "shelf.body"},
-                     {"kind": "volume", "body": "shelf.body", "unit": "mm", "at_least": want * 0.9995, "at_most": want * 1.0005}]}
+                     {"kind": "volume", "body": "shelf.body", "unit": "mm", "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("shelf.body", (lambda l, w: (l + V["pull.reach"], w, V["front.height"] + V["tooth.depth"]))(*spans(outline(), num, V)), 1.5)}
     open(f"tx-{DOC}.json", "w").write(json.dumps(tx, indent=1))
     dry = rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:

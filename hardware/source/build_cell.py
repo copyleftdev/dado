@@ -9,6 +9,7 @@ slides between. Rails and lips stand `gap` proud, so joined cells sit `gap`
 apart and the lattice pitch is the body plus the gap.
 """
 import json, math, subprocess, sys
+from build_checks import measures, spans
 
 RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
 DOC = "cell"
@@ -355,7 +356,7 @@ def run(ops, last, key, rounded):
     tx = {"schema_version": 1, "document": DOC, "base_revision": head, "operations": ops,
           "checks": [{"kind": "valid_solid", "body": "cell.body"},
                      {"kind": "volume", "body": "cell.body", "unit": "mm",
-                      "at_least": want * 0.9995, "at_most": want * 1.0005}]}
+                      "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("cell.body", (lambda w, h: (w, V["body.depth"], h))(*spans(outline(), num, V)), 0.8)}
     open(f"tx-{key}.json", "w").write(json.dumps(tx, indent=1))
     dry = rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:

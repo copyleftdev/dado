@@ -12,6 +12,7 @@ columns join to its sides, all with the joints already made. Everything is
 drawn with the cell's own code."""
 import json, math, sys
 import build_cell as c
+from build_checks import measures, spans
 
 # Places across, places up, roof thickness. The roof spans the whole bay and
 # carries whatever stands on it, so it is thicker than a cell's wall:
@@ -133,7 +134,7 @@ def run(ops, last, key, rounded):
     tx = {"schema_version": 1, "document": DOC, "base_revision": head, "operations": ops,
           "checks": [{"kind": "valid_solid", "body": "bay.body"},
                      {"kind": "volume", "body": "bay.body", "unit": "mm",
-                      "at_least": want * 0.9995, "at_most": want * 1.0005}]}
+                      "at_least": want * 0.9995, "at_most": want * 1.0005}] + measures("bay.body", (lambda w, h: (w, c.V["body.depth"], h))(*spans(outline(), c.num, c.V)), 0.8)}
     open(f"tx-{DOC}-{key}.json", "w").write(json.dumps(tx, indent=1))
     dry = c.rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:

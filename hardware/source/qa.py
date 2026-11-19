@@ -46,7 +46,7 @@ print("== 1. Can the designs be rebuilt from their scripts, identically? ==")
 now = {doc: state(doc) for doc in DOCS}
 with tempfile.TemporaryDirectory() as tmp:
   if not QUICK:
-    for script in sorted({cmd[0] for cmd in DOCS.values()}):
+    for script in sorted({cmd[0] for cmd in DOCS.values()} | {"build_checks.py"}):
         shutil.copy(os.path.join(HERE, script), tmp)
     quiet = dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
     with ThreadPoolExecutor(max_workers=10) as pool:
