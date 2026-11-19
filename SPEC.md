@@ -37,6 +37,7 @@ The board sits with its ports through the carrier's back wall and its card end 6
 | Tall bay | 3 by 2 | 10 | 201.7 by 72.8 | 3 |
 | Rack bay | 4 by 2 | 12 | 272.3 by 70.8 | 2 |
 | Jetson bay | 2 by 2 | 6 | 131.1 by 76.8 | 3 |
+| AGX bay | 2 by 3 | 6 | 131.1 by 122.4 | 3 |
 
 Roof loads are beam calculations allowing 0.25 of sag, with 200 g assumed for each loaded cell. Desktop switches and hubs have no standard size, so a shelf holds its device with straps through slots at three widths.
 
@@ -47,6 +48,14 @@ A board too big for a cell takes a bay of its own. The NVIDIA Jetson Orin Nano d
 Its tray is a shelf with four posts in place of strap slots, and five rows of air slots in its face. From NVIDIA's carrier board specification (SP-11324-001 v1.3) and the drill file of the P3768 reference design: board 100 by 79 and 1.57 thick, parts up to 4.30 below it; four mounting holes 2.75 across on a 92 by 58 pattern, 4 in from each side and from the edge opposite the sockets, 17 in from the socket edge.
 
 The board goes on without the stand it ships on, on posts 6 tall, with its sockets at the open back and 4 inside the bay's rear. Screws are M2.5 thread-forming, into pilot holes 2.1 across.
+
+### The AGX bay
+
+The NVIDIA Jetson AGX Orin developer kit is a closed box, 110 by 110 and 71.65 tall, weighing 872.5 g, with its fan in its top face (carrier board specification SP-10900-001 v1.1, figures 5-3 and 5-4). A two-row bay would leave 5.1 above that fan; a gap a quarter of the fan's width lets in as much air as the fan's own opening, which for a fan about 84 across is 21. So its bay is three rows high and leaves 50.7.
+
+Nothing may cover the fan, so the kit is not strapped. It stands between two fences 5 tall, a front stop and two rear stops, with 0.5 of slack to each, held by its own weight. Its front is 8.5 behind the tray's, so air from the face's nine rows of slots can pass.
+
+The kit is deeper than a bay. The tray's plate carries on 21 past the bay's back, the kit's sockets stand 18.5 behind it, and the latch fingers are tongues cut into the longer plate.
 
 ## Tolerances
 

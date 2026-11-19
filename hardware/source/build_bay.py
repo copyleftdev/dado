@@ -20,7 +20,10 @@ import build_cell as c
 #   bayrack  4 x 2, roof 12: ten-inch rack gear, one unit (44.45 mm) tall
 #   bayduo   2 x 2, roof 6:  a larger single-board computer with its cooler,
 #                            such as a Jetson Orin Nano developer kit
-KINDS = {"bay": (3, 1, 7.0), "baytall": (3, 2, 10.0), "bayrack": (4, 2, 12.0), "bayduo": (2, 2, 6.0)}
+#   bayagx   2 x 3, roof 6:  a boxed computer with its fan on top, such as a
+#                            Jetson AGX Orin developer kit
+KINDS = {"bay": (3, 1, 7.0), "baytall": (3, 2, 10.0), "bayrack": (4, 2, 12.0), "bayduo": (2, 2, 6.0),
+         "bayagx": (2, 3, 6.0)}
 DOC = sys.argv[1] if len(sys.argv) > 1 else "bay"
 N, M, ROOF = KINDS[DOC]
 W, H = c.W, c.H

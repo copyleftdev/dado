@@ -137,7 +137,7 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
         <div>dado cap<span>finishes top and sides</span></div>
         <div>dado bay<span>the place of several cells, for a switch, a hub or a larger board</span></div>
         <div>dado shelf<span>slides into a bay, holds the device</span></div>
-        <div>dado tray<span>a shelf with posts for one board, such as a Jetson</span></div>
+        <div>dado tray<span>a shelf fitted to one computer, such as a Jetson</span></div>
       </div>
     </div>
   </section>
@@ -157,8 +157,8 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
     <span class="eyebrow">Beyond the Pi</span>
     <h2>A bay takes the place of several cells, on the same joints.</h2>
     <div class="two">
-      <p>A cluster needs a switch, and switches and hubs come in no standard size. So a bay is not fitted to anything. It is the cell's own section, stretched: as wide as two, three or four cells and as tall as one or two, with a rail and a pair of lips wherever those cells would have had them. It slides on, latches and takes caps exactly as a cell does.</p>
-      <p class="muted">Inside, a shelf slides and latches like a carrier, behind the same closed face. The device is strapped to it through slots at three widths, with its ports at the open back, beside the Pis' own. One eight-port switch serves seven Pis and an uplink. The same section two cells wide and two high takes a board too big for a cell: an NVIDIA Jetson Orin Nano developer kit, screwed to a tray with posts at the board's own holes.</p>
+      <p>A cluster needs a switch, and switches and hubs come in no standard size. So a bay is not fitted to anything. It is the cell's own section, stretched: as wide as two, three or four cells and as tall as one, two or three, with a rail and a pair of lips wherever those cells would have had them. It slides on, latches and takes caps exactly as a cell does.</p>
+      <p class="muted">Inside, a shelf slides and latches like a carrier, behind the same closed face. The device is strapped to it through slots at three widths, with its ports at the open back, beside the Pis' own. One eight-port switch serves seven Pis and an uplink. The same section two cells wide and two high takes a board too big for a cell: an NVIDIA Jetson Orin Nano developer kit, screwed to a tray with posts at the board's own holes. A Jetson AGX Orin developer kit has its fan in its top face, so its bay is three rows high, and the kit stands between low fences with nothing over it.</p>
     </div>
     <div class="stage" style="padding:clamp(16px,4vw,36px)"><svg id="crown" role="img" aria-label="Six cells in two rows with a bay across the top"></svg></div>
     <div class="schemes" id="bays"></div>
@@ -402,7 +402,7 @@ document.getElementById("closer").innerHTML = shots.map(([name, cam, art, items]
 const state = { cols: 3, rows: 3, sleeve: "Graphite", look: "Run", hue: "teal", bay: "None" };
 // Each: places across, rows up, roof, grams of bay and shelf, most that fit across six columns, rows of air slots.
 const BAYS = { "Bay": [3, 1, 7, 247.33 + 50.4, 2, 1], "Tall bay": [3, 2, 10, 340.37 + 72.75, 2, 1], "Rack bay": [4, 2, 12, 491.05 + 97.48, 1, 1],
-  "Jetson bay": [2, 2, 6, 191.62 + 44.29, 3, 5] };
+  "Jetson bay": [2, 2, 6, 191.62 + 44.29, 3, 5], "AGX bay": [2, 3, 6, 224.0 + 60.38, 3, 9] };
 const sleeveHex = Object.fromEntries(DATA.neutrals.map(n => [n.name, n.hex]));
 const looks = {
   "Monolith": () => (state.sleeve === "Bone" ? sleeveHex.Graphite : sleeveHex.Bone),
@@ -429,8 +429,9 @@ function draw() {
   svg(document.getElementById("preview"), m.w, m.h, m.body, 6);
   pressed("bayKinds", ["None", ...Object.keys(BAYS)].map(k => [k]), state.bay, k => { state.bay = k; });
   document.getElementById("bayNote").textContent = !kind ? "A bay across the top holds a switch or a hub, with its ports to the back."
-    : !crown ? (state.bay === "Rack bay" ? "A rack bay is four cells wide: it needs four columns." : state.bay === "Jetson bay" ? "A Jetson bay is two cells wide: it needs two, four or six columns." : "A bay is three cells wide: it needs three or six columns.")
+    : !crown ? (state.bay === "Rack bay" ? "A rack bay is four cells wide: it needs four columns." : state.bay === "Jetson bay" ? "A Jetson bay is two cells wide: it needs two, four or six columns." : state.bay === "AGX bay" ? "An AGX bay is two cells wide: it needs two, four or six columns." : "A bay is three cells wide: it needs three or six columns.")
     : state.bay === "Jetson bay" ? `Two rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson Orin Nano developer kit, on a tray with posts at the board's own holes.`
+    : state.bay === "AGX bay" ? `Three rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson AGX Orin developer kit, standing between low fences with its top fan clear.`
     : state.bay === "Tall bay" ? "Two rows high: taller gear, or one rack unit up to 200 mm wide."
     : state.bay === "Rack bay" ? "Takes ten-inch rack gear, one unit tall, with its ears on."
     : n > 7 * crown ? `An eight-port switch serves seven Pis and an uplink. These ${n} need ${Math.ceil(n / 7)} switches; there is room for ${crown}.`
@@ -443,13 +444,13 @@ function draw() {
   const hues = document.getElementById("hues");
   hues.hidden = state.look !== "One voice";
   pressed("hues", DATA.faces.map(f => [f.name.toLowerCase(), f.hex]), state.hue, k => { state.hue = k; }, true);
-  const parts = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[state.bay + (crown > 1 ? "s" : ""), crown], [state.bay === "Jetson bay" ? "Orin trays" : "Shelves", crown]] : [])];
+  const parts = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[state.bay + (crown > 1 ? "s" : ""), crown], [{ "Jetson bay": "Orin trays", "AGX bay": "AGX trays" }[state.bay] || "Shelves", crown]] : [])];
   document.getElementById("box").innerHTML = parts.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
   const grams = 1.01 * (n * (73.06 + 15.86) + cols * (64.31 + 17.38) + high * (10.74 + 11.08) + (crown ? crown * kind[3] : 0));
   const wide = cols * PX - 3.6 + 11.2, tall = high * PZ + 28.6;
   document.getElementById("facts").textContent =
-    `${Math.round(wide)} mm wide, ${Math.round(tall)} tall, 110 deep. About ${(grams / 1000).toFixed(grams < 1000 ? 2 : 1)} kg of printed parts. `
-    + `With a Pi in every cell: about ${(n * 6.2).toFixed(0)} W at typical work, ${(n * 14.3).toFixed(0)} W flat out, over ${n} network cable${n > 1 ? "s" : ""}.` + (crown && state.bay === "Jetson bay" ? " Each Jetson adds up to 25 W." : "");
+    `${Math.round(wide)} mm wide, ${Math.round(tall)} tall, ${crown && state.bay === "AGX bay" ? 127 : 110} deep. About ${(grams / 1000).toFixed(grams < 1000 ? 2 : 1)} kg of printed parts. `
+    + `With a Pi in every cell: about ${(n * 6.2).toFixed(0)} W at typical work, ${(n * 14.3).toFixed(0)} W flat out, over ${n} network cable${n > 1 ? "s" : ""}.` + (crown && state.bay === "Jetson bay" ? " Each Jetson adds up to 25 W." : crown && state.bay === "AGX bay" ? " Each AGX Orin adds up to 60 W." : "");
 }
 const bump = (key, by, lo, hi) => () => { state[key] = Math.min(hi, Math.max(lo, state[key] + by)); draw(); };
 document.getElementById("colsDown").onclick = bump("cols", -1, 1, 6);
@@ -484,7 +485,8 @@ document.getElementById("bays").innerHTML = [
   ["Tall bay", 3, 2, 10, F.teal, "Three wide, two high. 201.7 by 72.8 mm: taller gear, or one rack unit up to 200 mm wide. Carries three rows above it."],
   ["Rack bay", 4, 2, 12, F.ochre, "Four wide, two high. 272.3 by 70.8 mm: ten-inch rack gear, one unit tall, with its ears on. Carries two rows above it."],
   ["Jetson bay", 2, 2, 6, F.moss, "Two wide, two high, with five rows of air slots. A Jetson Orin Nano developer kit on a tray with posts at its own holes, and 35 mm of air above its cooler. Carries three rows above it.", 5],
+  ["AGX bay", 2, 3, 6, F.lilac, "Two wide, three high, with nine rows of air slots. A Jetson AGX Orin developer kit between low fences, with 50 mm of air above the fan in its top face. Its sockets stand 18.5 mm behind the bay. Carries three rows above it.", 9],
 ].map(([name, n, m, roof, face, text, airs]) =>
-  `<div class="scheme"><div class="stage">${make(4 * PX - 3.6, 2 * PZ - 3.6, bay(0, (2 - m) * PZ, C.graphite, face, n, m, roof, 0, 0, airs), 4)}</div><h3>${name}</h3><p>${text}</p></div>`).join("");
+  `<div class="scheme"><div class="stage">${make(4 * PX - 3.6, Math.max(2, m) * PZ - 3.6, bay(0, (Math.max(2, m) - m) * PZ, C.graphite, face, n, m, roof, 0, 0, airs), 4)}</div><h3>${name}</h3><p>${text}</p></div>`).join("");
 </script>
 </body></html>

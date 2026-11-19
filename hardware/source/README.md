@@ -11,6 +11,7 @@ These scripts generated every part in `../step`. Each one writes a transaction f
 | `build_base.py`, `build_trim.py` | The base and the three caps |
 | `build_bay.py`, `build_shelf.py` | The bays and their shelves |
 | `build_orin.py` | The Jetson Orin Nano tray, for the two-by-two bay |
+| `build_agx.py` | The Jetson AGX Orin tray, for the two-by-three bay |
 | `qc.py`, `qc_carrier.py`, `qc_base.py`, `qc_trim.py`, `qc_bay.py` | QC of each part; output in `../reports` |
 | `fit_check.py`, `qa.py` | The joint proof, and checks across parts |
 | `pi5_import.py`, `pi5_fit.py` | Imports Raspberry Pi's model and checks the carrier against it. Needs their STEP file, which is not redistributed here: get it from Raspberry Pi's product page |

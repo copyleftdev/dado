@@ -22,6 +22,7 @@ Dado is an open-hardware enclosure for Raspberry Pi 5 clusters. Each Pi lives in
 | Tall bay | Three wide, two high, for taller gear | 208.2 × 87.6 × 100 | [`baytall.step`](hardware/step/baytall.step), [`shelftall.step`](hardware/step/shelftall.step) |
 | Rack bay | Four wide, two high, for ten-inch rack gear one unit tall | 278.8 × 87.6 × 100 | [`bayrack.step`](hardware/step/bayrack.step), [`shelfrack.step`](hardware/step/shelfrack.step) |
 | Jetson bay | Two wide, two high, for an NVIDIA Jetson Orin Nano developer kit on its own tray | 137.6 × 87.6 × 100 | [`bayduo.step`](hardware/step/bayduo.step), [`orin.step`](hardware/step/orin.step) |
+| AGX bay | Two wide, three high, for an NVIDIA Jetson AGX Orin developer kit, whose fan is in its top face | 137.6 × 133.2 × 100 | [`bayagx.step`](hardware/step/bayagx.step), [`agx.step`](hardware/step/agx.step) |
 
 Cells sit 70.6 mm apart across and 45.6 mm apart up. Every dimension of every part, with a sentence saying why it is what it is, is in [`hardware/parameters`](hardware/parameters). The reasoning behind the design is in [SPEC.md](SPEC.md).
 
@@ -30,6 +31,8 @@ Cells sit 70.6 mm apart across and 45.6 mm apart up. Every dimension of every pa
 ![A bay across three cells, its shelf drawn out with a switch on it](docs/img/bay.png)
 
 ![The Jetson bay standing on two cells, with a third beside it](docs/img/jetson.png)
+
+![The AGX bay, three rows high, standing on two cells](docs/img/agx.png)
 
 ## How it works
 
@@ -58,6 +61,7 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - Joints and latches were simulated across 200,000 parts at printing tolerance.
 - Roofs of the bays were calculated for the load of the rows above them.
 - The Jetson tray's posts sit under the four mounting holes in NVIDIA's own drill file, with 1.7 mm spare under the board and at least 34.9 mm above its cooler.
+- The AGX tray holds a box of the kit's published size between its fences and stops with 0.5 mm of slack, and the bay leaves 50.7 mm above the fan in its top face.
 
 ## What has not been checked
 
@@ -67,6 +71,7 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - **A PoE HAT's height is unverified.** There is 13.6 mm above the board's tallest part to the cell's roof.
 - **The single-height bay carries one row of cells above it,** not three. The tall bay carries three.
 - **The Jetson bay was checked against NVIDIA's published sizes, not a model of the board.** Its cooling is not modelled (the board can draw about 25 W), and it takes 9 to 20 V at a barrel socket, not the Pis' 5 V.
+- **The AGX bay was checked against a plain box of NVIDIA's three outside sizes.** The kit's feet and underside are not in the drawing used, and the tray's latch fingers need 1.2 mm of room under the kit to release. Its cooling is not modelled (15 to 60 W), and it stands 18.5 mm out behind the bay.
 - **Wire management stops at "out the back".** A cable spine was started and set aside.
 - **Tall walls need a deeper base** than the desk-scale one here.
 
@@ -79,6 +84,7 @@ Calculated from the part volumes and published figures; none is measured. The fu
 | One | 1 | 78 × 74 × 110 | 0.3 kg | 6 W | $53 to $101 |
 | Trio | 3 | 219 × 74 × 110 | 0.9 kg | 19 W | $148 to $280 |
 | Four and a Jetson | 4 | 149 × 211 × 110 | 1.5 kg | 40 W | $234 to $442 |
+| Four and an AGX Orin | 4 | 149 × 257 × 127 | 2.2 kg | 55 W | $253 to $479 |
 | Six and a bay | 6 | 219 × 165 × 110 | 1.8 kg | 37 W | $317 to $600 |
 | Nine | 9 | 219 × 165 × 110 | 2.1 kg | 56 W | $309 to $583 |
 | Twenty-four and two bays | 24 | 431 × 257 × 110 | 6.0 kg | 149 W | $925 to $1,748 |

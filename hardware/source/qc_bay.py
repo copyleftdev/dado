@@ -24,7 +24,7 @@ def samples(pos, tri):
 cell_p = params("cell")
 PX, PZ, E = cell_p["body.width"] + cell_p["gap"], cell_p["body.height"] + cell_p["gap"], 0.02
 M, S = {}, {}
-for d in ("cell", "trimtop", "bay", "baytall", "bayrack", "bayduo", "shelf", "shelftall", "shelfrack", "orin"):
+for d in ("cell", "trimtop", "bay", "baytall", "bayrack", "bayduo", "bayagx", "shelf", "shelftall", "shelfrack", "orin", "agx"):
     M[d] = scene(f".ringwright/{d}/view/scene.rwv")
     S[d] = samples(*M[d])
 
@@ -67,7 +67,52 @@ KINDS = {
         ("the same with its ears on (254 wide)", 254.0, 100.0, 44.45, True),
         ("two units of rack gear (88.9 tall)", 222.25, 100.0, 88.9, False)]),
     "bayduo": ("orin", 2, 2, []),
+    "bayagx": ("agx", 2, 3, []),
 }
+
+
+def agx(bay_p, tray_p, room_h):
+    """The Jetson AGX Orin developer kit on its tray. The kit's sizes are
+    NVIDIA's: carrier board specification SP-10900-001 v1.1, figures 5-3
+    and 5-4. It is a closed box with its fan in its top face."""
+    kit, tall, grams, fan = 110.0, 71.65, 872.5, 84.0
+    t, mid = tray_p["plate.thickness"], tray_p["plate.width"] / 2
+    x0, x1 = tray_p["kit.front"], tray_p["kit.front"] + kit
+    s = S["agx"]
+    box = (s[:, 0] > x0) & (s[:, 0] < x1) & (np.abs(s[:, 1] - mid) < kit / 2) & (s[:, 2] > t + 0.02) & (s[:, 2] < t + tall)
+    report("PASS" if int(box.sum()) == 0 else "FAIL", "nothing of the tray where the kit stands", f"points of the tray there: {int(box.sum())}")
+    gaps = {"each fence": (mid - kit / 2) - tray_p["side.lo"], "the front stop": x0 - tray_p["front.stop"], "the rear stops": tray_p["back.stop"] - x1}
+    report("PASS" if all(0.3 <= g <= 0.8 for g in gaps.values()) else "FAIL", "the kit between its fences and stops",
+           "; ".join(f"{g:.2f} mm to {k}" for k, g in gaps.items()))
+    names, caught = ["forward", "back", "to one side", "to the other"], []
+    for dx, dy in [(-1.0, 0), (1.0, 0), (0, 1.0), (0, -1.0)]:
+        moved = (s[:, 0] > x0 + dx) & (s[:, 0] < x1 + dx) & (np.abs(s[:, 1] - mid - dy) < kit / 2) & (s[:, 2] > t + 0.02) & (s[:, 2] < t + 3)
+        caught.append(int(moved.sum()))
+    report("PASS" if min(caught) > 0 else "FAIL", "pushed 1 mm any way along the tray",
+           f"it meets a fence or a stop: {dict(zip(names, caught))} points. Nothing holds it down but its {grams:.0f} g")
+    above = room_h - tall
+    report("PASS" if above >= fan / 4 else "FAIL", "room above the fan",
+           f"{above:.1f} mm, where {fan / 4:.0f} is wanted: a gap a quarter of the fan's width lets in as much air as the fan's own "
+           f"opening. The fan is about {fan:.0f} mm across, measured off NVIDIA's figure")
+    low = (bay_p["rise"] * 2 - bay_p["gap"]) - bay_p["wall"] - bay_p["roof"] - t - 0.02 - tall
+    report("PASS" if low < fan / 4 else "FAIL", "why the bay is three rows tall", f"a two-row bay would leave {low:.1f} mm above the fan")
+    side = (bay_p["body.width"] - 2 * bay_p["wall"] - kit) / 2
+    report("NOTE", "room at its sides", f"{side:.1f} mm each side between the kit's side vents and the bay's walls; whether that is enough is not modelled")
+    report("PASS" if tray_p["fence.height"] < 20 else "FAIL", "fences below the vents",
+           f"fences {tray_p['fence.height']:.0f} mm tall; the kit's side vents start about 40 mm up (off NVIDIA's figure)")
+    out = x1 - bay_p["body.depth"]
+    report("NOTE", "it stands out behind", f"the kit is {kit:.0f} mm deep and a bay {bay_p['body.depth']:.0f}: its sockets are {out:.1f} mm behind the bay's rear, "
+           f"and the plate carries on {tray_p['plate.length'] - bay_p['body.depth']:.0f} mm past it to carry them")
+    report("NOTE", "the latch fingers", "they lie under the kit and lift 1.2 mm to release; that needs the kit's feet to hold it at least "
+           "that far off the plate, and NVIDIA gives no height for them")
+    load = (grams + 1.01 * (kernel_volume("bayagx") + kernel_volume("agx")) / 1000) / 2
+    report("PASS" if load < 9 * 200 else "FAIL", "weight on what stands below",
+           f"bay, tray and kit put about {load:.0f} g on each of the two columns under them; the bottom cell of a ten-high wall carries {9 * 200} g")
+    report("NOTE", "cooling", "not modelled. The kit can draw 15 to 60 W; air comes in through 99 slots in the face "
+           f"({99 * tray_p['slot.width'] * tray_p['air.height'] / 100:.0f} cm2) and leaves by the open back")
+    report("NOTE", "power", "the kit takes 19 V at a USB-C socket or 7 to 20 V at a barrel socket, from its own supply; not the Pis' 5 V")
+    report("NOTE", "not checked", "the kit is treated as a plain box of NVIDIA's three outside sizes; its feet, its underside and which "
+           "face its buttons are on are not in the drawing used")
 
 
 def orin(bay_p, tray_p, room_h):
@@ -186,6 +231,8 @@ for bay, (shelf, n, m, devices) in KINDS.items():
     report("NOTE", "room on the shelf", f"{room_w:.1f} mm wide, {room_h:.1f} tall; the back is open, so a device may stand out behind")
     if shelf == "orin":
         orin(bay_p, shelf_p, room_h)
+    if shelf == "agx":
+        agx(bay_p, shelf_p, room_h)
     for name, dw, dd, dh, expected in devices:
         fits = dw <= room_w and dh <= room_h
         out = max(dd - (shelf_p["plate.length"] - shelf_p["front.thickness"]), 0)

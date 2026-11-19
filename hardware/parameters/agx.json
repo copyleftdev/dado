@@ -1,0 +1,268 @@
+{
+ "part": "agx",
+ "unit": "mm",
+ "parameters": [
+  {
+   "description": "A row of slots across the face",
+   "id": "air.height",
+   "value": 7.0
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack - top.bar - air.height",
+   "id": "air.low",
+   "value": 113.7
+  },
+  {
+   "description": "Row of air slots to row: the lowest clears the label flat by 1.7",
+   "id": "air.step",
+   "value": 11.5
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack - top.bar",
+   "id": "air.top",
+   "value": 120.7
+  },
+  {
+   "description": "",
+   "expr": "kit.front + kit.depth + kit.slack",
+   "id": "back.stop",
+   "value": 119.0
+  },
+  {
+   "description": "Bay, front to back",
+   "id": "bay.depth",
+   "value": 100.0
+  },
+  {
+   "description": "Inside the bay, floor to roof",
+   "id": "bay.height",
+   "value": 124.2
+  },
+  {
+   "description": "Inside the bay, across",
+   "id": "bay.width",
+   "value": 131.6
+  },
+  {
+   "description": "Where they end: short of the bay's back",
+   "id": "fence.back",
+   "value": 96.0
+  },
+  {
+   "description": "Where the side fences start, from the front",
+   "id": "fence.front",
+   "value": 14.0
+  },
+  {
+   "description": "Fences and the front stop: low, below the kit's vents",
+   "id": "fence.height",
+   "value": 5.0
+  },
+  {
+   "description": "Fences and stops",
+   "id": "fence.thick",
+   "value": 2.0
+  },
+  {
+   "description": "Each finger's near edge from the centre line",
+   "id": "finger.apart",
+   "value": 30.0
+  },
+  {
+   "description": "Where the fingers leave the plate, from the front",
+   "id": "finger.root",
+   "value": 86.0
+  },
+  {
+   "description": "Cut either side of a finger to free it",
+   "id": "finger.slot",
+   "value": 1.0
+  },
+  {
+   "description": "",
+   "expr": "bay.depth + tooth.behind + tooth.ramp + tooth.lead + 0.1",
+   "id": "finger.tip",
+   "value": 104.38
+  },
+  {
+   "description": "Each finger",
+   "id": "finger.width",
+   "value": 8.0
+  },
+  {
+   "description": "",
+   "expr": "bay.height - roof.slack",
+   "id": "front.height",
+   "value": 123.7
+  },
+  {
+   "description": "",
+   "expr": "kit.front - kit.slack",
+   "id": "front.stop",
+   "value": 8.0
+  },
+  {
+   "description": "The face; it stops on the ends of the bay's ledges",
+   "id": "front.thickness",
+   "value": 2.6
+  },
+  {
+   "description": "The kit, front to back (NVIDIA's figure 5-3)",
+   "id": "kit.depth",
+   "value": 110.0
+  },
+  {
+   "description": "The kit's front from the tray's front: air from the face's slots passes between them",
+   "id": "kit.front",
+   "value": 8.5
+  },
+  {
+   "description": "Between the kit and each fence or stop",
+   "id": "kit.slack",
+   "value": 0.5
+  },
+  {
+   "description": "The kit, across (NVIDIA's figure 5-3)",
+   "id": "kit.width",
+   "value": 110.0
+  },
+  {
+   "description": "Sunk, so a label's edges are protected",
+   "id": "label.depth",
+   "value": 0.4
+  },
+  {
+   "description": "Its upper edge",
+   "id": "label.high",
+   "value": 20.0
+  },
+  {
+   "description": "Its lower edge",
+   "id": "label.low",
+   "value": 10.0
+  },
+  {
+   "description": "A flat for a label",
+   "id": "label.width",
+   "value": 44.0
+  },
+  {
+   "description": "",
+   "expr": "(bay.width - side.slack) / 2",
+   "id": "mid",
+   "value": 65.55
+  },
+  {
+   "description": "Cut from each back corner",
+   "id": "nose.taper",
+   "value": 2.0
+  },
+  {
+   "description": "",
+   "expr": "kit.front + kit.depth + kit.slack + fence.thick",
+   "id": "plate.length",
+   "value": 121.0
+  },
+  {
+   "description": "Leaves 0.5 under the bay's ledges",
+   "id": "plate.thickness",
+   "value": 1.8
+  },
+  {
+   "description": "",
+   "expr": "bay.width - side.slack",
+   "id": "plate.width",
+   "value": 131.1
+  },
+  {
+   "description": "The rail's ends in from the face's sides",
+   "id": "pull.inset",
+   "value": 2.0
+  },
+  {
+   "description": "A lip under its edge",
+   "id": "pull.lip",
+   "value": 1.5
+  },
+  {
+   "description": "The pull: a rail along the face's top edge",
+   "id": "pull.reach",
+   "value": 6.0
+  },
+  {
+   "description": "Face lower than the bay's roof",
+   "id": "roof.slack",
+   "value": 0.5
+  },
+  {
+   "description": "",
+   "expr": "mid + kit.width / 2 + kit.slack",
+   "id": "side.hi",
+   "value": 121.05
+  },
+  {
+   "description": "",
+   "expr": "mid - kit.width / 2 - kit.slack",
+   "id": "side.lo",
+   "value": 10.049999999999997
+  },
+  {
+   "description": "Shelf narrower than the bay, in all",
+   "id": "side.slack",
+   "value": 0.5
+  },
+  {
+   "description": "Slot to slot, as on a carrier: seventeen of them",
+   "id": "slot.pitch",
+   "value": 10.5
+  },
+  {
+   "description": "Each slot",
+   "id": "slot.width",
+   "value": 8.0
+  },
+  {
+   "description": "The two rear stops",
+   "id": "stop.height",
+   "value": 4.0
+  },
+  {
+   "description": "Each rear stop, across: clear of the latch fingers between them",
+   "id": "stop.width",
+   "value": 15.0
+  },
+  {
+   "description": "Front ramp's start behind the bay's rear edge",
+   "id": "tooth.behind",
+   "value": 0.6
+  },
+  {
+   "description": "Tooth below the finger",
+   "id": "tooth.depth",
+   "value": 1.2
+  },
+  {
+   "description": "Its back ramp",
+   "id": "tooth.lead",
+   "value": 2.75
+  },
+  {
+   "description": "Its front ramp",
+   "id": "tooth.ramp",
+   "value": 0.93
+  },
+  {
+   "description": "",
+   "expr": "bay.depth + tooth.behind",
+   "id": "tooth.x",
+   "value": 100.6
+  },
+  {
+   "description": "The face's top edge, which the pull grows out of",
+   "id": "top.bar",
+   "value": 3.0
+  }
+ ]
+}

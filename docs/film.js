@@ -17,8 +17,8 @@ const HUES = ["clay", "ochre", "moss", "teal", "slate", "lilac"];
 // The rear shot was added after the rest was timed: for REAR seconds from 79
 // the film's own clock T holds still while the camera goes round the back.
 // The bay's shot follows it the same way, for BAY seconds more.
-const REAR = 8, BAY = 27, HOLD = REAR + BAY, TOTAL = 88 + HOLD, CONFIG_AT = 85.5, PX_PER_S = 115;
-const B0 = 79 + REAR, B1 = B0 + BAY, B2 = B0 + 11, B3 = B2 + 9.4;  // B2: the first bay leaves, its taller and wider kin follow; B3: the Jetson bay
+const REAR = 8, BAY = 33, HOLD = REAR + BAY, TOTAL = 88 + HOLD, CONFIG_AT = 85.5, PX_PER_S = 115;
+const B0 = 79 + REAR, B1 = B0 + BAY, B2 = B0 + 11, B3 = B2 + 9.4, B4 = B3 + 6.2;  // B2: the first bay leaves, its taller and wider kin follow; B3: the Jetson bay; B4: the AGX bay
 const still = new URLSearchParams(location.search).get("t");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -85,7 +85,7 @@ async function part(name, creased) {
   }
   return { g, lines };
 }
-const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "bayduo", "orin", "pi-far", "pi"];
+const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "bayduo", "orin", "bayagx", "agx", "pi-far", "pi"];
 const [man, ...loaded] = await Promise.all([
   fetch("assets/manifest.json").then((r) => r.json()),
   ...names.map((n) => part(n, !n.startsWith("pi"))),
@@ -147,7 +147,7 @@ const units = SLOTS.map(([c, r], i) => {
 const pool = (n, geo) => Array.from({ length: n }, () => {
   const m = solid(geo, M.sleeve, M.sleeveLine); scene.add(m); return { m, arr: 0 };
 });
-const bases = pool(6, G.base), tops = pool(6, G.trimtop), rails = pool(6, G.trimrail), lips = pool(6, G.trimlip);
+const bases = pool(6, G.base), tops = pool(6, G.trimtop), rails = pool(7, G.trimrail), lips = pool(7, G.trimlip);  // four rows and a three-row bay make seven
 // Two bays, each with its shelf and a switch strapped to it, ports to the back.
 const bays = [0, 1].map(() => {
   const group = new THREE.Group(), inner = new THREE.Group(), face = matte(PAL.slate);
@@ -173,12 +173,18 @@ const jetsonBoard = () => [[100, 1.57, 79, -68.8, 11.6, -56.5, 0x2f6a45, 0.6, 0]
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color, roughness, metalness }));
   m.position.set(x, y, z); m.castShadow = true; return m;
 });
+// And for the AGX Orin kit on its tray: a plain box of NVIDIA's outside sizes.
+const agxKit = () => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(110, 71.65, 110), new THREE.MeshStandardMaterial({ color: 0x1d1f22, roughness: 0.6, metalness: 0.2 }));
+  m.position.set(-68.8, 40.6, -63.5); m.castShadow = true; return [m];
+};
 // Each kind of bay: its pool, how many cells wide and how many rows high.
 const CROWNS = {
   bay: { pool: bays, wide: 3, high: 1 },
   tall: { pool: kin("baytall", "shelftall", 2, PAL.teal), wide: 3, high: 2 },
   rack: { pool: kin("bayrack", "shelfrack", 1, PAL.ochre), wide: 4, high: 2 },
   jetson: { pool: kin("bayduo", "orin", 3, PAL.moss, jetsonBoard), wide: 2, high: 2 },
+  agx: { pool: kin("bayagx", "agx", 3, PAL.lilac, agxKit), wide: 2, high: 3 },
 };
 const bayCount = () => { const k = CROWNS[cfg.bay]; return k && cfg.cols % k.wide === 0 ? Math.min(cfg.cols / k.wide, k.pool.length) : 0; };
 const bayRows = () => (bayCount() ? CROWNS[cfg.bay].high : 0);
@@ -269,7 +275,8 @@ const CAPS = [
   [79.3, 86.7, "Act two · Look closer", "The back.", "Ports, air and power all leave from behind. Power over Ethernet makes it one cable a cell."],
   [B0 + 0.3, B2 - 0.4, "Act two · Look closer", "The bay.", "A switch or a hub takes the place of three cells, on the same joints. The cables stay behind."],
   [B2 + 0.1, B3 - 0.4, "Act two · Look closer", "Taller. Wider.", "The same idea at two more sizes, for gear that is not a desktop switch."],
-  [B3 + 0.1, B1 - 0.3, "Act two · Look closer", "Not only Pis.", "A bay two cells wide and two rows high takes a Jetson Orin Nano developer kit, on its own tray."],
+  [B3 + 0.1, B4 - 0.4, "Act two · Look closer", "Not only Pis.", "A bay two cells wide and two rows high takes a Jetson Orin Nano developer kit, on its own tray."],
+  [B4 + 0.1, B1 - 0.3, "Act two · Look closer", "Room to breathe.", "A Jetson AGX Orin developer kit has its fan in its top face, so its bay stands three rows high."],
   [79.6 + HOLD, 85.2 + HOLD, "Act three", "Make it yours.", "Pick a size and its colours. The list is what would be in the box."],
 ].map(([a, b, kicker, head, body]) => {
   const el = document.createElement("div");
@@ -305,7 +312,8 @@ const NOTES = [
   [B0 + 4.2, B2 - 2.6, [-24, 0, 62], "shelf", [250, 120], "The shelf", "Slides and latches like a carrier, behind the same closed face."],
   [B2 + 0.9, B2 + 3.3, [-196, 0, 120], "", [-190, -70], "Tall bay", "Two rows high: taller gear, or one rack unit up to 200 mm wide."],
   [B2 + 5.6, B2 + 8.0, [-270, 0, 120], "", [-170, -70], "Rack bay", "Four cells wide: ten-inch rack gear, one unit tall, with its ears on."],
-  [B3 + 2.0, B1 - 2.0, [-126, 0, 120], "", [-190, -70], "Jetson bay", "The board on four posts at NVIDIA’s own hole spacing, with 35 mm of air above its cooler."],
+  [B3 + 2.0, B4 - 1.6, [-126, 0, 120], "", [-190, -70], "Jetson bay", "The board on four posts at NVIDIA’s own hole spacing, with 35 mm of air above its cooler."],
+  [B4 + 2.0, B1 - 2.0, [-126, 0, 165], "", [-190, -70], "AGX bay", "The kit stands between low fences with 50 mm of air above its fan. Nothing straps over it."],
 ].map(([a, b, at, rides, off, head, body], i, all) => {
   const el = document.createElement("div");
   el.className = "label" + (off[0] < 0 ? " left" : "");
@@ -404,8 +412,8 @@ function frame(dt) {
     b.face.color.lerp(tmp.setHex(config ? look("config", 1 + 3 * k, cfg.rows) : PAL.slate), config ? rate * 1.4 : 1);
   });
   const SHOTS = { tall: [B2 - 0.4, B2 + 1.2, B2 + 3.1, B2 + 4.1, PAL.teal], rack: [B2 + 4.4, B2 + 6, B3 - 1.3, B3 - 0.1, PAL.ochre],
-    jetson: [B3, B3 + 1.6, B1 - 1.9, B1 - 0.7, PAL.moss] };
-  for (const kind of ["tall", "rack", "jetson"]) {
+    jetson: [B3, B3 + 1.6, B4 - 1.3, B4 - 0.1, PAL.moss], agx: [B4, B4 + 1.6, B1 - 1.9, B1 - 0.7, PAL.lilac] };
+  for (const kind of ["tall", "rack", "jetson", "agx"]) {
     const { pool: made, wide } = CROWNS[kind], [a0, a1, z0, z1, hex] = SHOTS[kind];
     const film = segc(a0, a1) * (1 - segc(z0, z1));
     made.forEach((b, k) => {
@@ -433,8 +441,8 @@ function frame(dt) {
   }
   const overBay = config ? 0 : io(segc(B0 - 0.6, B0 + 1.4)) * (1 - io(segc(B1 - 1.2, B1 + 0.6)));
   if (overBay > 0) {
-    const grown = io(segc(B2 - 0.6, B2 + 1)), wider = io(segc(B2 + 3.2, B2 + 4.8)) * (1 - io(segc(B3 - 0.8, B3 + 0.8)));
-    const b = { x: mix(-104, -138, wider), y: 10, z: mix(44, 64, grown), az: 32 - 8 * segc(B0, B1), el: 17, d: mix(720, 860, grown) + 90 * wider };
+    const grown = io(segc(B2 - 0.6, B2 + 1)), wider = io(segc(B2 + 3.2, B2 + 4.8)) * (1 - io(segc(B3 - 0.8, B3 + 0.8))), taller = io(segc(B4 - 0.8, B4 + 0.8));
+    const b = { x: mix(-104, -138, wider), y: 10, z: mix(44, 64, grown) + 22 * taller, az: 32 - 8 * segc(B0, B1), el: 17, d: mix(720, 860, grown) + 90 * wider + 90 * taller };
     for (const n in want) want[n] = mix(want[n], b[n], overBay);
   }
   cable.visible = rear > 0.02;
@@ -499,21 +507,23 @@ function panel() {
   $("hues").hidden = cfg.look !== "voice";
   choices("hues", HUES.map((h) => [h]), cfg.hue, (k) => { cfg.hue = k; }, true);
   const crown = bayCount(), kind = CROWNS[cfg.bay], high = rows + bayRows();
-  choices("bays", [["none", "None"], ["bay", "Bay"], ["tall", "Tall bay"], ["rack", "Rack bay"], ["jetson", "Jetson bay"]], cfg.bay, (k) => { cfg.bay = k; });
+  choices("bays", [["none", "None"], ["bay", "Bay"], ["tall", "Tall bay"], ["rack", "Rack bay"], ["jetson", "Jetson bay"], ["agx", "AGX bay"]], cfg.bay, (k) => { cfg.bay = k; });
   $("bayNote").textContent = !kind ? "A bay across the top holds a switch or a hub, with its ports to the back."
-    : !crown ? `A ${cfg.bay === "rack" ? "rack bay is four cells wide: it needs four columns" : cfg.bay === "jetson" ? "Jetson bay is two cells wide: it needs two, four or six columns" : "bay is three cells wide: it needs three or six columns"}.`
+    : !crown ? { rack: "A rack bay is four cells wide: it needs four columns.", jetson: "A Jetson bay is two cells wide: it needs two, four or six columns.",
+      agx: "An AGX bay is two cells wide: it needs two, four or six columns." }[cfg.bay] || "A bay is three cells wide: it needs three or six columns."
     : cfg.bay === "jetson" ? `Two rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson Orin Nano developer kit, on a tray with posts at the board’s own holes.`
+    : cfg.bay === "agx" ? `Three rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson AGX Orin developer kit, standing between low fences with its top fan clear.`
     : cfg.bay === "tall" ? "Two rows high: taller gear, or one rack unit up to 200 mm wide."
     : cfg.bay === "rack" ? "Takes ten-inch rack gear, one unit tall, with its ears on."
     : n > 7 * crown ? `An eight-port switch serves seven Pis and an uplink. These ${n} need ${Math.ceil(n / 7)} switches; there is room for ${crown}.`
     : `Room for ${crown === 1 ? "one eight-port switch" : "two eight-port switches"}: enough ports for these ${n} Pis and an uplink.`;
-  const bayName = { bay: "Bays", tall: "Tall bays", rack: "Rack bays", jetson: "Jetson bays" }[cfg.bay], bayGrams = { bay: 247.33 + 50.4, tall: 340.37 + 72.75, rack: 491.05 + 97.48, jetson: 191.62 + 44.29 }[cfg.bay] || 0;
-  $("box").innerHTML = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[bayName, crown], [cfg.bay === "jetson" ? "Orin trays" : "Shelves", crown]] : [])]
+  const bayName = { bay: "Bays", tall: "Tall bays", rack: "Rack bays", jetson: "Jetson bays", agx: "AGX bays" }[cfg.bay], bayGrams = { bay: 247.33 + 50.4, tall: 340.37 + 72.75, rack: 491.05 + 97.48, jetson: 191.62 + 44.29, agx: 224.0 + 60.38 }[cfg.bay] || 0;
+  $("box").innerHTML = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[bayName, crown], [{ jetson: "Orin trays", agx: "AGX trays" }[cfg.bay] || "Shelves", crown]] : [])]
     .map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
   const grams = 1.01 * (n * (73.06 + 15.86) + cols * (64.31 + 17.38) + high * (10.74 + 11.08) + crown * bayGrams);
-  $("facts").textContent = `${Math.round(cols * PX - man.gap + 2 * CAP)} mm wide, ${Math.round(high * PZ + 28.6)} tall, 110 deep. `
+  $("facts").textContent = `${Math.round(cols * PX - man.gap + 2 * CAP)} mm wide, ${Math.round(high * PZ + 28.6)} tall, ${crown && cfg.bay === "agx" ? 127 : 110} deep. `
     + `About ${(grams / 1000).toFixed(grams < 1000 ? 2 : 1)} kg of printed parts. With a Pi in every cell: about ${(n * 6.2).toFixed(0)} W at typical work, `
-    + `${(n * 14.3).toFixed(0)} W flat out.` + (crown && cfg.bay === "jetson" ? ` Each Jetson adds up to 25 W.` : "");
+    + `${(n * 14.3).toFixed(0)} W flat out.` + (crown && cfg.bay === "jetson" ? ` Each Jetson adds up to 25 W.` : crown && cfg.bay === "agx" ? ` Each AGX Orin adds up to 60 W.` : "");
 }
 const bump = (k, by, lo, hi) => () => { cfg[k] = Math.min(hi, Math.max(lo, cfg[k] + by)); panel(); };
 $("colsDown").onclick = bump("cols", -1, 1, 6); $("colsUp").onclick = bump("cols", 1, 1, 6);
