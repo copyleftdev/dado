@@ -29,7 +29,7 @@ Cells sit 70.6 mm apart across and 45.6 mm apart up. Every dimension of every pa
 
 ![A bay across three cells, its shelf drawn out with a switch on it](docs/img/bay.png)
 
-![The Jetson bay on two cells, its tray drawn out](docs/img/jetson.png)
+![The Jetson bay standing on two cells, with a third beside it](docs/img/jetson.png)
 
 ## How it works
 
