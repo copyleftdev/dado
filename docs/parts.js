@@ -28,6 +28,7 @@ const PARTS = [
     notes: [[[-33.5, -5.5, 38.5], "Pull", "A rail along the whole top edge. Pull the face and everything comes."],
       [[-12, 0, 30], "Air in", "Five tall slots, with a 25 mm fan in a cradle behind the middle three."],
       [[-33.5, 45, 8.2], "Posts", "Four, on the Raspberry Pi 5's own hole pattern."],
+      [[-22, 62, 9.5], "The board", "A Raspberry Pi 5, ports to the back, card slot to the front.", "pi"],
       [[-33.5, 97, 22], "Back wall", "Ports and air leave through it, so every cable runs behind."],
       [[-33.5, 103, 2.4], "Latch", "Two fingers drop behind the sleeve's rear edge."]] },
   { id: "base", in: "cell", name: "Base", body: "67 × 22 × 100", cm3: 64.31,
@@ -101,7 +102,7 @@ const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ---------------------------------------------------------------- renderer
 const canvas = $("stage");
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true, stencil: true });  // the stencil fills cut faces
 renderer.toneMapping = THREE.NeutralToneMapping;
 renderer.shadowMap.enabled = true;
 renderer.localClippingEnabled = true;
@@ -122,19 +123,47 @@ scene.add(key, key.target, rim, rim.target, new THREE.HemisphereLight(0xffffff, 
 // ------------------------------------------------------------------ assets
 async function load(name) {
   const buf = await (await fetch(`assets/${name}.bin`)).arrayBuffer();
-  const [nv, nt, ns] = new Uint32Array(buf, 0, 4);
+  const [nv, nt, ns, tinted] = new Uint32Array(buf, 0, 4);
   const turn = (src) => { const out = new Float32Array(src.length);
     for (let i = 0; i < src.length; i += 3) { out[i] = src[i]; out[i + 1] = src[i + 2]; out[i + 2] = -src[i + 1]; } return out; };
   let at = 16, g = new THREE.BufferGeometry();
   g.setAttribute("position", new THREE.BufferAttribute(turn(new Float32Array(buf, at, nv * 3)), 3)); at += nv * 12;
+  if (tinted) {  // a colour for each vertex, as sRGB bytes
+    const raw = new Uint8Array(buf, at, nv * 4), rgb = new Float32Array(nv * 3), c = new THREE.Color();
+    for (let i = 0; i < nv; i++) { c.setRGB(raw[4 * i] / 255, raw[4 * i + 1] / 255, raw[4 * i + 2] / 255, THREE.SRGBColorSpace); c.toArray(rgb, 3 * i); }
+    g.setAttribute("color", new THREE.BufferAttribute(rgb, 3)); at += nv * 4;
+  }
   g.setIndex(new THREE.BufferAttribute(new Uint32Array(buf, at, nt * 3), 1)); at += nt * 12;
-  g = toCreasedNormals(g, Math.PI / 5);
+  if (tinted) g.computeVertexNormals(); else g = toCreasedNormals(g, Math.PI / 5);
   const lines = new THREE.BufferGeometry();
   lines.setAttribute("position", new THREE.BufferAttribute(turn(new Float32Array(buf, at, ns * 3)), 3));
   g.computeBoundingBox();
   return { g, lines, box: g.boundingBox.clone() };
 }
 const cut = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+// Filling a cut face. A closed solid cut by a plane shows its inside through the hole. Counting, for each pixel, the
+// back faces seen less the front faces seen leaves a count wherever the eye looks into the solid; a sheet lying in
+// the plane, drawn only where that count is not nothing, is the cut face. One pair of counters and one sheet a solid.
+function fill(geometry, colour, order) {
+  const count = (side, op) => {
+    const m = new THREE.MeshBasicMaterial({ side, colorWrite: false, depthWrite: false, depthTest: false, clippingPlanes: [cut],
+      stencilWrite: true, stencilFunc: THREE.AlwaysStencilFunc, stencilFail: op, stencilZFail: op, stencilZPass: op });
+    const mesh = new THREE.Mesh(geometry, m); mesh.renderOrder = order; return mesh;
+  };
+  const group = new THREE.Group();
+  const sheet = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshStandardMaterial({ color: colour, roughness: 0.95, side: THREE.DoubleSide,
+    stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp }));
+  sheet.renderOrder = order + 0.1; sheet.onAfterRender = (r) => r.clearStencil();
+  group.add(count(THREE.BackSide, THREE.IncrementWrapStencilOp), count(THREE.FrontSide, THREE.DecrementWrapStencilOp), sheet);
+  group.visible = false; scene.add(group);
+  return { group, sheet };
+}
+// The sheet lies in the plane, across the part, facing what was cut away.
+function lay({ sheet }, p) {
+  sheet.position.copy(p.centre).addScaledVector(cut.normal, -cut.distanceToPoint(p.centre));
+  sheet.lookAt(sheet.position.clone().sub(cut.normal)); sheet.scale.setScalar(p.radius * 4);
+}
+const tone = (hex) => { const c = new THREE.Color(hex), l = c.getHSL({}).l; return c.lerp(new THREE.Color(l < 0.3 ? 0xffffff : 0x000000), l < 0.3 ? 0.34 : 0.22); };
 for (const p of PARTS) {
   const geo = await load(p.id);
   const skin = new THREE.MeshStandardMaterial({ color: p.face ?? PAL.graphite, roughness: 0.93, side: THREE.DoubleSide, clipShadows: true });
@@ -142,7 +171,18 @@ for (const p of PARTS) {
   p.mesh = new THREE.Mesh(geo.g, skin); p.mesh.castShadow = p.mesh.receiveShadow = true;
   p.edges = new THREE.LineSegments(geo.lines, line); p.mesh.add(p.edges);
   p.box = geo.box; p.centre = geo.box.getCenter(new THREE.Vector3()); p.size = geo.box.getSize(new THREE.Vector3()); p.radius = p.size.length() / 2;
-  p.mesh.visible = false; scene.add(p.mesh);
+  p.mesh.visible = false; p.mesh.renderOrder = 6; scene.add(p.mesh);
+  p.fill = fill(geo.g, tone(p.face ?? PAL.graphite), 1);
+}
+// The Raspberry Pi 5 that a carrier holds: Raspberry Pi's own model, fetched the first time the carrier is opened.
+const pi = { mesh: null, fill: null, wanted: true, loading: null };
+function bringPi() {
+  pi.loading ??= load("pi").then((geo) => {
+    pi.mesh = new THREE.Mesh(geo.g, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.25, side: THREE.DoubleSide, clipShadows: true }));
+    pi.mesh.castShadow = pi.mesh.receiveShadow = true; pi.mesh.renderOrder = 6; pi.mesh.visible = false; scene.add(pi.mesh);
+    pi.fill = fill(geo.g, 0x7d8286, 2);
+    if (look.part) slice();
+  });
 }
 
 // Where the camera stands to see a part: a direction, at the distance that frames it.
@@ -161,7 +201,7 @@ function light(p) {
   key.shadow.camera.updateProjectionMatrix();
   ground.position.set(p.centre.x, p.box.min.y - 0.05, p.centre.z);
 }
-function only(p) { for (const q of PARTS) q.mesh.visible = q === p; }
+function only(p) { for (const q of PARTS) { q.mesh.visible = q === p; q.fill.group.visible = false; } }
 
 // A picture of each part for its tile, made once with the same renderer.
 renderer.setPixelRatio(1); renderer.setSize(480, 360, false);
@@ -192,24 +232,32 @@ const press = (id, items, current, pick) => {
   $(id).onclick = (e) => { const b = e.target.closest("button"); if (b) pick(b.dataset.k); };
 };
 function slice() {
-  const p = look.part, t = $("depth").value / 100, material = [p.mesh.material, p.edges.material];
-  $("depth").hidden = look.cut === "Whole";
+  const p = look.part, t = $("depth").value / 100, whole = look.cut === "Whole";
+  const board = p.id === "carrier" && pi.wanted && pi.mesh;
+  $("depth").hidden = whole;
   press("cuts", ["Whole", "From the front", "From the side", "From the top"], look.cut, (k) => { look.cut = k; slice(); });
-  if (look.cut === "Whole") { for (const m of material) m.clippingPlanes = []; return; }
+  if (pi.mesh) pi.mesh.visible = Boolean(board);
   // Keep what lies behind, beside or under the plane; the slider says how much is cut away.
-  const [normal, far] = { "From the front": [[0, 0, -1], p.box.max.z - t * p.size.z], "From the side": [[-1, 0, 0], p.box.max.x - t * p.size.x],
-    "From the top": [[0, -1, 0], p.box.max.y - t * p.size.y] }[look.cut];
-  cut.normal.set(...normal); cut.constant = far;
-  for (const m of material) m.clippingPlanes = [cut];
+  if (!whole) {
+    const [normal, far] = { "From the front": [[0, 0, -1], p.box.max.z - t * p.size.z], "From the side": [[-1, 0, 0], p.box.max.x - t * p.size.x],
+      "From the top": [[0, -1, 0], p.box.max.y - t * p.size.y] }[look.cut];
+    cut.normal.set(...normal); cut.constant = far;
+  }
+  const planes = whole ? [] : [cut];
+  for (const m of [p.mesh.material, p.edges.material, ...(pi.mesh ? [pi.mesh.material] : [])]) m.clippingPlanes = planes;
+  p.fill.group.visible = !whole; if (!whole) lay(p.fill, p);
+  if (pi.fill) { pi.fill.group.visible = !whole && Boolean(board); if (!whole) lay(pi.fill, p); }
 }
 $("depth").oninput = slice;
 $("notes").onclick = () => { look.notes = !look.notes; $("notes").setAttribute("aria-pressed", String(look.notes)); };
 $("edges").onclick = () => { const p = look.part; p.edges.visible = !p.edges.visible; $("edges").setAttribute("aria-pressed", String(p.edges.visible)); };
 $("spin").onclick = () => setSpin(!controls.autoRotate);
+$("pi").onclick = () => { pi.wanted = !pi.wanted; $("pi").setAttribute("aria-pressed", String(pi.wanted)); slice(); label(look.part); };
 
 function open(p) {
   look.part = p; look.cut = "Whole"; look.goal = null;
   only(p); light(p); p.edges.visible = true; $("edges").setAttribute("aria-pressed", "true");
+  $("pi").hidden = p.id !== "carrier"; if (p.id === "carrier") bringPi();
   resize();
   controls.target.copy(p.centre); controls.minDistance = p.radius * 1.2; controls.maxDistance = p.radius * 14;
   camera.position.copy(seat(p, VIEWS.Corner)); setSpin(true);
@@ -220,16 +268,22 @@ function open(p) {
   $("name").textContent = p.name; $("blurb").textContent = p.blurb;
   $("facts").innerHTML = [["Body", `${p.body} mm`], ["With its joints", `${overall} mm`], ["Printed in nylon", `${grams.toFixed(0)} g`], ["To print, projected", money(grams)]]
     .map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
-  $("files").innerHTML = `<a href="${REPO}/step/${p.id}.step">STEP file</a> · <a href="${REPO}/parameters/${p.id}.json">Every dimension, with its reason</a>`;
+  $("files").innerHTML = `<a href="${REPO}/step/${p.id}.step">STEP file</a> · <a href="${REPO}/parameters/${p.id}.json">Every dimension, with its reason</a>`
+    + (p.id === "carrier" ? `<br>The board shown is Raspberry Pi Ltd's own model of the Pi 5, coloured by us.` : "");
   const i = PARTS.indexOf(p), before = PARTS[(i + PARTS.length - 1) % PARTS.length], after = PARTS[(i + 1) % PARTS.length];
   $("prev").href = `#${before.id}`; $("prev").textContent = `← ${before.name}`;
   $("next").href = `#${after.id}`; $("next").textContent = `${after.name} →`;
-  $("labels").innerHTML = p.notes.map(([, head, text]) => `<div class="label"><b>${head}</b><span>${text}</span></div>`).join("");
-  $("leaders").innerHTML = p.notes.map(() => `<line/><circle r="2.6"/>`).join("");
+  label(p);
   document.title = `${p.name} · Dado Parts`;
   renderer.setAnimationLoop(frame);
 }
 
+// A part's notes, less any that belong to the board when the board is not shown.
+const notesOf = (p) => p.notes.filter(([, , , needs]) => !needs || pi.wanted);
+function label(p) {
+  $("labels").innerHTML = notesOf(p).map(([, head, text]) => `<div class="label"><b>${head}</b><span>${text}</span></div>`).join("");
+  $("leaders").innerHTML = notesOf(p).map(() => `<line/><circle r="2.6"/>`).join("");
+}
 // Notes hang either side of the part, each tied to its point by a leader. They follow as the part turns.
 const at = new THREE.Vector3(), ray = new THREE.Raycaster(), toward = new THREE.Vector3();
 // Whether a point on the part is behind some other bit of it, as seen from the camera.
@@ -250,7 +304,7 @@ function annotate() {
   const about = $("name").getBoundingClientRect(), bench = document.querySelector(".bench").getBoundingClientRect();
   const lo = wide ? 96 : about.bottom + 58, hi = { [-1]: wide ? about.top - 150 : bench.top - 40, 1: wide ? innerHeight - 150 : bench.top - 40 };
   const edge = { [-1]: Math.max(gut, left - w - 36), 1: Math.min((wide ? bench.left - 16 : innerWidth - gut) - w, right + 36) };
-  const spots = p.notes.map(([point], i) => { const world = v(...point), [x, y] = onScreen(world); return { i, x, y, behind: hidden(p, world) }; });
+  const spots = notesOf(p).map(([point], i) => { const world = v(...point), [x, y] = onScreen(world); return { i, x, y, behind: hidden(p, world) }; });
   for (const side of [-1, 1]) {
     const mine = spots.filter((s) => (s.x < (left + right) / 2 ? -1 : 1) === side).sort((a, b) => a.y - b.y);
     const room = wide ? 96 : 40, start = Math.max(lo, Math.min(hi[side] - (mine.length - 1) * room, (mine[0]?.y ?? 0) - 46));
