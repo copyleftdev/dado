@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+import { mergeGeometries, toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
 
 const PAL = { graphite: 0x24272a, bone: 0xe1ded4, clay: 0xcd8b7a, ochre: 0xba9960, moss: 0x88ab75, teal: 0x57afaf, slate: 0x75a3d2, lilac: 0xaf90c6 };
 const DENSITY = 1.01, PRINT = [0.275, 0.52];  // g/cm3 of PA12 nylon; US$ a gram to print, low and high, as in the projections
@@ -29,6 +29,7 @@ const PARTS = [
       [[-12, 0, 30], "Air in", "Five tall slots, with a 25 mm fan in a cradle behind the middle three."],
       [[-33.5, 45, 8.2], "Posts", "Four, on the Raspberry Pi 5's own hole pattern."],
       [[-22, 62, 9.5], "The board", "A Raspberry Pi 5, ports to the back, card slot to the front.", "pi"],
+      [[-33.5, 8.2, 37.5], "Fan", "25 mm, in the cradle behind the face. A plain block stands in for it here.", "fan"],
       [[-33.5, 97, 22], "Back wall", "Ports and air leave through it, so every cable runs behind."],
       [[-33.5, 103, 2.4], "Latch", "Two fingers drop behind the sleeve's rear edge."]] },
   { id: "base", in: "cell", name: "Base", body: "67 × 22 × 100", cm3: 64.31,
@@ -174,13 +175,28 @@ for (const p of PARTS) {
   p.mesh.visible = false; p.mesh.renderOrder = 6; scene.add(p.mesh);
   p.fill = fill(geo.g, tone(p.face ?? PAL.graphite), 1);
 }
-// The Raspberry Pi 5 that a carrier holds: Raspberry Pi's own model, fetched the first time the carrier is opened.
-const pi = { mesh: null, fill: null, wanted: true, loading: null };
+// What a carrier holds. The fan is a stand-in made here: a 25 mm frame 6 thick with a rotor and a hub, where the
+// cradle holds it. The Pi is Raspberry Pi's own model: a lighter copy comes for the carrier's tile once the tiles are
+// up, and the full one the first time the carrier is opened.
+const shown = { pi: true, fan: true };
+const fan = (() => {
+  const turned = (g) => g.rotateX(Math.PI / 2);
+  const solid = mergeGeometries([new THREE.BoxGeometry(25, 25, 5.2), turned(new THREE.CylinderGeometry(11.2, 11.2, 5.6, 40)), turned(new THREE.CylinderGeometry(4.6, 4.6, 6, 24))], true);
+  solid.translate(-33.5, 25, -5.6);
+  const dark = { roughness: 0.6, side: THREE.DoubleSide, clipShadows: true };
+  const mesh = new THREE.Mesh(solid, [new THREE.MeshStandardMaterial({ color: 0x17181a, ...dark }), new THREE.MeshStandardMaterial({ color: 0x2b2d31, ...dark, roughness: 0.5 }),
+    new THREE.MeshStandardMaterial({ color: 0x17181a, ...dark })]);
+  mesh.castShadow = true; mesh.renderOrder = 6; mesh.visible = false; scene.add(mesh);
+  return { mesh, fill: fill(solid, 0x55595e, 3) };
+})();
+const board = (geo, order) => {
+  const mesh = new THREE.Mesh(geo.g, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.25, side: THREE.DoubleSide, clipShadows: true }));
+  mesh.castShadow = mesh.receiveShadow = true; mesh.renderOrder = order; mesh.visible = false; scene.add(mesh); return mesh;
+};
+const pi = { mesh: null, fill: null, loading: null, far: null };
 function bringPi() {
   pi.loading ??= load("pi").then((geo) => {
-    pi.mesh = new THREE.Mesh(geo.g, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.25, side: THREE.DoubleSide, clipShadows: true }));
-    pi.mesh.castShadow = pi.mesh.receiveShadow = true; pi.mesh.renderOrder = 6; pi.mesh.visible = false; scene.add(pi.mesh);
-    pi.fill = fill(geo.g, 0x7d8286, 2);
+    pi.mesh = board(geo, 6); pi.fill = fill(geo.g, 0x7d8286, 2);
     if (look.part) slice();
   });
 }
@@ -201,17 +217,27 @@ function light(p) {
   key.shadow.camera.updateProjectionMatrix();
   ground.position.set(p.centre.x, p.box.min.y - 0.05, p.centre.z);
 }
-function only(p) { for (const q of PARTS) { q.mesh.visible = q === p; q.fill.group.visible = false; } }
+function only(p) {
+  for (const q of PARTS) { q.mesh.visible = q === p; q.fill.group.visible = false; }
+  fan.mesh.visible = fan.fill.group.visible = false;
+  for (const m of [pi.mesh, pi.far]) if (m) m.visible = false;
+  if (pi.fill) pi.fill.group.visible = false;
+}
 
-// A picture of each part for its tile, made once with the same renderer.
-renderer.setPixelRatio(1); renderer.setSize(480, 360, false);
-camera.aspect = 4 / 3; camera.updateProjectionMatrix();
-for (const p of PARTS) {
-  only(p); light(p); p.mesh.material.clippingPlanes = [];
+// A picture of a part for its tile, made with the same renderer, with whatever else is to be in it.
+function snap(p, company = []) {
+  renderer.setPixelRatio(1); renderer.setSize(480, 360, false);
+  camera.aspect = 4 / 3; camera.clearViewOffset(); camera.updateProjectionMatrix();
+  only(p); light(p);
+  for (const m of [p.mesh.material, p.edges.material]) m.clippingPlanes = [];
+  p.edges.visible = true;
+  for (const mesh of company) { mesh.visible = true; for (const m of [mesh.material].flat()) m.clippingPlanes = []; }
   camera.position.copy(seat(p, VIEWS.Corner, 0.82)); camera.lookAt(p.centre);
   renderer.render(scene, camera);
-  p.picture = canvas.toDataURL("image/png");
+  for (const mesh of company) mesh.visible = false;
+  return canvas.toDataURL("image/png");
 }
+for (const p of PARTS) p.picture = snap(p, p.id === "carrier" ? [fan.mesh] : []);
 
 // ---------------------------------------------------------------- the tiles
 const money = (g) => `$${Math.round(g * PRINT[0])} to $${Math.round(g * PRINT[1])}`;
@@ -233,10 +259,11 @@ const press = (id, items, current, pick) => {
 };
 function slice() {
   const p = look.part, t = $("depth").value / 100, whole = look.cut === "Whole";
-  const board = p.id === "carrier" && pi.wanted && pi.mesh;
+  const carrier = p.id === "carrier", withPi = carrier && shown.pi && pi.mesh, withFan = carrier && shown.fan;
   $("depth").hidden = whole;
   press("cuts", ["Whole", "From the front", "From the side", "From the top"], look.cut, (k) => { look.cut = k; slice(); });
-  if (pi.mesh) pi.mesh.visible = Boolean(board);
+  if (pi.mesh) pi.mesh.visible = Boolean(withPi);
+  fan.mesh.visible = withFan;
   // Keep what lies behind, beside or under the plane; the slider says how much is cut away.
   if (!whole) {
     const [normal, far] = { "From the front": [[0, 0, -1], p.box.max.z - t * p.size.z], "From the side": [[-1, 0, 0], p.box.max.x - t * p.size.x],
@@ -244,20 +271,21 @@ function slice() {
     cut.normal.set(...normal); cut.constant = far;
   }
   const planes = whole ? [] : [cut];
-  for (const m of [p.mesh.material, p.edges.material, ...(pi.mesh ? [pi.mesh.material] : [])]) m.clippingPlanes = planes;
+  for (const m of [p.mesh.material, p.edges.material, ...fan.mesh.material, ...(pi.mesh ? [pi.mesh.material] : [])]) m.clippingPlanes = planes;
   p.fill.group.visible = !whole; if (!whole) lay(p.fill, p);
-  if (pi.fill) { pi.fill.group.visible = !whole && Boolean(board); if (!whole) lay(pi.fill, p); }
+  if (pi.fill) { pi.fill.group.visible = !whole && Boolean(withPi); if (!whole) lay(pi.fill, p); }
+  fan.fill.group.visible = !whole && withFan; if (!whole) lay(fan.fill, p);
 }
 $("depth").oninput = slice;
 $("notes").onclick = () => { look.notes = !look.notes; $("notes").setAttribute("aria-pressed", String(look.notes)); };
 $("edges").onclick = () => { const p = look.part; p.edges.visible = !p.edges.visible; $("edges").setAttribute("aria-pressed", String(p.edges.visible)); };
 $("spin").onclick = () => setSpin(!controls.autoRotate);
-$("pi").onclick = () => { pi.wanted = !pi.wanted; $("pi").setAttribute("aria-pressed", String(pi.wanted)); slice(); label(look.part); };
+for (const what of ["pi", "fan"]) $(what).onclick = () => { shown[what] = !shown[what]; $(what).setAttribute("aria-pressed", String(shown[what])); slice(); label(look.part); };
 
 function open(p) {
   look.part = p; look.cut = "Whole"; look.goal = null;
   only(p); light(p); p.edges.visible = true; $("edges").setAttribute("aria-pressed", "true");
-  $("pi").hidden = p.id !== "carrier"; if (p.id === "carrier") bringPi();
+  $("pi").hidden = $("fan").hidden = p.id !== "carrier"; if (p.id === "carrier") bringPi();
   resize();
   controls.target.copy(p.centre); controls.minDistance = p.radius * 1.2; controls.maxDistance = p.radius * 14;
   camera.position.copy(seat(p, VIEWS.Corner)); setSpin(true);
@@ -269,7 +297,7 @@ function open(p) {
   $("facts").innerHTML = [["Body", `${p.body} mm`], ["With its joints", `${overall} mm`], ["Printed in nylon", `${grams.toFixed(0)} g`], ["To print, projected", money(grams)]]
     .map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
   $("files").innerHTML = `<a href="${REPO}/step/${p.id}.step">STEP file</a> · <a href="${REPO}/parameters/${p.id}.json">Every dimension, with its reason</a>`
-    + (p.id === "carrier" ? `<br>The board shown is Raspberry Pi Ltd's own model of the Pi 5, coloured by us.` : "");
+    + (p.id === "carrier" ? `<br>The board shown is Raspberry Pi Ltd's own model of the Pi 5, coloured by us. The fan is a plain stand-in.` : "");
   const i = PARTS.indexOf(p), before = PARTS[(i + PARTS.length - 1) % PARTS.length], after = PARTS[(i + 1) % PARTS.length];
   $("prev").href = `#${before.id}`; $("prev").textContent = `← ${before.name}`;
   $("next").href = `#${after.id}`; $("next").textContent = `${after.name} →`;
@@ -278,8 +306,8 @@ function open(p) {
   renderer.setAnimationLoop(frame);
 }
 
-// A part's notes, less any that belong to the board when the board is not shown.
-const notesOf = (p) => p.notes.filter(([, , , needs]) => !needs || pi.wanted);
+// A part's notes, less any that belong to the board or the fan when that is not shown.
+const notesOf = (p) => p.notes.filter(([, , , needs]) => !needs || shown[needs]);
 function label(p) {
   $("labels").innerHTML = notesOf(p).map(([, head, text]) => `<div class="label"><b>${head}</b><span>${text}</span></div>`).join("");
   $("leaders").innerHTML = notesOf(p).map(() => `<line/><circle r="2.6"/>`).join("");
@@ -351,7 +379,7 @@ function route(first) {
   const p = PARTS.find((q) => q.id === location.hash.slice(1));
   if (!p) {
     renderer.setAnimationLoop(null); const left = look.part; look.part = null;
-    document.body.dataset.view = "gallery"; document.title = "Dado Parts";
+    document.body.dataset.view = "gallery"; document.title = "Dado Parts"; retile();
     if (left) { const tile = $(`tile-${left.id}`); tile.scrollIntoView({ block: "center" }); tile.focus({ preventScroll: true }); }
     return;
   }
@@ -369,6 +397,14 @@ function route(first) {
   open(p);
 }
 addEventListener("hashchange", () => route(false));
+// The carrier's tile is redrawn with the Pi on it once a lighter copy of the model has come. The one renderer is busy
+// while a part is on the bench, so the picture is taken the next time the tiles are showing.
+function retile() {
+  if (!pi.far || pi.tiled || look.part) return;
+  const carrier = PARTS.find((p) => p.id === "carrier");
+  carrier.picture = snap(carrier, [fan.mesh, pi.far]); $("tile-carrier").querySelector("img").src = carrier.picture; pi.tiled = true;
+}
+load("pi-far").then((geo) => { pi.far = board(geo, 6); retile(); });
 addEventListener("keydown", (e) => {
   if (!look.part || e.target.matches?.("input")) return;
   if (e.key === "Escape") location.hash = "";
