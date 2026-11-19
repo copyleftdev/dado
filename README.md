@@ -4,8 +4,6 @@
 
 Dado is an open-hardware enclosure for Raspberry Pi 5 clusters. Each Pi lives in its own cell, and cells join to each other on four sides by sliding along one axis, so a cluster starts at one and grows to whatever size you need. This repository holds the complete specification: the STEP files, every dimension, the scripts that generated them and the reports of the checks they passed.
 
-![The Dado film in brief: a line becomes a sleeve, a Pi slides in, cells join into a wall and change colour](docs/img/dado.gif)
-
 **See it move:** [copyleftdev.github.io/dado](https://copyleftdev.github.io/dado/) is a short film built from these exact parts, ending in a configurator.
 
 > **Status: a design, not yet a product.** Every part here has been modelled and checked by calculation and simulation. **Nothing has been printed.** Treat the files as a well-tested starting point, and read [what has not been checked](#what-has-not-been-checked) before you spend money on a print.
