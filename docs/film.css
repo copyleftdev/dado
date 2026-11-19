@@ -80,6 +80,7 @@ table { border-collapse: collapse; width: 100%; font-size: 15px; }
 td { padding: 6px 0; border-top: 1px solid var(--rule); }
 td:last-child { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .facts { margin: 0; font-size: 13.5px; line-height: 1.45; color: #5C605D; }
+#panel a { color: #1F2224; font-weight: 500; }
 
 @media (max-width: 760px) {
   #panel { top: auto; bottom: 0; right: 0; left: 0; transform: none; width: 100%; max-height: 52vh; border-radius: 10px 10px 0 0;

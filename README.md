@@ -28,7 +28,7 @@ Dado is an open-hardware enclosure for Raspberry Pi 5 clusters. Each Pi lives in
 | Cross | Where a line of row spacers meets a column of spacers | 31.7 × 19.2 × 60 | [`spacercross.step`](hardware/step/spacercross.step) |
 | Half base and half top cap | Under and over a column of spacers | 31.7 wide | [`basehalf.step`](hardware/step/basehalf.step), [`trimtophalf.step`](hardware/step/trimtophalf.step) |
 
-Cells sit 70.6 mm apart across and 45.6 mm apart up. Every dimension of every part, with a sentence saying why it is what it is, is in [`hardware/parameters`](hardware/parameters). The reasoning behind the design is in [SPEC.md](SPEC.md).
+Cells sit 70.6 mm apart across and 45.6 mm apart up. Each part can be turned over, cut open and read on the site's [Every part](https://copyleftdev.github.io/dado/parts.html) page. Every dimension of every part, with a sentence saying why it is what it is, is in [`hardware/parameters`](hardware/parameters). The reasoning behind the design is in [SPEC.md](SPEC.md).
 
 ![Nine Dado cells in six colours](docs/img/wall.png)
 

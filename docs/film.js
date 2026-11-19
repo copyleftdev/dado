@@ -574,6 +574,8 @@ function size() {
 }
 addEventListener("resize", size); size();
 const span = () => document.documentElement.scrollHeight - innerHeight;
+// Coming back from the parts, the page opens where it was left: on the configurator.
+if (location.hash === "#make" && still === null) { history.scrollRestoration = "manual"; scrollTo(0, span()); }
 // The score: a looping instrumental, made with ElevenLabs Music. A browser
 // plays sound only after a click, so it starts from a button, and fades.
 const score = new Audio("assets/score.mp3");

@@ -1,0 +1,113 @@
+/* Every part: a wall of tiles, and one part at a time on a bench. */
+:root {
+  --bg: #C9CAC4; --ink: #1F2224; --soft: rgba(31, 34, 36, 0.64); --rule: rgba(31, 34, 36, 0.16);
+  --tile: #D6D7D1; --clay: #CD8B7A; --panel: rgba(236, 237, 233, 0.86);
+  --display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --gut: max(20px, env(safe-area-inset-left, 0px));
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+body { overflow-x: hidden; }
+a { color: inherit; }
+small { display: block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--soft); }
+
+.top { position: fixed; inset: 0 0 auto 0; z-index: 6; display: flex; justify-content: space-between; align-items: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) var(--gut) 0; pointer-events: none; }
+.top > * { pointer-events: auto; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.04em; text-decoration: none; }
+.brand svg { width: 20px; height: 20px; }
+.tools { display: inline-flex; gap: 8px; align-items: center; }
+.link { font-size: 14px; text-decoration: none; border-bottom: 1px solid var(--soft); padding: 7px 2px; margin-right: 6px; }
+button, .button { font: inherit; font-size: 14px; color: var(--ink); background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(31, 34, 36, 0.28);
+  border-radius: 3px; padding: 7px 12px; cursor: pointer; text-decoration: none; display: inline-block; }
+button:hover, .button:hover { border-color: var(--ink); }
+button[aria-pressed="true"] { background: var(--ink); color: #ECEDE9; border-color: var(--ink); }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* The wall of tiles. */
+#gallery { padding: calc(96px + env(safe-area-inset-top, 0px)) var(--gut) 80px; max-width: 1280px; margin: 0 auto; }
+.lead h1 { font-family: var(--display); font-weight: 700; font-size: clamp(56px, 10vw, 120px); line-height: 0.9; letter-spacing: -0.05em; margin: 10px 0 0 -0.04em; }
+.lead p { font-size: clamp(16px, 1.6vw, 19px); color: var(--soft); max-width: 46ch; margin: 18px 0 0; }
+.family { margin-top: 56px; }
+.family h2 { font-family: var(--display); font-weight: 600; font-size: clamp(26px, 3vw, 36px); letter-spacing: -0.03em; line-height: 1.05; margin: 8px 0 0; text-wrap: balance; }
+.family > p { color: var(--soft); max-width: 60ch; margin: 8px 0 0; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; margin-top: 22px; }
+.tile { display: flex; flex-direction: column; text-decoration: none; background: var(--tile); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+  transition: transform 0.25s, border-color 0.25s; }
+.tile:hover { transform: translateY(-3px); border-color: var(--ink); }
+.tile img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: contain; }
+.tile div { padding: 12px 14px 14px; border-top: 1px solid var(--rule); }
+.tile b { display: block; font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: -0.01em; }
+.tile span { display: block; font-size: 13.5px; line-height: 1.35; color: var(--soft); margin-top: 2px; }
+.tile em { display: block; font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--soft); margin-top: 8px; }
+
+/* One part on the bench. */
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#stage:active { cursor: grabbing; }
+#leaders { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+/* A pale halo keeps a leader readable where it crosses a dark part. */
+#leaders { filter: drop-shadow(0 0 1.2px rgba(236, 237, 233, 0.95)) drop-shadow(0 0 1.2px rgba(236, 237, 233, 0.95)); }
+#leaders line { stroke: var(--ink); stroke-width: 1; }
+#leaders circle { fill: var(--ink); stroke: #ECEDE9; stroke-width: 1.2; }
+#labels { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.label { position: absolute; width: 190px; }
+.label b { display: block; font-family: var(--display); font-weight: 600; font-size: 18px; line-height: 1.15; padding-bottom: 4px; border-bottom: 1px solid var(--ink); }
+.label span { display: block; margin-top: 6px; font-size: 13.5px; line-height: 1.35; color: var(--soft); }
+.label.left { text-align: right; }
+.label b, .label span { text-shadow: 0 0 5px var(--bg), 0 0 5px var(--bg), 0 0 2px var(--bg); }
+/* A note whose point is on the far side of the part steps back until the part is turned. */
+.label.behind { opacity: 0.4; }
+#leaders .behind { opacity: 0.4; stroke-dasharray: 3 4; }
+.label, #leaders line, #leaders circle { transition: opacity 0.25s; }
+#detail { pointer-events: none; }
+#detail > * { pointer-events: auto; }
+.about { position: fixed; z-index: 4; left: var(--gut); bottom: max(6vh, 28px); width: min(360px, calc(100vw - 2 * var(--gut))); }
+.about h2 { font-family: var(--display); font-weight: 600; font-size: clamp(34px, 5vw, 60px); line-height: 1; letter-spacing: -0.03em; margin: 10px 0 0; }
+.about p { margin: 12px 0 0; color: var(--soft); font-size: clamp(15px, 1.4vw, 17px); }
+.about table { border-collapse: collapse; width: 100%; font-size: 14.5px; margin-top: 14px; }
+.about td { padding: 5px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+.about td:last-child { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; }
+.about .files { font-size: 13.5px; }
+.bench { position: fixed; z-index: 5; right: var(--gut); top: 50%; transform: translateY(-50%); width: 230px; padding: 18px; display: grid; gap: 14px;
+  background: var(--panel); border: 1px solid var(--rule); border-radius: 4px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.ctl { display: grid; gap: 8px; }
+.ctl > span { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.07em; text-transform: uppercase; color: #5C605D; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; }
+.bench button { padding: 5px 9px; font-size: 13.5px; }
+input[type="range"] { width: 100%; accent-color: var(--ink); }
+input[hidden] { display: none; }
+.step { position: fixed; z-index: 4; right: var(--gut); bottom: max(6vh, 28px); display: flex; gap: 8px; }
+.step a { font-size: 14px; text-decoration: none; border: 1px solid rgba(31, 34, 36, 0.28); background: rgba(255, 255, 255, 0.35); border-radius: 3px; padding: 7px 12px; }
+.step a:hover { border-color: var(--ink); }
+
+/* Which of the two is showing. The part's own canvas is drawn only on the bench. */
+body[data-view="gallery"] #stage, body[data-view="gallery"] #detail, body[data-view="gallery"] #leaders, body[data-view="gallery"] #labels,
+body[data-view="gallery"] #toAll, body[data-view="loading"] #stage, body[data-view="loading"] #detail, body[data-view="loading"] #toAll { display: none; }
+body[data-view="detail"] #gallery { display: none; }
+body[data-view="detail"] { overflow: hidden; }
+#stage, #detail, #labels, #leaders, #gallery { animation: arrive 0.5s ease both; }
+@keyframes arrive { from { opacity: 0; } to { opacity: 1; } }
+/* The tile that was picked grows to fill the window while the bench arrives behind it. */
+.flight { position: fixed; z-index: 9; object-fit: contain; pointer-events: none; background: var(--bg); transition: all 0.55s cubic-bezier(0.6, 0, 0.2, 1), opacity 0.35s 0.35s; }
+
+@media (max-width: 760px) {
+  .bench { top: auto; bottom: 0; left: 0; right: 0; transform: none; width: 100%; border-radius: 10px 10px 0 0; padding: 12px var(--gut) calc(12px + env(safe-area-inset-bottom, 0px));
+    grid-template-columns: 1fr; gap: 10px; }
+  .bench .ctl { grid-template-columns: 74px 1fr; align-items: center; }
+  .bench input[type="range"] { grid-column: 2; }
+  .about { bottom: auto; top: calc(62px + env(safe-area-inset-top, 0px)); }
+  .about h2 { font-size: 30px; margin-top: 0; }
+  .about small, .about p, .about table, .about .files { display: none; }
+  .step { bottom: auto; top: calc(104px + env(safe-area-inset-top, 0px)); left: var(--gut); right: auto; }
+  .step a { padding: 5px 9px; font-size: 13px; }
+  .label { width: 112px; }
+  .label b { font-size: 15px; }
+  .label span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #stage, #detail, #labels, #leaders, #gallery { animation: none; }
+  .tile { transition: none; }
+}
