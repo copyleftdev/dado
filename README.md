@@ -78,6 +78,7 @@ Calculated from the part volumes and published figures; none is measured. The fu
 |---|---|---|---|---|---|
 | One | 1 | 78 × 74 × 110 | 0.3 kg | 6 W | $53 to $101 |
 | Trio | 3 | 219 × 74 × 110 | 0.9 kg | 19 W | $148 to $280 |
+| Four and a Jetson | 4 | 149 × 211 × 110 | 1.5 kg | 40 W | $234 to $442 |
 | Six and a bay | 6 | 219 × 165 × 110 | 1.8 kg | 37 W | $317 to $600 |
 | Nine | 9 | 219 × 165 × 110 | 2.1 kg | 56 W | $309 to $583 |
 | Twenty-four and two bays | 24 | 431 × 257 × 110 | 6.0 kg | 149 W | $925 to $1,748 |
