@@ -24,7 +24,7 @@
    "value": 1.4
   },
   {
-   "description": "As the cell: the pitch across is this plus the gap",
+   "description": "As the part it stands under: a cell, or a column spacer half a pitch wide",
    "id": "body.width",
    "value": 67.0
   },

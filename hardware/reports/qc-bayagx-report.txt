@@ -30,6 +30,7 @@ PASS  the face under the roof: 0.50 mm between them
 NOTE  room on the shelf: 131.1 mm wide, 122.4 tall; the back is open, so a device may stand out behind
 PASS  nothing of the tray where the kit stands: points of the tray there: 0
 PASS  the kit between its fences and stops: 0.50 mm to each fence; 0.50 mm to the front stop; 0.50 mm to the rear stops
+PASS  the rear stops clear of the latch fingers: 1.50 mm between each stop and the slot that frees the finger beside it (1.0 wanted)
 PASS  pushed 1 mm any way along the tray: it meets a fence or a stop: {'forward': 294, 'back': 107, 'to one side': 231, 'to the other': 235} points. Nothing holds it down but its 872 g
 PASS  room above the fan: 50.7 mm, where 21 is wanted: a gap a quarter of the fan's width lets in as much air as the fan's own opening. The fan is about 84 mm across, measured off NVIDIA's figure
 PASS  why the bay is three rows tall: a two-row bay would leave 5.1 mm above the fan
@@ -46,4 +47,4 @@ PASS  1 row(s) of cells on it: about 3.9 N; the 6 mm roof sags about 0.04 mm (0.
 PASS  2 row(s) of cells on it: about 7.8 N; the 6 mm roof sags about 0.08 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
 PASS  3 row(s) of cells on it: about 11.8 N; the 6 mm roof sags about 0.11 mm (0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)
 
-{'PASS': 33, 'FAIL': 0, 'NOTE': 7}
+{'PASS': 34, 'FAIL': 0, 'NOTE': 7}

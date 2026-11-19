@@ -1,5 +1,26 @@
 == 1. Can the designs be rebuilt from their scripts, identically? ==
-== 2. Do the three parts agree on the dimensions they share? ==
+PASS  cell rebuilds from build_cell.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 73059.878 against 73059.878 mm3
+PASS  carrier rebuilds from build_carrier.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 15863.118 against 15863.118 mm3
+PASS  base rebuilds from build_base.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 64305.685 against 64305.685 mm3
+PASS  basehalf rebuilds from build_base.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 41431.285 against 41431.285 mm3
+PASS  trimtop rebuilds from build_trim.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 17375.545 against 17375.545 mm3
+PASS  trimrail rebuilds from build_trim.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 10743.446 against 10743.446 mm3
+PASS  trimlip rebuilds from build_trim.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 11076.187 against 11076.187 mm3
+PASS  trimtophalf rebuilds from build_trim.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 10315.545 against 10315.545 mm3
+PASS  bay rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 247334.870 against 247334.870 mm3
+PASS  baytall rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 340374.503 against 340374.503 mm3
+PASS  bayrack rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 491051.999 against 491051.999 mm3
+PASS  bayduo rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 191617.007 against 191617.007 mm3
+PASS  bayagx rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 223996.639 against 223996.639 mm3
+PASS  shelf rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 50404.991 against 50404.991 mm3
+PASS  shelftall rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 72745.283 against 72745.283 mm3
+PASS  shelfrack rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 97483.521 against 97483.521 mm3
+PASS  orin rebuilds from build_orin.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 44289.427 against 44289.427 mm3
+PASS  agx rebuilds from build_agx.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 60375.261 against 60375.261 mm3
+PASS  spacerrow rebuilds from build_spacer.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 52487.333 against 52487.333 mm3
+PASS  spacercol rebuilds from build_spacer.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 43289.366 against 43289.366 mm3
+PASS  spacercross rebuilds from build_spacer.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 19033.198 against 19033.198 mm3
+== 2. Do the parts agree on the dimensions they share? ==
 PASS  cell and base: the joint: 13 shared dimensions; disagreeing: []
 PASS  the reach of a cell's teeth: 1.4 and 1.4
 PASS  play across the stacking joint: 0.8 and 0.8
@@ -14,6 +35,31 @@ PASS  reach of the ledges: 1.2 and 1.2
 PASS  cell and trimtop: 39 dimensions; differing only where a cap is a plate: ['body.height', 'v.mid']
 PASS  cell and trimrail: 39 dimensions; differing only where a cap is a plate: ['body.width', 'u.mid']
 PASS  cell and trimlip: 39 dimensions; differing only where a cap is a plate: ['body.width', 'u.mid']
+PASS  cell and bay: the joint: 39 shared dimensions; differing beyond its own size: none
+PASS  cell and baytall: the joint: 39 shared dimensions; differing beyond its own size: none
+PASS  cell and bayrack: the joint: 39 shared dimensions; differing beyond its own size: none
+PASS  cell and bayduo: the joint: 39 shared dimensions; differing beyond its own size: none
+PASS  cell and bayagx: the joint: 39 shared dimensions; differing beyond its own size: none
+PASS  cell and spacerrow: the joint: 36 shared dimensions; differing beyond its own size: none
+PASS  cell and spacercol: the joint: 36 shared dimensions; differing beyond its own size: none
+PASS  cell and spacercross: the joint: 36 shared dimensions; differing beyond its own size: none
+PASS  cell and trimtophalf: the joint: 39 shared dimensions; differing beyond its own size: none
+PASS  base and half base: 32 dimensions; differing: ['body.width', 'u.mid']
+PASS  bay and shelf: the bay's inside: the bay is 202.2 by 32.0 by 100 inside; the shelf was built for 202.2 by 32.0 by 100; disagreeing: none
+PASS  bay and shelf: underside of the ledges: 2.3 and 2.3
+PASS  bay and shelf: the ledges' cut and the face: flush: 2.6 and 2.6
+PASS  baytall and shelftall: the bay's inside: the bay is 202.2 by 74.6 by 100 inside; the shelftall was built for 202.2 by 74.6 by 100; disagreeing: none
+PASS  baytall and shelftall: underside of the ledges: 2.3 and 2.3
+PASS  baytall and shelftall: the ledges' cut and the face: flush: 2.6 and 2.6
+PASS  bayrack and shelfrack: the bay's inside: the bay is 272.8 by 72.6 by 100 inside; the shelfrack was built for 272.8 by 72.6 by 100; disagreeing: none
+PASS  bayrack and shelfrack: underside of the ledges: 2.3 and 2.3
+PASS  bayrack and shelfrack: the ledges' cut and the face: flush: 2.6 and 2.6
+PASS  bayduo and orin: the bay's inside: the bay is 131.6 by 78.6 by 100 inside; the orin was built for 131.6 by 78.6 by 100; disagreeing: none
+PASS  bayduo and orin: underside of the ledges: 2.3 and 2.3
+PASS  bayduo and orin: the ledges' cut and the face: flush: 2.6 and 2.6
+PASS  bayagx and agx: the bay's inside: the bay is 131.6 by 124.2 by 100 inside; the agx was built for 131.6 by 124.2 by 100; disagreeing: none
+PASS  bayagx and agx: underside of the ledges: 2.3 and 2.3
+PASS  bayagx and agx: the ledges' cut and the face: flush: 2.6 and 2.6
 == 3. Do the QC scripts measure against the dimensions the parts now have? ==
 PASS  fit_check.py: W, H, GAP, DEPTH, WALL, FLOAT, SIDE_FLOAT: script has [67.0, 42.0, 3.6, 100.0, 3.0, 0.8, 1.6]; the parts have [67.0, 42.0, 3.6, 100.0, 3.0, 0.8, 1.6]
 PASS  qc.py: W, H, GAP, DEPTH, WALL: script has [67.0, 42.0, 3.6, 100.0, 3.0]; the parts have [67.0, 42.0, 3.6, 100.0, 3.0]
@@ -23,7 +69,32 @@ PASS  qc_base.py: W, GAP, RAIL, HB, DEPTH, SETBACK, PAD: script has [67.0, 3.6, 
 == 4. Assembled: two bases, four cells two by two, a carrier in each, with plugs behind it ==
 PASS  nothing collides that should not: 14 bodies, 30 neighbouring pairs tested both ways; unexpected collisions in 0
 PASS  every carrier's latch rests unloaded: carriers whose teeth press on their cell at rest: 0 of 4
+== 4b. Assembled: a wall with every kind of part in it ==
+PASS  nothing in the wall collides that should not: 34 bodies of 11 kinds, 88 neighbouring pairs tested both ways; unexpected collisions in 0
+PASS  every latch in the wall rests unloaded: carriers or trays whose teeth press at rest: none
+PASS  the wall's width: 250.3 mm over its joints; three places and a half is 243.5 between the outer walls
 == 5. The engine's own check of intent, before the corners are rounded ==
-NOTE  cell and base at r3: the rounded corners are the only change after r2, and the engine cannot compare a part this thin once they are in; their volume was checked by hand instead
+PASS  cell at r2: file validated: True; shape compared with the plan at 7936 points, 0 disagree
+PASS  carrier at r2: file validated: True; shape compared with the plan at 12352 points, 0 disagree
+PASS  base at r2: file validated: True; shape compared with the plan at 6784 points, 0 disagree
+PASS  basehalf at r2: file validated: True; shape compared with the plan at 6784 points, 0 disagree
+PASS  trimtop at r2: file validated: True; shape compared with the plan at 5248 points, 0 disagree
+PASS  trimrail at r2: file validated: True; shape compared with the plan at 5248 points, 0 disagree
+PASS  trimlip at r2: file validated: True; shape compared with the plan at 4864 points, 0 disagree
+PASS  trimtophalf at r2: file validated: True; shape compared with the plan at 5248 points, 0 disagree
+PASS  bay at r2: file validated: True; shape compared with the plan at 10624 points, 0 disagree
+PASS  baytall at r2: file validated: True; shape compared with the plan at 12160 points, 0 disagree
+PASS  bayrack at r2: file validated: True; shape compared with the plan at 13504 points, 0 disagree
+PASS  bayduo at r2: file validated: True; shape compared with the plan at 10816 points, 0 disagree
+PASS  bayagx at r2: file validated: True; shape compared with the plan at 12352 points, 0 disagree
+PASS  shelf at r2: file validated: True; shape compared with the plan at 11584 points, 0 disagree
+PASS  shelftall at r2: file validated: True; shape compared with the plan at 11584 points, 0 disagree
+PASS  shelfrack at r2: file validated: True; shape compared with the plan at 12736 points, 0 disagree
+PASS  orin at r2: file validated: True; shape compared with the plan at 18112 points, 0 disagree
+PASS  agx at r2: file validated: True; shape compared with the plan at 25984 points, 0 disagree
+PASS  spacerrow at r2: file validated: True; shape compared with the plan at 7360 points, 0 disagree
+PASS  spacercol at r2: file validated: True; shape compared with the plan at 9088 points, 0 disagree
+PASS  spacercross at r2: file validated: True; shape compared with the plan at 6400 points, 0 disagree
+NOTE  the sleeves at r3: for the cell, the bases, the bays and the spacers the rounded corners are the only change after r2, and the engine cannot compare a part this thin once they are in; their volume was checked by hand instead
 
-{'PASS': 21, 'FAIL': 0, 'NOTE': 1}
+{'PASS': 91, 'FAIL': 0, 'NOTE': 1}

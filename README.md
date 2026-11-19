@@ -61,6 +61,7 @@ The STEP files are ready to send to a print bureau or open in any CAD program.
 Each part was built from a script that states its volume by hand; the CAD kernel had to agree within 0.05 % before the part was accepted. After that, each part went through a QC script. The reports are in [`hardware/reports`](hardware/reports).
 
 - Every mesh is closed and matches the kernel's volume.
+- The checks themselves were tested: 37 wrong numbers were planted one at a time across every part. The checks caught 36; the miss exposed a missing check, which was added and now catches it. See [`mutation-report.txt`](hardware/reports/mutation-report.txt).
 - Joints seat without touching and hold when pulled, in every position a part can take in a wall.
 - A carrier goes in, stops on its face, latches behind the cell, and is held down.
 - Raspberry Pi's own model of the Pi 5 sits on the carrier's posts with every port through its window and nothing touching. The tightest port clears by 0.61 mm.

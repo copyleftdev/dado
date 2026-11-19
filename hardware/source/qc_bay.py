@@ -84,6 +84,10 @@ def agx(bay_p, tray_p, room_h):
     gaps = {"each fence": (mid - kit / 2) - tray_p["side.lo"], "the front stop": x0 - tray_p["front.stop"], "the rear stops": tray_p["back.stop"] - x1}
     report("PASS" if all(0.3 <= g <= 0.8 for g in gaps.values()) else "FAIL", "the kit between its fences and stops",
            "; ".join(f"{g:.2f} mm to {k}" for k, g in gaps.items()))
+    # A rear stop is solid plate; a finger beside it must stay free to lift.
+    clear = (mid - tray_p["finger.apart"] - tray_p["finger.width"] - tray_p["finger.slot"]) - (tray_p["side.lo"] + tray_p["stop.width"])
+    report("PASS" if clear >= 1.0 else "FAIL", "the rear stops clear of the latch fingers",
+           f"{clear:.2f} mm between each stop and the slot that frees the finger beside it (1.0 wanted)")
     names, caught = ["forward", "back", "to one side", "to the other"], []
     for dx, dy in [(-1.0, 0), (1.0, 0), (0, 1.0), (0, -1.0)]:
         moved = (s[:, 0] > x0 + dx) & (s[:, 0] < x1 + dx) & (np.abs(s[:, 1] - mid - dy) < kit / 2) & (s[:, 2] > t + 0.02) & (s[:, 2] < t + 3)
@@ -247,10 +251,11 @@ for bay, (shelf, n, m, devices) in KINDS.items():
     # along its length: their skids and lips stand on it at many points.
     E_MOD, span = 1700.0, bay_p["body.width"] - 2 * w
     inertia = bay_p["body.depth"] * bay_p["roof"] ** 3 / 12
+    carries = {"bay": 1, "baytall": 3, "bayrack": 2, "bayduo": 3, "bayagx": 3}[bay]  # the rows each is meant to carry
     for rows in (1, 2, 3):
         load = rows * n * 0.20 * 9.81  # a cell, carrier, Pi, cooler and fan: about 200 g
         sag = 5 * load * span ** 3 / (384 * E_MOD * inertia)
-        report("PASS" if sag <= 0.25 else "NOTE", f"{rows} row(s) of cells on it",
+        report("PASS" if sag <= 0.25 else "FAIL" if rows <= carries else "NOTE", f"{rows} row(s) of cells on it",
                f"about {load:.1f} N; the {bay_p['roof']:.0f} mm roof sags about {sag:.2f} mm "
                f"(0.25 allowed: half the joint's 0.5 mm clearance, the other half kept for nylon's creep)")
     print()
