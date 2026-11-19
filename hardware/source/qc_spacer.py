@@ -5,6 +5,7 @@ to each other, and that air and cables have the ways through them the
 design says they have."""
 import json, math, subprocess, sys
 import numpy as np
+from fitlib import ahead, clash
 from qclib import inside, integrity, kernel_volume, report, results, scene, thickness
 
 RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
@@ -30,12 +31,6 @@ GAP, PX, PZ = cell["gap"], cell["body.width"] + cell["gap"], cell["body.height"]
 wide = lambda d: P[d]["body.width"]
 high = lambda d: P[d].get("body.height", P[d].get("base.height"))
 at = lambda x=0.0, y=0.0, z=0.0: np.array([x, y, z], float)
-
-
-def clash(a, at_a, b, at_b):
-    """Sample points of each part inside the other."""
-    pa, pb = S[a] + at_a, S[b] + at_b
-    return int(inside(pa - at_b, *M[b]).sum()) + int(inside(pb - at_a, *M[a]).sum())
 
 
 def within(points, placed):
@@ -73,22 +68,30 @@ print("== 3. Joined: seated without touching, held when pulled ==")
 up, out = at(z=1.2), at(x=-1.2)
 on = lambda lower: at(z=high(lower) + GAP + E)
 beside = lambda first: at(x=-(wide(first) + GAP) - E)
-joint("a row spacer on a cell", "cell", "spacerrow", on("cell"), up)
-joint("a cell on a row spacer", "spacerrow", "cell", on("spacerrow"), up)
-joint("a row spacer on a row spacer", "spacerrow", "spacerrow", on("spacerrow"), up)
-joint("a column spacer on a column spacer", "spacercol", "spacercol", on("spacercol"), up)
-joint("a cross on a column spacer", "spacercol", "spacercross", on("spacercol"), up)
-joint("a column spacer on a cross", "spacercross", "spacercol", on("spacercross"), up)
-joint("a cross on a cross", "spacercross", "spacercross", on("spacercross"), up)
-joint("a column spacer on its base", "basehalf", "spacercol", on("basehalf"), up)
-joint("a half top cap on a column spacer", "spacercol", "trimtophalf", on("spacercol"), up)
-joint("a column spacer at a cell's rail side", "cell", "spacercol", beside("cell"), out)
-joint("a cell at a column spacer's rail side", "spacercol", "cell", beside("spacercol"), out)
-joint("a column spacer beside a column spacer", "spacercol", "spacercol", beside("spacercol"), out)
-joint("a half base at a base's rail side", "base", "basehalf", beside("base"), out)
-joint("a base at a half base's rail side", "basehalf", "base", beside("basehalf"), out)
-for name, a, b in (("row spacers side by side", "spacerrow", "spacerrow"), ("a cross beside a row spacer", "spacerrow", "spacercross"),
-                   ("a row spacer beside a cross", "spacercross", "spacerrow")):
+JOINTS = [
+    ("a row spacer on a cell", "cell", "spacerrow", on("cell"), up),
+    ("a cell on a row spacer", "spacerrow", "cell", on("spacerrow"), up),
+    ("a row spacer on a row spacer", "spacerrow", "spacerrow", on("spacerrow"), up),
+    ("a column spacer on a column spacer", "spacercol", "spacercol", on("spacercol"), up),
+    ("a cross on a column spacer", "spacercol", "spacercross", on("spacercol"), up),
+    ("a column spacer on a cross", "spacercross", "spacercol", on("spacercross"), up),
+    ("a cross on a cross", "spacercross", "spacercross", on("spacercross"), up),
+    ("a column spacer on its base", "basehalf", "spacercol", on("basehalf"), up),
+    ("a half top cap on a column spacer", "spacercol", "trimtophalf", on("spacercol"), up),
+    ("a column spacer at a cell's rail side", "cell", "spacercol", beside("cell"), out),
+    ("a cell at a column spacer's rail side", "spacercol", "cell", beside("spacercol"), out),
+    ("a column spacer beside a column spacer", "spacercol", "spacercol", beside("spacercol"), out),
+    ("a half base at a base's rail side", "base", "basehalf", beside("base"), out),
+    ("a base at a half base's rail side", "basehalf", "base", beside("basehalf"), out),
+]
+LOOSE = (("row spacers side by side", "spacerrow", "spacerrow"), ("a cross beside a row spacer", "spacerrow", "spacercross"),
+         ("a row spacer beside a cross", "spacercross", "spacerrow"))
+# Every joint seated and pulled, asked of Ringwright in one go.
+ahead([(a, at(), b, where + d) for _, a, b, where, pull in JOINTS for d in (at(), pull)]
+      + [(a, at(), b, at(x=-(wide(a) + GAP))) for _, a, b in LOOSE])
+for each in JOINTS:
+    joint(*each)
+for name, a, b in LOOSE:
     hits = clash(a, at(), b, at(x=-(wide(a) + GAP)))
     report("PASS" if hits == 0 else "FAIL", name, f"no joint between them, {GAP} mm apart: points of one inside the other: {hits}")
 
@@ -102,6 +105,7 @@ report("PASS" if abs(x - 2 * PX) < 1e-9 else "FAIL", "a cell, two column spacers
 
 # A bay two places wide on two column spacers and a cell.
 under = [("spacercol", at()), ("spacercol", at(x=-(wide("spacercol") + GAP))), ("cell", at(x=-PX))]
+ahead([(d, where, "bayduo", at(z=PZ + E + lift)) for d, where in under for lift in (0, 1.2)])
 seat = [clash(d, where, "bayduo", at(z=PZ + E)) for d, where in under]
 held = [clash(d, where, "bayduo", at(z=PZ + E + 1.2)) for d, where in under]
 report("PASS" if sum(seat) == 0 and held[2] > 0 else "FAIL", "a two-wide bay on two column spacers and a cell",

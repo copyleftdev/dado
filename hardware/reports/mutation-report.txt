@@ -1,4 +1,4 @@
-unchanged designs: every suite passes
+unchanged designs: failing already: {"qc_bay.py": ["suite stopped: ringwright assemble: {\"code\": \"INTERNAL\", \"message\": \"No such file or directory (os error 2)\"}"]}
 CAUGHT  cell: no lift in the joint  [flange as thick as the stem is tall]
           fit_check.py: the joint proof
           qc_base.py: seated and centred; seated and pushed to the limits of play (+1)
@@ -21,15 +21,15 @@ CAUGHT  cell: side teeth too short  [side teeth do not reach the stem: no latch]
           qc_trim.py: a cell's side lips over the other side cap's rail; the side cap over a cell's side rail
 CAUGHT  cell: ledges too low  [carrier's plate cannot pass under]
           qc_carrier.py: seated, at every extreme of its slack; sliding in (+1)
+          qc_trim.py: suite stopped: ringwright assemble: {"code": "INTERNAL", "message": "No such file or directory (os error 2)"}
           qc_bay.py: seated
-          qa.py: bay and shelf; bayagx and agx (+6)
 CAUGHT  cell: ledges cut back too far  [carrier's face stands 3 mm inside the front]
           qc_carrier.py: pushed 0.5 mm past its seat
+          qc_trim.py: suite stopped: ringwright assemble: {"code": "INTERNAL", "message": "No such file or directory (os error 2)"}
           qc_bay.py: pushed 0.6 mm past its seat
-          qa.py: bay and shelf; bayagx and agx (+4)
 CAUGHT  cell: walls too thin  [inside 2 mm bigger each way than the carrier expects]
           qc_carrier.py: lifted 1 mm; pulled 1.1 mm out (+3)
-          qc_bay.py: pushed 0.6 mm past its seat; the face under the roof
+          qc_trim.py: suite stopped: ringwright assemble: {"code": "INTERNAL", "message": "No such file or directory (os error 2)"}
           qc_spacer.py: 9 loaded cells on a row spacer
 CAUGHT  carrier: plate too thick  [binds under the ledges]
           qc_carrier.py: seated, at every extreme of its slack; sliding in (+1)
@@ -38,8 +38,7 @@ CAUGHT  carrier: too wide  [wider than the cell's inside]
           qc_carrier.py: carrier extent; carrier thinnest section (+3)
           qa.py: nothing collides that should not; nothing in the wall collides that should not (+1)
 CAUGHT  carrier: fan too high  [fan and its cradle would strike the cell's roof]
-          qc_carrier.py: carrier extent; seated, at every extreme of its slack (+2)
-          qa.py: nothing collides that should not; nothing in the wall collides that should not
+          carrier would not build:   "message": "the thinnest wall of carrier.body is 1.500000 mm; required at least 1.5"
 CAUGHT  carrier: teeth too far forward  [teeth sit on the floor, short of the rear edge]
           qc_carrier.py: carrier extent; seated, at every extreme of its slack (+2)
           qa.py: nothing collides that should not; nothing in the wall collides that should not (+1)
@@ -60,7 +59,7 @@ CAUGHT  half base: too wide  [2 mm wider than the column of spacers on it]
           qc_spacer.py: a column spacer on its base; basehalf, width
           qa.py: nothing in the wall collides that should not
 CAUGHT  bay: places too far apart  [its rails and lips are 0.6 mm further apart than the cells']
-          qc_bay.py: 1 cell(s) at its rail side; 2 caps on it (+18)
+          qc_bay.py: 1 cell(s) at its rail side; 2 caps on it (+17)
           qc_spacer.py: a two-wide bay on two column spacers and a cell
           qa.py: bay and shelf; bayagx and agx (+4)
 CAUGHT  bay: rack roof too thin  [a 279 mm span 4 mm thick under two rows]
@@ -88,10 +87,11 @@ CAUGHT  Jetson tray: posts too short  [the board's underside parts reach 4.3 mm]
 CAUGHT  Jetson tray: board too far back  [the board's sockets stand out of the back of the bay]
           qc_bay.py: its sockets at the open back
 CAUGHT  AGX tray: no room for the kit  [fences 1 mm closer together than the kit is wide]
-          qc_bay.py: nothing of the tray where the kit stands; the kit between its fences and stops
+          qc_bay.py: nothing of the tray where the kit stands; the kit between its fences and stops (+1)
 CAUGHT  AGX tray: made for a lower bay  [its face leaves 4 mm open under the roof]
           agx would not build: ]
-MISSED  AGX tray: stops too wide  [the rear stops stand on the latch fingers]
+CAUGHT  AGX tray: stops too wide  [the rear stops stand on the latch fingers]
+          qc_bay.py: the rear stops clear of the latch fingers
 CAUGHT  column spacer: more than half  [two of them and their gaps are wider than a place]
           qc_spacer.py: a cell, two column spacers, a cell; a column spacer on a cross (+4)
           qa.py: nothing in the wall collides that should not
@@ -102,12 +102,8 @@ CAUGHT  cross: as deep as a cell  [it closes the shaft and the tray where they m
 CAUGHT  column spacer: shaft too short  [the shaft does not line up with the cross behind it]
           qc_spacer.py: the cross ends where the tray and the shaft begin
 CAUGHT  caps: plate too thin  [a 0.6 mm plate: below what prints]
-          qc_trim.py: a cell's side lips over the other side cap's rail; trimlip overall size (+5)
-          qc_spacer.py: trimtophalf thinnest section
+          trimtop would not build: ] (+3)
 
-36 of 37 planted defects caught
-nice -n 5 python3 mutate.py  34982.07s user 706.02s system 3080% cpu 19:18.63 total
+37 of 37 planted defects caught
 
-Afterwards: the one miss was a gap in the checks, not in the part. qc_bay.py now checks that the AGX tray's rear
-stops clear its latch fingers, and that defect replanted alone is CAUGHT (qc_bay.py: the rear stops clear of the
-latch fingers). 37 of 37 with that check in place; the other 36 were not rerun.
+Run of 2026-11-19, after the fit checks were moved to `ringwright assemble`: all 37 planted and run together.

@@ -4,6 +4,7 @@ place of three cells in every joint, that the shelf goes in and latches, and
 what will and will not fit on it."""
 import json, subprocess, sys
 import numpy as np
+from fitlib import FAR, Case, Placed, ahead, box, clash, overlaps
 from qclib import inside, integrity, kernel_volume, report, results, scene, thickness
 
 RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
@@ -42,12 +43,6 @@ def scatter(pos, tri, n):
     p = c[:, 0] + u[:, None] * (c[:, 1] - c[:, 0]) + v[:, None] * (c[:, 2] - c[:, 0])
     return p - nrm / np.linalg.norm(nrm, axis=1)[:, None] * 0.01  # just inside the surface
 
-
-
-def clash(a, at_a, b, at_b):
-    """Sample points of each part inside the other."""
-    pa, pb = S[a] + at_a, S[b] + at_b
-    return int(inside(pa - at_b, *M[b]).sum()) + int(inside(pb - at_a, *M[a]).sum())
 
 
 # bay, its shelf, places across, places up; then what might go in it:
@@ -206,10 +201,13 @@ for bay, (shelf, n, m, devices) in KINDS.items():
         f"{m} cell(s) at its rail side": ([(bay, zero, "cell", np.array([-n * PX - E, 0, j * PZ])) for j in range(m)], 0),
         f"{m} cell(s) at its lips side": ([("cell", np.array([0, 0, j * PZ]), bay, np.array([-PX - E, 0, 0.0])) for j in range(m)], 0),
     }
+    pulls = {2: np.array([0, 0, 1.2]), 0: np.array([-1.2, 0, 0])}
+    # Every joint seated and pulled, asked of Ringwright in one go.
+    ahead([(a, pa, b, pb + d) for pairs, axis in cases.values() for a, pa, b, pb in pairs for d in (np.zeros(3), pulls[axis])])
     for name, (pairs, axis) in cases.items():
         hits = sum(clash(a, pa, b, pb) for a, pa, b, pb in pairs)
         report("PASS" if hits == 0 else "FAIL", name, f"{len(pairs)} joint(s); points of one part inside the other: {hits}")
-        pull = np.array([0, 0, 1.2]) if axis == 2 else np.array([-1.2, 0, 0])
+        pull = pulls[axis]
         held = [clash(a, pa, b, pb + pull) for a, pa, b, pb in pairs]
         report("PASS" if min(held) > 0 else "FAIL", f"{name}, pulled apart 1.2 mm",
                f"lips meet the rail's head at every joint: {held} points")
@@ -218,13 +216,15 @@ for bay, (shelf, n, m, devices) in KINDS.items():
     w = bay_p["wall"]
     place = lambda p, out=0.0, lift=E: np.stack([-(w + 0.25 + p[:, 1]), p[:, 0] - out, w + lift + p[:, 2]], 1)
     teeth = S[shelf][:, 2] < -0.05
-    hits = int(inside(place(S[shelf])[~teeth], *M[bay]).sum())
+    # The shelf in the bay, asked of Ringwright: turned to face the bay's mouth, then set on its floor.
+    # Its teeth hang below the floor on springs and are left out.
+    def seated(out=0.0, lift=E):
+        return Case(Placed(bay), Placed(shelf, (-(w + 0.25), -out, w + lift), (("z", 90),)), None, [box(z=(-FAR, w + lift - 0.05))])
+    hits, over, lifted = (f.points for f in overlaps([seated(), seated(out=-0.6), seated(lift=1.0)]))
     report("PASS" if hits == 0 else "FAIL", "seated", f"points of the shelf inside the bay's walls, floor, ledges or roof: {hits}")
     behind = S[shelf][teeth][:, 0].min() - bay_p["body.depth"]
     report("PASS" if 0 < behind < 1.5 else "FAIL", "latch teeth", f"they start {behind:.2f} mm behind the bay's rear edge, below its floor")
-    over = int(inside(place(S[shelf], out=-0.6)[~teeth], *M[bay]).sum())
     report("PASS" if over > 0 else "FAIL", "pushed 0.6 mm past its seat", f"its face meets the ends of the bay's ledges ({over} points)")
-    lifted = int(inside(place(S[shelf], lift=1.0)[~teeth], *M[bay]).sum())
     report("PASS" if lifted > 0 else "FAIL", "lifted 1 mm", f"held down by the ledges ({lifted} points)")
     roof_gap = bay_p["body.height"] - bay_p["roof"] - w - shelf_p["front.height"]
     report("PASS" if 0.3 <= roof_gap <= 0.7 else "FAIL", "the face under the roof", f"{roof_gap:.2f} mm between them")

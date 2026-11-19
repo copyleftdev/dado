@@ -19,5 +19,6 @@ These scripts generated every part in `../step`. Each one writes a transaction f
 | `pi5_import.py`, `pi5_fit.py` | Imports Raspberry Pi's model and checks the carrier against it. Needs their STEP file, which is not redistributed here: get it from Raspberry Pi's product page |
 | `build_checks.py` | The checks every build script adds to its transaction: the part's size along each axis, worked out by hand, and its thinnest wall. The engine refuses the commit if either is out |
 | `qclib.py` | Shared mesh checks |
+| `fitlib.py` | Part against part, asked of Ringwright's `assemble`: whether two parts overlap at a given placing, and where. The joint, base, cap, bay, spacer and carrier checks use it |
 
 Some scripts refer to files that live only in the working project (scene files, earlier versions). They are kept as they were used, not tidied into a package.

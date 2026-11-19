@@ -3,7 +3,8 @@
 as what keeps a cluster standing. Measured from the meshes the kernel made."""
 import math, sys
 import numpy as np
-from qclib import inside, integrity, kernel_volume, ray_hits, report, results, scene, thickness
+from fitlib import FAR, Case, Placed, box, overlaps
+from qclib import integrity, kernel_volume, ray_hits, report, results, scene, thickness
 
 rng = np.random.default_rng(20261118)
 W, GAP, RAIL, HB, DEPTH, SETBACK, PAD = 67.0, 3.6, 3.1, 22.0, 100.0, 0.0, 1.0
@@ -14,47 +15,35 @@ base, base_tri = scene(".ringwright/base/view/scene.rwv")
 cell, cell_tri = scene(".ringwright/cell/view/scene.rwv")
 
 
-def samples(pos, tri):
-    t = pos[tri]
-    mids = [(t[:, i] + t[:, j]) / 2 for i, j in ((0, 1), (1, 2), (2, 0))]
-    return np.vstack([pos, t.mean(1), *mids])
-
-
-SB, SC = samples(base, base_tri), samples(cell, cell_tri)
-
-
-def clash(fixed, moved, offset, zone, points=False):
-    """Collisions between a fixed part and another moved by `offset`, both
-    ways, as (in the latch, elsewhere). The moved part carries the fingers;
-    the latch is the stretch `zone` behind its own front."""
-    (fp, ft, fs), (mp, mt, ms) = fixed, moved
-    off = np.array(offset, float)
-    hits = np.vstack([(ms + off)[inside(ms + off, fp, ft)], fs[inside(fs - off, mp, mt)]])
-    along = hits[:, 1] - off[1]
-    latch = (along > zone[0]) & (along < zone[1])
-    if points:
-        return hits[~latch]
-    return int(latch.sum()), int((~latch).sum())
+def clash(fixed, moved, offsets, zone):
+    """For each offset, collisions between a fixed part and another moved by
+    it, as (in the latch, elsewhere), asked of Ringwright. The moved part
+    carries the fingers; the latch is the stretch `zone` behind its own front."""
+    asked = [Case(Placed(fixed), Placed(moved, tuple(float(v) for v in o)), None, [box(y=(o[1] + zone[0], o[1] + zone[1]))])
+             for o in offsets]
+    return [(f.ignored, f.points) for f in overlaps(asked)]
 
 
 def both_lips(fixed, moved, offset, axis, centre):
     """Pulled apart at either end of the joint's play: is it held on both
-    lips, or hanging by one?"""
-    ok = True
+    lips, or hanging by one? Asked as overlap on each side of the rail's centre."""
+    asked = []
     for sign in (-1, 1):
         o = np.array(offset, float)
         o[axis] += sign * (FLOAT - 0.05)
-        across = clash(fixed, moved, o, ZONE, points=True)[:, axis] - centre
-        ok &= bool((across < -1).any() and (across > 1).any())
-    return ok
+        latch = [box(y=(o[1] + ZONE[0], o[1] + ZONE[1]))]
+        for side in ((-FAR, centre - 1), (centre + 1, FAR)):
+            where = box(**{"xyz"[axis]: side})
+            asked.append(Case(Placed(fixed), Placed(moved, tuple(float(v) for v in o)), where, latch))
+    return all(f.points > 0 for f in overlaps(asked))
 
 
 def catches(fixed, moved, offset):
     """Moved along the joint, do the teeth meet the ends of their notches?"""
-    return all(clash(fixed, moved, np.array(offset) + (0, dy, 0), ZONE)[0] > 0 for dy in (-2.5, 2.5))
+    return all(a > 0 for a, _ in clash(fixed, moved, [np.array(offset) + (0, dy, 0) for dy in (-2.5, 2.5)], ZONE))
 
 
-BASE, CELL = (base, base_tri, SB), (cell, cell_tri, SC)
+BASE, CELL = "base", "cell"
 ZONE = (10.9, 25.5)  # a 12 mm finger from 12 behind the front, and its end cut
 
 print("== 1. Integrity ==")
@@ -72,16 +61,16 @@ report("NOTE", "material", f"{vol / 1000:.0f} cm3, about {vol * 1.01 / 1000:.0f}
 print("== 3. A cell on the base ==")
 ON = np.array([0, SETBACK, HB + GAP])
 poses = [ON + (0, 0, E), ON + (0, 0.1, E), ON + (0, -0.1, E)]
-worst = max(sum(clash(BASE, CELL, o, ZONE)) for o in poses)
+worst = max(sum(c) for c in clash(BASE, CELL, poses, ZONE))
 report("PASS" if worst == 0 else "FAIL", "seated and centred", f"{len(poses)} poses; collisions {worst}")
 pushed = [ON + (dx, 0, dz) for dx in (-FLOAT + 0.05, FLOAT - 0.05) for dz in (E, 0.45)]
-got = [clash(BASE, CELL, o, ZONE) for o in pushed]
+got = clash(BASE, CELL, pushed, ZONE)
 report("PASS" if max(b for _, b in got) == 0 else "FAIL", "seated and pushed to the limits of play",
        f"{len(pushed)} poses; springs pressed in {sum(1 for a, _ in got if a)}; collisions elsewhere {max(b for _, b in got)}")
-got = [clash(BASE, CELL, ON + (0, back, E), ZONE) for back in np.arange(-95, 0, 2.5)]
+got = clash(BASE, CELL, [ON + (0, back, E) for back in np.arange(-95, 0, 2.5)], ZONE)
 report("PASS" if max(b for _, b in got) == 0 else "FAIL", "sliding on from the front",
        f"{len(got)} steps; teeth on the rail in {sum(1 for a, _ in got if a)}; collisions elsewhere {max(b for _, b in got)}")
-up = clash(BASE, CELL, ON + (0, 0, 1.0), ZONE)[1]
+up = clash(BASE, CELL, [ON + (0, 0, 1.0)], ZONE)[0][1]
 report("PASS" if up > 0 else "FAIL", "pulled 1 mm up off the base", f"it is held ({up} samples collide)")
 ok = both_lips(BASE, CELL, ON + (0, 0, 1.0), 0, -W / 2)
 report("PASS" if ok else "FAIL", "pulled up at either end of its play", f"held on both lips: {ok}")
@@ -103,17 +92,16 @@ report("PASS" if skids.any() and lips.any() else "FAIL", "what the cell stands o
 
 print("== 4. A base beside a base ==")
 BESIDE = np.array([-PX - E, 0, 0])
-worst = max(sum(clash(BASE, BASE, BESIDE + (0, dy, 0), ZONE)) for dy in (0, 0.1, -0.1))
+worst = max(sum(c) for c in clash(BASE, BASE, [BESIDE + (0, dy, 0) for dy in (0, 0.1, -0.1)], ZONE))
 report("PASS" if worst == 0 else "FAIL", "seated and centred", f"3 poses; collisions {worst}")
 pushed = [BESIDE + (-dx, 0, dz) for dz in (-FLOAT + 0.05, FLOAT - 0.05) for dx in (0, 0.43)]
-got = [clash(BASE, BASE, o, ZONE) for o in pushed]
+got = clash(BASE, BASE, pushed, ZONE)
 report("PASS" if max(b for _, b in got) == 0 else "FAIL", "seated and pushed to the limits of play",
        f"{len(pushed)} poses; springs pressed in {sum(1 for a, _ in got if a)}; collisions elsewhere {max(b for _, b in got)}")
-got = [clash(BASE, BASE, BESIDE + (0, back, 0), ZONE) for back in np.arange(-95, 0, 2.5)]
+got = clash(BASE, BASE, [BESIDE + (0, back, 0) for back in np.arange(-95, 0, 2.5)], ZONE)
 report("PASS" if max(b for _, b in got) == 0 else "FAIL", "sliding on from the front",
        f"{len(got)} steps; teeth on the rail in {sum(1 for a, _ in got if a)}; collisions elsewhere {max(b for _, b in got)}")
-apart = clash(BASE, BASE, BESIDE + (-1.0, 0, 0), ZONE)[1]
-lifted = clash(BASE, BASE, BESIDE + (0, 0, FLOAT + 0.5), ZONE)[1]
+(_, apart), (_, lifted) = clash(BASE, BASE, [BESIDE + (-1.0, 0, 0), BESIDE + (0, 0, FLOAT + 0.5)], ZONE)
 report("PASS" if apart > 0 else "FAIL", "pulled 1 mm apart", f"it is held ({apart} samples collide)")
 report("PASS" if lifted > 0 else "FAIL", "one base lifted past the joint's play",
        f"the other holds it down ({lifted} samples collide): joined bases tip as one")

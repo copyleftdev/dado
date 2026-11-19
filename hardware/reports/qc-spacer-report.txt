@@ -27,40 +27,40 @@ PASS  spacercross: every joint dimension is the cell's: differing: none
 PASS  the other way each is a whole place: row spacer 67 wide, column spacer 42 high, as a cell
 == 3. Joined: seated without touching, held when pulled ==
 PASS  a row spacer on a cell: seated: points of one part inside the other: 0
-PASS  a row spacer on a cell, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a row spacer on a cell, pulled apart 1.2 mm: the lips meet the rail's head: 36549 points
 PASS  a cell on a row spacer: seated: points of one part inside the other: 0
-PASS  a cell on a row spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a cell on a row spacer, pulled apart 1.2 mm: the lips meet the rail's head: 36549 points
 PASS  a row spacer on a row spacer: seated: points of one part inside the other: 0
-PASS  a row spacer on a row spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a row spacer on a row spacer, pulled apart 1.2 mm: the lips meet the rail's head: 36549 points
 PASS  a column spacer on a column spacer: seated: points of one part inside the other: 0
-PASS  a column spacer on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a column spacer on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 64313 points
 PASS  a cross on a column spacer: seated: points of one part inside the other: 0
-PASS  a cross on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a cross on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 64313 points
 PASS  a column spacer on a cross: seated: points of one part inside the other: 0
-PASS  a column spacer on a cross, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a column spacer on a cross, pulled apart 1.2 mm: the lips meet the rail's head: 64313 points
 PASS  a cross on a cross: seated: points of one part inside the other: 0
-PASS  a cross on a cross, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a cross on a cross, pulled apart 1.2 mm: the lips meet the rail's head: 64313 points
 PASS  a column spacer on its base: seated: points of one part inside the other: 0
-PASS  a column spacer on its base, pulled apart 1.2 mm: the lips meet the rail's head: 323 points
+PASS  a column spacer on its base, pulled apart 1.2 mm: the lips meet the rail's head: 31740 points
 PASS  a half top cap on a column spacer: seated: points of one part inside the other: 0
-PASS  a half top cap on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 315 points
+PASS  a half top cap on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 16108 points
 PASS  a column spacer at a cell's rail side: seated: points of one part inside the other: 0
-PASS  a column spacer at a cell's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 320 points
+PASS  a column spacer at a cell's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 46953 points
 PASS  a cell at a column spacer's rail side: seated: points of one part inside the other: 0
-PASS  a cell at a column spacer's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 320 points
+PASS  a cell at a column spacer's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 46953 points
 PASS  a column spacer beside a column spacer: seated: points of one part inside the other: 0
-PASS  a column spacer beside a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 320 points
+PASS  a column spacer beside a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 46953 points
 PASS  a half base at a base's rail side: seated: points of one part inside the other: 0
-PASS  a half base at a base's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a half base at a base's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 59766 points
 PASS  a base at a half base's rail side: seated: points of one part inside the other: 0
-PASS  a base at a half base's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a base at a half base's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 59766 points
 PASS  row spacers side by side: no joint between them, 3.6 mm apart: points of one inside the other: 0
 PASS  a cross beside a row spacer: no joint between them, 3.6 mm apart: points of one inside the other: 0
 PASS  a row spacer beside a cross: no joint between them, 3.6 mm apart: points of one inside the other: 0
 == 4. Back in step ==
 PASS  a cell, two row spacers, a cell: the upper cell stands 91.2 mm up: exactly two rows (91.2), so it lines up with a neighbour that has no spacers
 PASS  a cell, two column spacers, a cell: the far cell is 141.2 mm over: exactly two places (141.2), so a bay above still fits
-PASS  a two-wide bay on two column spacers and a cell: it seats without touching (0 points); pulled up 1.2 mm it is held by the cell's rail (306 points)
+PASS  a two-wide bay on two column spacers and a cell: it seats without touching (0 points); pulled up 1.2 mm it is held by the cell's rail (45277 points)
 NOTE  a bay over column spacers is not held by them: its lips fall between the two spacers' rails (0 points meet when pulled): it is held only where it stands on cells
 == 5. Ways through ==
 PASS  the shaft: a column spacer, a cross and a column spacer stacked: 2520 points from under the stack to over it, in the rear 40 mm: inside a part: 0

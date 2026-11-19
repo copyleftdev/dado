@@ -12,9 +12,9 @@ PASS  front flush with the cell: -0.02 mm from the cell's front plane; the pull 
 PASS  front in the cell's mouth: 0.25 mm each side, 0.5 mm under the roof, as drawn
 == 4. Going in, coming out ==
 PASS  sliding in: 47 steps; teeth riding on the floor in 47; collisions elsewhere 0
-PASS  pulled 1.1 mm out: the teeth meet the rear edge (14 samples) and nothing else touches; before that it moves freely at least 0.5 mm
-PASS  pushed 0.5 mm past its seat: its face meets the ends of the cell's ledges (32 samples)
-PASS  lifted 1 mm: hits the ledges (298 samples)
+PASS  pulled 1.1 mm out: the teeth meet the rear edge (211 samples) and nothing else touches; before that it moves freely at least 0.5 mm
+PASS  pushed 0.5 mm past its seat: its face meets the ends of the cell's ledges (296 samples)
+PASS  lifted 1 mm: hits the ledges (24993 samples)
 == 5. A Raspberry Pi 5 on the carrier in the cell ==
 PASS  board: 0 points in the carrier, 0 in the cell; 29.8 mm to the cell's roof
 PASS  USB and Ethernet, through the back: 0 points in the carrier, 0 in the cell; 13.6 mm to the cell's roof

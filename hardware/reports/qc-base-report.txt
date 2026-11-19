@@ -9,7 +9,7 @@ NOTE  material: 64 cm3, about 65 g in nylon
 PASS  seated and centred: 3 poses; collisions 0
 PASS  seated and pushed to the limits of play: 4 poses; springs pressed in 4; collisions elsewhere 0
 PASS  sliding on from the front: 38 steps; teeth on the rail in 2; collisions elsewhere 0
-PASS  pulled 1 mm up off the base: it is held (76 samples collide)
+PASS  pulled 1 mm up off the base: it is held (29336 samples collide)
 PASS  pulled up at either end of its play: held on both lips: True
 PASS  moved 2.5 mm along the rail: the cell's teeth catch in the base's notches: True
 PASS  what the cell stands on: its skids touch the deck (4 faces) and so do its lips (32 faces)
@@ -17,8 +17,8 @@ PASS  what the cell stands on: its skids touch the deck (4 faces) and so do its 
 PASS  seated and centred: 3 poses; collisions 0
 PASS  seated and pushed to the limits of play: 4 poses; springs pressed in 4; collisions elsewhere 0
 PASS  sliding on from the front: 38 steps; teeth on the rail in 2; collisions elsewhere 0
-PASS  pulled 1 mm apart: it is held (76 samples collide)
-PASS  one base lifted past the joint's play: the other holds it down (60 samples collide): joined bases tip as one
+PASS  pulled 1 mm apart: it is held (48976 samples collide)
+PASS  one base lifted past the joint's play: the other holds it down (40895 samples collide): joined bases tip as one
 PASS  pulled apart at either end of the play: held on both lips: True
 PASS  moved 2.5 mm along the joint: the teeth catch in the notches: True
 == 5. Will it go together as made? (200,000 simulated bases) ==

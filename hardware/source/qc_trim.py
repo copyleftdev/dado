@@ -3,7 +3,8 @@
 of the cell it covers. Measured from the meshes the kernel made."""
 import sys
 import numpy as np
-from qclib import inside, integrity, kernel_volume, report, results, scene, thickness
+from fitlib import FAR, Case, Placed, box, overlaps
+from qclib import integrity, kernel_volume, report, results, scene, thickness
 
 W, H, GAP, RAIL, T, DEPTH, RELIEF = 67.0, 42.0, 3.6, 3.1, 2.0, 100.0, 9.0
 PX, PZ = W + GAP, H + GAP
@@ -13,49 +14,42 @@ SIDE_ZONE, STACK_ZONE = (10.9, 29.5), (10.9, 25.5)
 M = {d: scene(f".ringwright/{d}/view/scene.rwv") for d in ("cell", "trimtop", "trimrail", "trimlip")}
 
 
-def samples(pos, tri):
-    t = pos[tri]
-    mids = [(t[:, i] + t[:, j]) / 2 for i, j in ((0, 1), (1, 2), (2, 0))]
-    return np.vstack([pos, t.mean(1), *mids])
-
-
-P = {d: (pos, tri, samples(pos, tri)) for d, (pos, tri) in M.items()}
-
-
-def clash(fixed, moved, offset, zone, points=False):
-    (fp, ft, fs), (mp, mt, ms) = P[fixed], P[moved]
-    off = np.array(offset, float)
-    hits = np.vstack([(ms + off)[inside(ms + off, fp, ft)], fs[inside(fs - off, mp, mt)]])
-    along = hits[:, 1] - off[1]
-    latch = (along > zone[0]) & (along < zone[1])
-    return hits[~latch] if points else (int(latch.sum()), int((~latch).sum()))
+def clash(fixed, moved, offsets, zone):
+    """For each offset, collisions between a fixed part and another moved by
+    it, as (in the latch, elsewhere), asked of Ringwright."""
+    asked = [Case(Placed(fixed), Placed(moved, tuple(float(v) for v in o)), None, [box(y=(o[1] + zone[0], o[1] + zone[1]))])
+             for o in offsets]
+    return [(f.ignored, f.points) for f in overlaps(asked)]
 
 
 def joint(name, fixed, moved, seat, axis, play, centre, zone):
     seat = np.array(seat, float)
     normal = 2 if axis == 0 else 0
     apart = np.zeros(3); apart[normal] = 1.0 if normal == 2 else -1.0
-    worst = max(sum(clash(fixed, moved, seat + apart * E + (0, dy, 0), zone)) for dy in (0, 0.1, -0.1))
-    pushed = []
+    worst = max(sum(c) for c in clash(fixed, moved, [seat + apart * E + (0, dy, 0) for dy in (0, 0.1, -0.1)], zone))
+    limits = []
     for sign in (-1, 1):
         for gap in (E, 0.45):
             o = seat + apart * gap
             o[axis] += sign * (play - 0.05)
-            pushed.append(clash(fixed, moved, o, zone)[1])
-    slide = [clash(fixed, moved, seat + apart * E + (0, back, 0), zone) for back in np.arange(-95, 0, 2.5)]
-    held = clash(fixed, moved, seat + apart * 1.0, zone)[1] > 0
-    both = True
+            limits.append(o)
+    pushed = [b for _, b in clash(fixed, moved, limits, zone)]
+    slide = clash(fixed, moved, [seat + apart * E + (0, back, 0) for back in np.arange(-95, 0, 2.5)], zone)
+    held = clash(fixed, moved, [seat + apart * 1.0], zone)[0][1] > 0
+    # Held on both lips at either end of the play: overlap on each side of the rail's centre.
+    sides = []
     for sign in (-1, 1):
         o = seat + apart * 1.0
         o[axis] += sign * (play - 0.05)
-        across = clash(fixed, moved, o, zone, points=True)[:, axis] - centre
-        both &= bool((across < -1).any() and (across > 1).any())
-    catches = all(clash(fixed, moved, seat + apart * E + (0, dy, 0), zone)[0] > 0 for dy in (-2.5, 2.5))
+        for side in ((-FAR, centre - 1), (centre + 1, FAR)):
+            sides.append(Case(Placed(fixed), Placed(moved, tuple(float(v) for v in o)), box(**{"xyz"[axis]: side}),
+                              [box(y=(o[1] + zone[0], o[1] + zone[1]))]))
+    both = all(f.points > 0 for f in overlaps(sides))
+    catches = all(a > 0 for a, _ in clash(fixed, moved, [seat + apart * E + (0, dy, 0) for dy in (-2.5, 2.5)], zone))
     ok = worst == 0 and max(pushed) == 0 and max(b for _, b in slide) == 0 and held and both and catches
     report("PASS" if ok else "FAIL", name,
            f"centred collisions {worst}; at the limits of play {max(pushed)}; sliding on {max(b for _, b in slide)}; "
            f"held when pulled apart: {held}, on both lips at either end of the play: {both}; teeth catch: {catches}")
-
 
 print("== 1. Integrity and size ==")
 sizes = {"trimtop": [W, DEPTH, T + GAP], "trimrail": [T + GAP, DEPTH, H], "trimlip": [T + RAIL, DEPTH, H]}

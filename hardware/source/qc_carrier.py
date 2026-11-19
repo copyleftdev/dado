@@ -3,6 +3,7 @@
 meshes the kernel made. Each check prints PASS, FAIL or NOTE."""
 import math, sys
 import numpy as np
+from fitlib import FAR, Case, Placed, box, overlaps
 from qclib import inside, integrity, kernel_volume, ray_hits, report, results, scene, thickness
 
 rng = np.random.default_rng(20261118)
@@ -35,17 +36,14 @@ def to_carrier(q, push=0.0, slack=0.25, lift=0.02):
     return np.stack([q[:, 1] - push, -q[:, 0] - WALL - slack, q[:, 2] - WALL - lift], 1)
 
 
-def clash(push=0.0, slack=0.25, lift=0.02):
-    """Collisions between the carrier and the cell, as (at the teeth,
-    anywhere else), looking both ways: the carrier's points in the cell and
-    the cell's points in the carrier. The teeth are on springs."""
-    a = C[inside(to_cell(C, push, slack, lift), cell, cell_tri)]
-    near = S[(S[:, 1] > push - 5) & (S[:, 1] < push + 110)]
-    b = to_carrier(near, push, slack, lift)
-    b = b[inside(b, car, car_tri)]
-    hits = np.vstack([a, b])
-    teeth = hits[:, 0] > TOOTH_X - 0.05
-    return int(teeth.sum()), int((~teeth).sum())
+def clash(poses):
+    """For each pose (push, slack, lift), collisions between the carrier and
+    the cell, as (at the teeth, anywhere else), asked of Ringwright. The
+    carrier is turned to face the cell's mouth and set on its floor. The
+    teeth are on springs: what they press on is counted apart."""
+    asked = [Case(Placed("cell"), Placed("carrier", (-(WALL + slack), push, WALL + lift), (("z", 90),)), None,
+                  [box(y=(push + TOOTH_X - 0.05, FAR))]) for push, slack, lift in poses]
+    return [(f.ignored, f.points) for f in overlaps(asked)]
 
 
 print("== 1. Integrity ==")
@@ -69,10 +67,7 @@ thickness("fan barbs (snap features, floor 0.4)", car, car_tri[_barb], 0.4)
 print("== 3. Seated in the cell ==")
 SEAT = -0.02  # against the stop, a hair short so that touching is not counted
 # It can lift until its front meets the roof, 0.5 up; try just short of that.
-worst = 0
-for slack in (0.02, 0.25, 0.48):
-    for lift in (0.02, 0.45):
-        worst = max(worst, sum(clash(SEAT, slack, lift)))
+worst = max(sum(c) for c in clash([(SEAT, slack, lift) for slack in (0.02, 0.25, 0.48) for lift in (0.02, 0.45)]))
 report("PASS" if worst == 0 else "FAIL", "seated, at every extreme of its slack",
        f"6 poses; collisions anywhere, teeth included: {worst}")
 report("PASS" if worst == 0 else "FAIL", "the latch rests unloaded",
@@ -85,18 +80,18 @@ side = (CAV_W - PLATE_W) / 2
 report("PASS", "front in the cell's mouth", f"{side:.2f} mm each side, {CAV_H - FRONT_H:.1f} mm under the roof, as drawn")
 
 print("== 4. Going in, coming out ==")
-got = [clash(push, 0.25, 0.02) for push in np.arange(-96, -2, 2.0)]
+got = clash([(push, 0.25, 0.02) for push in np.arange(-96, -2, 2.0)])
 report("PASS" if max(b for _, b in got) == 0 else "FAIL", "sliding in",
        f"{len(got)} steps; teeth riding on the floor in {sum(1 for a, _ in got if a)}; "
        f"collisions elsewhere {max(b for _, b in got)}")
-free = max(d for d in (0.2, 0.4, 0.5) if sum(clash(-d, 0.25, 0.02)) == 0)
-held = clash(-(BEHIND + 0.5), 0.25, 0.02)
+steps = (0.2, 0.4, 0.5)
+*freely, held, over, up = clash([(-d, 0.25, 0.02) for d in steps]
+                                + [(-(BEHIND + 0.5), 0.25, 0.02), (0.5, 0.25, 0.02), (SEAT, 0.25, 1.0)])
+free = max(d for d, c in zip(steps, freely) if sum(c) == 0)
 report("PASS" if held[0] > 0 and held[1] == 0 else "FAIL", f"pulled {BEHIND + 0.5:.1f} mm out",
        f"the teeth meet the rear edge ({held[0]} samples) and nothing else touches; "
        f"before that it moves freely at least {free} mm")
-over = clash(0.5, 0.25, 0.02)
 report("PASS" if over[1] > 0 else "FAIL", "pushed 0.5 mm past its seat", f"its face meets the ends of the cell's ledges ({over[1]} samples)")
-up = clash(SEAT, 0.25, 1.0)
 report("PASS" if up[1] > 0 else "FAIL", "lifted 1 mm", f"hits the ledges ({up[1]} samples)")
 
 print("== 5. A Raspberry Pi 5 on the carrier in the cell ==")
