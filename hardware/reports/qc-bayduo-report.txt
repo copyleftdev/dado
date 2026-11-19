@@ -2,8 +2,8 @@
 == 1. Sound ==
 PASS  bayduo mesh is closed and consistently wound: 1416 triangles, every edge used once each way: True
 PASS  bayduo mesh volume against the kernel's: mesh 191613.4 mm3, kernel 191617.0 mm3, 0.002% apart
-PASS  orin mesh is closed and consistently wound: 2860 triangles, every edge used once each way: True
-PASS  orin mesh volume against the kernel's: mesh 44329.0 mm3, kernel 44330.2 mm3, 0.003% apart
+PASS  orin mesh is closed and consistently wound: 3064 triangles, every edge used once each way: True
+PASS  orin mesh volume against the kernel's: mesh 44987.4 mm3, kernel 44988.6 mm3, 0.003% apart
 PASS  bayduo thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
 PASS  orin thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.61, 1.8, 2.1, 2.2, 2.45]
 == 2. The lattice ==
@@ -26,7 +26,7 @@ PASS  sliding in: 47 steps; teeth riding on the side walls in 47; collisions els
 PASS  pulled 1.1 mm out: the teeth meet the walls' rear ends (94 points) and nothing else touches
 PASS  latch teeth: they start 0.64 mm behind the rear ends of the bay's side walls, beyond the plate's edges
 PASS  pushed 0.6 mm past its seat: its face meets the ends of the bay's ledges (196 points)
-PASS  lifted 1 mm: held down by the ledges (10783 points)
+PASS  lifted 1 mm: held down by the ledges (10647 points)
 PASS  the face under the roof: 0.50 mm between them
 == 5. What goes on it ==
 NOTE  room on the shelf: 131.1 mm wide, 76.8 tall; the back is open, so a device may stand out behind

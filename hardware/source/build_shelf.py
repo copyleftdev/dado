@@ -53,6 +53,7 @@ P = {
     "pull.reach": (6, "The pull: a rail along the face's top edge"),
     "pull.inset": (2, "The rail's ends in from the face's sides"),
     "pull.lip": (1.5, "A lip under its edge"),
+    "pull.lip.reach": (1.5, "The lip, front to back"),
     "nose.taper": (2, "Cut from each back corner"),
     "finger.root": (82, "Where the fingers leave the plate, from the front"),
     "finger.width": (2.2, "Each finger, across: this is what bends, in the plane of the plate"),
@@ -153,10 +154,40 @@ def latch_volume():
     return 2 * (rib + tooth)
 
 
+def slot_low(k):
+    """The low edge of face slot k, across."""
+    return f"mid - {(SLOTS - 1) / 2} * slot.pitch - slot.width / 2 + {k} * slot.pitch"
+
+
+def gussets():
+    """Where the pull is held up from the face, as (low, high) across: at the rail's two ends and on
+    every other bar between slots. Between them the rail and its lip are bridges no longer than two
+    slots and a bar, and that is where fingers go."""
+    out = [("pull.inset", slot_low(0))]
+    out += [(f"{slot_low(k)} + slot.width", slot_low(k + 1)) for k in range(1, SLOTS - 1, 2)]
+    return out + [(f"{slot_low(SLOTS - 1)} + slot.width", f"{WD} - pull.inset")]
+
+
+def gusset_section():
+    """A gusset seen from the side, as (front to back, up): under the rail and behind its lip, sloping
+    back to the face at 45 degrees so it prints without support."""
+    low = "air.top - pull.lip"
+    return [("-pull.reach", "air.top + 0.3"), (0.3, "air.top + 0.3"),
+            (0.3, f"{low} - pull.reach - 0.3"), ("-pull.reach", low)]
+
+
+def pull_volume():
+    """The rail, its lip, and the gussets under them."""
+    r, lip = V["pull.reach"], V["pull.lip"]
+    rail = (V["plate.width"] - 2 * V["pull.inset"]) * (V["top.bar"] * r + V["pull.lip.reach"] * lip)
+    section = r * (lip + lip + r) / 2 - V["pull.lip.reach"] * lip
+    return rail + section * sum(num(b, V) - num(a, V) for a, b in gussets())
+
+
 def cuts():
     out = [("label", ["-1", "mid - label.width / 2", "label.low"], ["label.depth", "mid + label.width / 2", "label.high"])]
     for k in range(SLOTS):
-        lo = f"mid - {(SLOTS - 1) / 2} * slot.pitch - slot.width / 2 + {k} * slot.pitch"
+        lo = slot_low(k)
         out.append((f"air{k}", ["-1", lo, "air.low"], ["front.thickness + 1", f"{lo} + slot.width", "air.top"]))
     for k in range(2):
         # The outer slot ends in the gap before the head; the inner one runs out the back.
@@ -188,10 +219,17 @@ def features():
     f.append({"id": "pull", "version": 1, "type": "boss", "target": ref(last, "body"),
               "profile": ref("pull.sketch", "tab"), "height": "pull.reach"})
     under = {"origin": [0, 0, "air.top"], "x": [1, 0, 0], "y": [0, -1, 0]}  # normal -Z
-    f.append(sketch("pull.lip.sketch", box("-pull.reach", f"-({WD} - pull.inset)", "-pull.reach + 1.5", "-pull.inset"), "lip", under))
+    f.append(sketch("pull.lip.sketch", box("-pull.reach", f"-({WD} - pull.inset)", "-pull.reach + pull.lip.reach", "-pull.inset"), "lip", under))
     f.append({"id": "pull.lip", "version": 1, "type": "boss", "target": ref("pull", "body"),
               "profile": ref("pull.lip.sketch", "lip"), "height": "pull.lip"})
     last = "pull.lip"
+    # The gussets that hold the pull up, each drawn from the side and as wide as its bar.
+    for k, (lo, hi) in enumerate(gussets()):
+        side = {"origin": [0, hi, 0], "x": [1, 0, 0], "y": [0, 0, 1]}  # normal -Y
+        f.append(sketch(f"gusset{k}.sketch", gusset_section(), "web", side))
+        f.append({"id": f"gusset{k}", "version": 1, "type": "boss", "target": ref(last, "body"),
+                  "profile": ref(f"gusset{k}.sketch", "web"), "height": f"({hi}) - ({lo})"})
+        last = f"gusset{k}"
     # A rib along each finger, from the plate ahead of its root to the end of its head.
     for k in range(2):
         a, b = across(k, "finger.low", "finger.high")
@@ -220,8 +258,7 @@ def expected_volume():
     vol = area * t
     front = v["plate.width"] * (v["front.height"] - t) - SLOTS * v["slot.width"] * v["air.height"]
     vol += front * v["front.thickness"] - v["label.width"] * (v["label.high"] - v["label.low"]) * v["label.depth"]
-    vol += (v["plate.width"] - 2 * v["pull.inset"]) * (v["top.bar"] * v["pull.reach"] + 1.5 * v["pull.lip"])
-    return vol + latch_volume()
+    return vol + pull_volume() + latch_volume()
 
 
 def main():

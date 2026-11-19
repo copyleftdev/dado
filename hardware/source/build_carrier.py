@@ -75,6 +75,7 @@ P = {
     "pull.reach": (6, "The pull: a rail along the face's top edge"),
     "pull.inset": (2, "The rail's ends in from the face's sides"),
     "pull.lip": (1.5, "A lip under its edge, for fingertips to catch"),
+    "pull.lip.reach": (1.5, "The lip, front to back"),
     "nose.taper": (2, "Cut from each back corner"),
     # The latch.
     "finger.root": (82, "Where the fingers leave the plate, from the front: clear of the rear posts"),
@@ -206,6 +207,35 @@ def outline():
     return pts + [(f"{L} - {t}", WD), (0, WD)]
 
 
+def slot_low(k):
+    """The low edge of face slot k, across."""
+    return f"mid - 2 * slot.pitch - slot.width / 2 + {k} * slot.pitch"
+
+
+def gussets():
+    """Where the pull is held up from the face, as (low, high) across: at the rail's two ends, and on the
+    bars either side of the middle slot. Between them the rail and its lip are bridges no longer than two
+    slots and a bar, and that is where fingers go."""
+    bar = lambda k: (f"{slot_low(k)} + slot.width", slot_low(k + 1))  # the bar between slot k and the next
+    return [("pull.inset", slot_low(0)), bar(1), bar(2), (f"{slot_low(4)} + slot.width", f"{WD} - pull.inset")]
+
+
+def gusset_section():
+    """A gusset seen from the side, as (front to back, up): under the rail and behind its lip, sloping
+    back to the face at 45 degrees so it prints without support. It starts a little inside the rail and
+    the face so they are one."""
+    low = "air.top - pull.lip"
+    return [("-pull.reach", "air.top + 0.3"), (0.3, "air.top + 0.3"),
+            (0.3, f"{low} - pull.reach - 0.3"), ("-pull.reach", low)]
+
+
+def gusset_volume():
+    """What the gussets add: each one's section outside the rail, the lip and the face, by its width."""
+    r, lip = V["pull.reach"], V["pull.lip"]
+    section = r * (lip + lip + r) / 2 - V["pull.lip.reach"] * lip
+    return section * sum(num(b, V) - num(a, V) for a, b in gussets())
+
+
 def lightening():
     return box("post.x + 8", "post.y + 8", "post.x + hole.spacing_x - 8",
                "post.y + hole.spacing_y - 8")
@@ -221,7 +251,7 @@ def cuts():
            ("card", ["-1", "mid - card.width / 2", "card.low"],
             ["front.thickness + 1", "mid + card.width / 2", "card.high"])]
     for k in range(5):
-        lo = f"mid - 2 * slot.pitch - slot.width / 2 + {k} * slot.pitch"
+        lo = slot_low(k)
         out.append((f"air{k}", ["-1", lo, "intake.low"], ["front.thickness + 1", f"{lo} + slot.width", "air.top"]))
         out.append((f"vent{k}", ["back.x - 1", lo, "air.low"], [f"{L} + 1", f"{lo} + slot.width", "air.top"]))
     for k in range(2):
@@ -316,10 +346,17 @@ def features():
               "profile": ref("pull.sketch", "tab"), "height": "pull.reach"})
     under = {"origin": [0, 0, "air.top"], "x": [1, 0, 0], "y": [0, -1, 0]}  # normal -Z
     f.append(sketch("pull.lip.sketch", {"lip": box("-pull.reach", f"-({WD} - pull.inset)",
-                                                    "-pull.reach + 1.5", "-pull.inset")}, under))
+                                                    "-pull.reach + pull.lip.reach", "-pull.inset")}, under))
     f.append({"id": "pull.lip", "version": 1, "type": "boss", "target": ref("pull", "body"),
               "profile": ref("pull.lip.sketch", "lip"), "height": "pull.lip"})
     last = "pull.lip"
+    # The gussets that hold the pull up, each drawn from the side and as wide as its bar.
+    for k, (lo, hi) in enumerate(gussets()):
+        side = {"origin": [0, hi, 0], "x": [1, 0, 0], "y": [0, 0, 1]}  # normal -Y
+        f.append(sketch(f"gusset{k}.sketch", {"web": gusset_section()}, side))
+        f.append({"id": f"gusset{k}", "version": 1, "type": "boss", "target": ref(last, "body"),
+                  "profile": ref(f"gusset{k}.sketch", "web"), "height": f"({hi}) - ({lo})"})
+        last = f"gusset{k}"
     # A rib along each finger, from the plate ahead of its root to the end of its head.
     for k in range(2):
         side = (lambda y: y) if k == 0 else mirrored
@@ -362,7 +399,8 @@ def expected_volume():
     vol += 2 * v["lip.reach"] * (v["cheek.thick"] + v["lip.reach"]) * v["lip.height"]
     vol += v["shelf.reach"] * (v["fan.size"] + v["fan.slack"]) * v["shelf.thick"]
     vol -= v["label.width"] * (v["label.high"] - v["label.low"]) * v["label.depth"]
-    vol += (v["plate.width"] - 2 * v["pull.inset"]) * (v["top.bar"] * v["pull.reach"] + 1.5 * v["pull.lip"])
+    vol += (v["plate.width"] - 2 * v["pull.inset"]) * (v["top.bar"] * v["pull.reach"] + v["pull.lip.reach"] * v["pull.lip"])
+    vol += gusset_volume()
     vol += front * v["front.thickness"]
     post, hole = math.pi * (v["post.diameter"] / 2) ** 2, math.pi * (v["screw.hole"] / 2) ** 2
     vol += 4 * post * v["post.height"] - 4 * hole * (t + v["post.height"])

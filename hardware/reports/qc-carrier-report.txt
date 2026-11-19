@@ -1,6 +1,6 @@
 == 1. Integrity ==
-PASS  carrier mesh is closed and consistently wound: 2316 triangles, every edge used once each way: True
-PASS  carrier mesh volume against the kernel's: mesh 15983.1 mm3, kernel 15983.3 mm3, 0.001% apart
+PASS  carrier mesh is closed and consistently wound: 2424 triangles, every edge used once each way: True
+PASS  carrier mesh volume against the kernel's: mesh 16267.7 mm3, kernel 16267.9 mm3, 0.001% apart
 == 2. Measured dimensions ==
 PASS  carrier extent: measured [-6.0, -1.2, 0.0] to [103.65, 61.7, 35.5]; drawn [-6.0, -1.2, 0.0] to [103.64999999999999, 61.7, 35.5]
 PASS  carrier thinnest section: 1.50 mm (floor for this check 1.5 mm); thinnest values found [1.5, 1.6, 1.61, 1.65, 1.8, 1.85]
@@ -43,7 +43,7 @@ PASS  finger bent 0.00 mm (seated): strain 0.00% (kept under 2.5%); each pushes 
 PASS  force to pull the carrier out: about 12.7 N (friction 0.3 assumed; 10.3 N with none), against 1.0 N for a loaded carrier's own weight
 NOTE  the hold is less than the carrier before this one: which held about 22 N on a tooth under each finger. A tooth to one side of its finger frees itself under a pull; 12 to 14 N was accepted on 2026-11-19 for a carrier that prints flat
 NOTE  unplugging a network cable: a plug with its tab pressed comes out for less than the 13 N the latch holds; one yanked with the tab up will still draw the carrier out
-NOTE  the pull: a rail 6 mm proud along the whole top edge, with a 1.5 mm lip under it; fingers pull it while the thumb rests on the cell's rim, so pulling a carrier does not drag its cell. Whether that grip is good for 13 N is for a hand to judge
+NOTE  the pull: a rail 6 mm proud along the whole top edge, with a 1.5 mm lip under it, held up by four gussets that leave two gaps 18.5 mm wide for fingertips; fingers pull it while the thumb rests on the cell's rim, so pulling a carrier does not drag its cell. Whether that grip is good for 13 N is for a hand to judge
 PASS  the pull rail under that pull: 5.0 MPa in bending along its 56.5 mm, safety factor 10
 NOTE  plate thickness: 1.8 mm, under the 2.5 to 3 mm at which printed flame-retardant materials are rated; the front is 2.6 mm
 

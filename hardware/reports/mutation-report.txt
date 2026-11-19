@@ -8,6 +8,7 @@ CAUGHT  cell: stacking rail too narrow  [head barely wider than the opening: let
 CAUGHT  cell: side rail too narrow  [lets go at the end of the side joint's play]
           fit_check.py: the joint proof
           qc_trim.py: a cell's side lips over the other side cap's rail; the side cap over a cell's side rail
+          print_check.py: bay, -y up; bayagx, -y up (+5)
 CAUGHT  cell: latch moved  [teeth 4 mm from the base's notches]
           qc_base.py: seated and centred
           qc_spacer.py: a column spacer on its base
@@ -38,7 +39,7 @@ CAUGHT  carrier: too wide  [wider than the cell's inside]
           qc_carrier.py: carrier extent; carrier thinnest section (+3)
           qa.py: nothing collides that should not; nothing in the wall collides that should not (+1)
 CAUGHT  carrier: fan too high  [fan and its cradle would strike the cell's roof]
-          carrier would not build:   "message": "the thinnest wall of carrier.
+          carrier would not build:   "message": "the thinnest wall of carrier.body is 1.500000 mm; r
 CAUGHT  carrier: teeth too far forward  [teeth press on the side walls, short of their rear ends]
           qc_carrier.py: carrier extent; seated, at every extreme of its slack (+2)
           qa.py: every carrier's latch rests unloaded; nothing collides that should not (+2)
@@ -90,7 +91,7 @@ CAUGHT  Jetson tray: board too far back  [the board's sockets stand out of the b
 CAUGHT  AGX tray: no room for the kit  [fences 1 mm closer together than the kit is wide]
           qc_bay.py: nothing of the tray where the kit stands; the kit between its fences and stops
 CAUGHT  AGX tray: made for a lower bay  [its face leaves 4 mm open under the roof]
-          agx would not build: ]
+          agx would not build:   "message": "the thinnest wall of shelf.body is 1.500000 mm; require
 CAUGHT  AGX tray: fences too thick  [each fence stands over the slot that frees a latch finger]
           qc_bay.py: the fences clear of the latch fingers
 CAUGHT  column spacer: more than half  [two of them and their gaps are wider than a place]
@@ -107,4 +108,4 @@ CAUGHT  caps: plate too thin  [a 0.6 mm plate: below what prints]
 
 37 of 37 planted defects caught
 
-Run of 2026-11-19, after the latch of the carrier, shelves and trays was turned on its side and the print check joined the suites.
+Run of 2026-11-19, after gussets were put under the pull of the carrier, shelves and trays.

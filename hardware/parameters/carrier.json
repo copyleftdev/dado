@@ -376,6 +376,11 @@
    "value": 1.5
   },
   {
+   "description": "The lip, front to back",
+   "id": "pull.lip.reach",
+   "value": 1.5
+  },
+  {
    "description": "The pull: a rail along the face's top edge",
    "id": "pull.reach",
    "value": 6.0

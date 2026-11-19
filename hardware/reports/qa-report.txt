@@ -1,6 +1,6 @@
 == 1. Can the designs be rebuilt from their scripts, identically? ==
 PASS  cell rebuilds from build_cell.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 73059.878 against 73059.878 mm3
-PASS  carrier rebuilds from build_carrier.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 15863.118 against 15863.118 mm3
+PASS  carrier rebuilds from build_carrier.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 16267.916 against 16267.916 mm3
 PASS  base rebuilds from build_base.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 64305.685 against 64305.685 mm3
 PASS  basehalf rebuilds from build_base.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 41431.285 against 41431.285 mm3
 PASS  trimtop rebuilds from build_trim.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 17375.545 against 17375.545 mm3
@@ -12,11 +12,11 @@ PASS  baytall rebuilds from build_bay.py: a fresh store reaches r3 with the same
 PASS  bayrack rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 491051.999 against 491051.999 mm3
 PASS  bayduo rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 191617.007 against 191617.007 mm3
 PASS  bayagx rebuilds from build_bay.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 223996.639 against 223996.639 mm3
-PASS  shelf rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 50404.991 against 50404.991 mm3
-PASS  shelftall rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 72745.283 against 72745.283 mm3
-PASS  shelfrack rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 97483.521 against 97483.521 mm3
-PASS  orin rebuilds from build_orin.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 44289.427 against 44289.427 mm3
-PASS  agx rebuilds from build_agx.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 60375.261 against 60375.261 mm3
+PASS  shelf rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 51477.887 against 51477.887 mm3
+PASS  shelftall rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 73818.179 against 73818.179 mm3
+PASS  shelfrack rebuilds from build_shelf.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 98930.142 against 98930.142 mm3
+PASS  orin rebuilds from build_orin.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 44988.598 against 44988.598 mm3
+PASS  agx rebuilds from build_agx.py: a fresh store reaches r2 with the same document digest as the working store: True; volume 61728.327 against 61728.327 mm3
 PASS  spacerrow rebuilds from build_spacer.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 52487.333 against 52487.333 mm3
 PASS  spacercol rebuilds from build_spacer.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 43289.366 against 43289.366 mm3
 PASS  spacercross rebuilds from build_spacer.py: a fresh store reaches r3 with the same document digest as the working store: True; volume 19033.198 against 19033.198 mm3
@@ -64,7 +64,7 @@ PASS  bayagx and agx: the ledges' cut and the face: flush: 2.6 and 2.6
 PASS  fit_check.py: W, H, GAP, DEPTH, WALL, FLOAT, SIDE_FLOAT: script has [67.0, 42.0, 3.6, 100.0, 3.0, 0.8, 1.6]; the parts have [67.0, 42.0, 3.6, 100.0, 3.0, 0.8, 1.6]
 PASS  qc.py: W, H, GAP, DEPTH, WALL: script has [67.0, 42.0, 3.6, 100.0, 3.0]; the parts have [67.0, 42.0, 3.6, 100.0, 3.0]
 PASS  qc_carrier.py: PLATE, PLATE_W, PLATE_L, FRONT_T, FRONT_H: script has [1.8, 60.5, 97.0, 2.6, 35.5]; the parts have [1.8, 60.5, 97.0, 2.6, 35.5]
-PASS  qc_carrier.py: TOOTH, RAMP, BEHIND: script has [1.2, 0.93, 0.6]; the parts have [1.2, 0.93, 0.6]
+PASS  qc_carrier.py: TOOTH, RAMP, BEHIND: script has [1.2, 0.2, 0.6]; the parts have [1.2, 0.2, 0.6]
 PASS  qc_base.py: W, GAP, RAIL, HB, DEPTH, SETBACK, PAD: script has [67.0, 3.6, 3.1, 22.0, 100.0, 0.0, 1.0]; the parts have [67.0, 3.6, 3.0999999999999996, 22.0, 100.0, 0.0, 1.0]
 == 4. Assembled: two bases, four cells two by two, a carrier in each, with plugs behind it ==
 PASS  nothing collides that should not: 14 bodies, 30 neighbouring pairs tested both ways; unexpected collisions in 0
@@ -75,7 +75,7 @@ PASS  every latch in the wall rests unloaded: carriers or trays whose teeth pres
 PASS  the wall's width: 250.3 mm over its joints; three places and a half is 243.5 between the outer walls
 == 5. The engine's own check of intent, before the corners are rounded ==
 PASS  cell at r2: file validated: True; shape compared with the plan at 7936 points, 0 disagree
-PASS  carrier at r2: file validated: True; shape compared with the plan at 12352 points, 0 disagree
+PASS  carrier at r2: file validated: True; shape compared with the plan at 13504 points, 0 disagree
 PASS  base at r2: file validated: True; shape compared with the plan at 6784 points, 0 disagree
 PASS  basehalf at r2: file validated: True; shape compared with the plan at 6784 points, 0 disagree
 PASS  trimtop at r2: file validated: True; shape compared with the plan at 5248 points, 0 disagree
@@ -87,11 +87,11 @@ PASS  baytall at r2: file validated: True; shape compared with the plan at 12160
 PASS  bayrack at r2: file validated: True; shape compared with the plan at 13504 points, 0 disagree
 PASS  bayduo at r2: file validated: True; shape compared with the plan at 10816 points, 0 disagree
 PASS  bayagx at r2: file validated: True; shape compared with the plan at 12352 points, 0 disagree
-PASS  shelf at r2: file validated: True; shape compared with the plan at 11584 points, 0 disagree
-PASS  shelftall at r2: file validated: True; shape compared with the plan at 11584 points, 0 disagree
-PASS  shelfrack at r2: file validated: True; shape compared with the plan at 12736 points, 0 disagree
-PASS  orin at r2: file validated: True; shape compared with the plan at 18112 points, 0 disagree
-PASS  agx at r2: file validated: True; shape compared with the plan at 25984 points, 0 disagree
+PASS  shelf at r2: file validated: True; shape compared with the plan at 13888 points, 0 disagree
+PASS  shelftall at r2: file validated: True; shape compared with the plan at 13888 points, 0 disagree
+PASS  shelfrack at r2: file validated: True; shape compared with the plan at 15616 points, 0 disagree
+PASS  orin at r2: file validated: True; shape compared with the plan at 19840 points, 0 disagree
+PASS  agx at r2: file validated: True; shape compared with the plan at 28480 points, 0 disagree
 PASS  spacerrow at r2: file validated: True; shape compared with the plan at 7360 points, 0 disagree
 PASS  spacercol at r2: file validated: True; shape compared with the plan at 9088 points, 0 disagree
 PASS  spacercross at r2: file validated: True; shape compared with the plan at 6400 points, 0 disagree

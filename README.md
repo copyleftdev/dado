@@ -53,7 +53,7 @@ Cells sit 70.6 mm apart across and 45.6 mm apart up. Each part can be turned ove
 The STEP files are ready to send to a print bureau or open in any CAD program.
 
 - **Process and material:** designed for powder-bed nylon (PA12, by MJF or SLS). The joints assume parts within ±0.30 mm.
-- **On a filament printer:** every part has a way up that needs little or no support. Sleeves, bases, caps and spacers stand on end; the carrier, shelves and trays lie flat on their plates, with support under the pull only. [`print_check.py`](hardware/source/print_check.py) holds each part to it, and lists which bed sizes take which parts: a 220 mm bed takes all but the rack bay and its shelf.
+- **On a filament printer:** every part has a way up that needs little or no support. Sleeves, bases, caps and spacers stand on end; the carrier, shelves and trays lie flat on their plates, their pulls held up by gussets a printer can build without support. [`print_check.py`](hardware/source/print_check.py) holds each part to it, and lists which bed sizes take which parts: a 220 mm bed takes all but the rack bay and its shelf.
 - **What else a cell needs:** a Raspberry Pi 5, four M2.5 screws, and optionally the Active Cooler, a PoE HAT, and a 25 × 25 × 6 mm fan. A standard 10 mm thick fan does not fit under a HAT.
 - **Start small.** Print three cells, three carriers, a base and a set of caps first. That is enough to test every joint.
 

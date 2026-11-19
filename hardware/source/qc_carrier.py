@@ -197,7 +197,8 @@ report("NOTE", "the hold is less than the carrier before this one", "which held 
        "side of its finger frees itself under a pull; 12 to 14 N was accepted on 2026-11-19 for a carrier that prints flat")
 report("NOTE", "unplugging a network cable", f"a plug with its tab pressed comes out for less than the {pull:.0f} N "
        f"the latch holds; one yanked with the tab up will still draw the carrier out")
-report("NOTE", "the pull", f"a rail {PULL:.0f} mm proud along the whole top edge, with a 1.5 mm lip under it; "
+report("NOTE", "the pull", f"a rail {PULL:.0f} mm proud along the whole top edge, with a 1.5 mm lip under it, held up by four gussets "
+       f"that leave two gaps 18.5 mm wide for fingertips; "
        f"fingers pull it while the thumb rests on the cell's rim, so pulling a carrier does not drag its cell. "
        f"Whether that grip is good for {pull:.0f} N is for a hand to judge")
 bend = pull * 56.5 / 8 / (3.0 * 6.0 ** 2 / 6)

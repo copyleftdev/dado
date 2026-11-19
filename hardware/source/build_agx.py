@@ -117,7 +117,7 @@ def expected_volume():
     vol = (area - latch_cut_area()) * t
     front = v["plate.width"] * (v["front.height"] - t) - ROWS * s.SLOTS * v["slot.width"] * v["air.height"]
     vol += front * v["front.thickness"] - v["label.width"] * (v["label.high"] - v["label.low"]) * v["label.depth"]
-    vol += (v["plate.width"] - 2 * v["pull.inset"]) * (v["top.bar"] * v["pull.reach"] + 1.5 * v["pull.lip"])
+    vol += s.pull_volume()
     vol += s.latch_volume()
     return vol + sum((n(x1) - n(x0)) * (n(y1) - n(y0)) * n(h) for _, (x0, y0, x1, y1), h in RIBS)
 
