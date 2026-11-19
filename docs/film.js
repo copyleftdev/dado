@@ -7,6 +7,7 @@ import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+import { Wall } from "./config.js";
 
 const PAL = {
   graphite: 0x24272a, putty: 0x88867e, bone: 0xe1ded4,
@@ -180,14 +181,19 @@ const agxKit = () => {
 };
 // Each kind of bay: its pool, how many cells wide and how many rows high.
 const CROWNS = {
-  bay: { pool: bays, wide: 3, high: 1 },
-  tall: { pool: kin("baytall", "shelftall", 2, PAL.teal), wide: 3, high: 2 },
-  rack: { pool: kin("bayrack", "shelfrack", 1, PAL.ochre), wide: 4, high: 2 },
-  jetson: { pool: kin("bayduo", "orin", 3, PAL.moss, jetsonBoard), wide: 2, high: 2 },
-  agx: { pool: kin("bayagx", "agx", 3, PAL.lilac, agxKit), wide: 2, high: 3 },
+  bay: { pool: bays },
+  tall: { pool: kin("baytall", "shelftall", 2, PAL.teal) },
+  rack: { pool: kin("bayrack", "shelfrack", 1, PAL.ochre) },
+  jetson: { pool: kin("bayduo", "orin", 3, PAL.moss, jetsonBoard) },
+  agx: { pool: kin("bayagx", "agx", 3, PAL.lilac, agxKit) },
 };
-const bayCount = () => { const k = CROWNS[cfg.bay]; return k && cfg.cols % k.wide === 0 ? Math.min(cfg.cols / k.wide, k.pool.length) : 0; };
-const bayRows = () => (bayCount() ? CROWNS[cfg.bay].high : 0);
+// How wide and tall each is comes from the rules, and each pool holds as many as the widest wall can take.
+for (const k in CROWNS) {
+  Object.assign(CROWNS[k], Wall.BAYS[k]);
+  console.assert(CROWNS[k].pool.length * CROWNS[k].wide >= Math.max(...Wall.widths(k)), `too few ${k} bays made`);
+}
+const bayCount = () => Wall.crowns(cfg);
+const bayRows = () => (CROWNS[cfg.bay] ? CROWNS[cfg.bay].high : 0);
 
 // The section, drawn before anything is solid: the kernel's own edges.
 const loops = man.section.map((pts) => {
@@ -199,7 +205,9 @@ const loops = man.section.map((pts) => {
 });
 
 // ---------------------------------------------------------------- the looks
-const cfg = { cols: +(new URLSearchParams(location.search).get("cols") || 3), rows: 3, sleeve: "graphite", look: "run", hue: "teal", bay: new URLSearchParams(location.search).get("bay") || "none" };
+// The wall being configured. Its size and bay change only through Wall's moves, so it can always be built.
+const asked = new URLSearchParams(location.search);
+const cfg = Wall.repair({ cols: asked.get("cols") ?? 3, rows: 3, sleeve: "graphite", look: "run", hue: "teal", bay: asked.get("bay") ?? "none" });
 const FILM = { cols: 3, rows: 3, sleeve: "graphite", hue: "teal" };
 function look(name, c, r, s) {
   switch (name) {
@@ -488,7 +496,6 @@ function frame(dt) {
 }
 
 // ------------------------------------------------------------- configurator
-const PRESETS = { One: [1, 1], Trio: [3, 1], Nine: [3, 3], Twelve: [4, 3] };
 const LOOK_NAMES = { monolith: "Monolith", voice: "One voice", run: "Run", roles: "Roles", signal: "Signal" };
 const css = (hex) => `#${hex.toString(16).padStart(6, "0")}`;
 function choices(id, items, current, pick, dot) {
@@ -499,35 +506,23 @@ function choices(id, items, current, pick, dot) {
   el.onclick = (e) => { const b = e.target.closest("button"); if (b) { pick(b.dataset.k); panel(); } };
 }
 function panel() {
-  const { cols, rows } = cfg, n = cols * rows;
-  $("colsN").textContent = cols; $("rowsN").textContent = rows;
-  choices("presets", Object.keys(PRESETS).map((k) => [k, k]), Object.keys(PRESETS).find((k) => PRESETS[k][0] === cols && PRESETS[k][1] === rows), (k) => { [cfg.cols, cfg.rows] = PRESETS[k]; });
+  console.assert(Wall.valid(cfg), "a wall that cannot be built", cfg);
+  const move = (next) => Object.assign(cfg, next);
+  $("colsN").textContent = cfg.cols; $("rowsN").textContent = cfg.rows;
+  for (const [id, what, by] of [["colsDown", "cols", -1], ["colsUp", "cols", 1], ["rowsDown", "rows", -1], ["rowsUp", "rows", 1]]) $(id).disabled = !Wall.canStep(cfg, what, by);
+  choices("presets", Object.keys(Wall.PRESETS).map((k) => [k, k]), Wall.preset(cfg), (k) => move(Wall.setPreset(cfg, k)));
   choices("sleeves", [["graphite"], ["putty"], ["bone"]], cfg.sleeve, (k) => { cfg.sleeve = k; }, true);
   choices("looks", Object.entries(LOOK_NAMES), cfg.look, (k) => { cfg.look = k; });
   $("hues").hidden = cfg.look !== "voice";
   choices("hues", HUES.map((h) => [h]), cfg.hue, (k) => { cfg.hue = k; }, true);
-  const crown = bayCount(), kind = CROWNS[cfg.bay], high = rows + bayRows();
-  choices("bays", [["none", "None"], ["bay", "Bay"], ["tall", "Tall bay"], ["rack", "Rack bay"], ["jetson", "Jetson bay"], ["agx", "AGX bay"]], cfg.bay, (k) => { cfg.bay = k; });
-  $("bayNote").textContent = !kind ? "A bay across the top holds a switch or a hub, with its ports to the back."
-    : !crown ? { rack: "A rack bay is four cells wide: it needs four columns.", jetson: "A Jetson bay is two cells wide: it needs two, four or six columns.",
-      agx: "An AGX bay is two cells wide: it needs two, four or six columns." }[cfg.bay] || "A bay is three cells wide: it needs three or six columns."
-    : cfg.bay === "jetson" ? `Two rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson Orin Nano developer kit, on a tray with posts at the board’s own holes.`
-    : cfg.bay === "agx" ? `Three rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson AGX Orin developer kit, standing between low fences with its top fan clear.`
-    : cfg.bay === "tall" ? "Two rows high: taller gear, or one rack unit up to 200 mm wide."
-    : cfg.bay === "rack" ? "Takes ten-inch rack gear, one unit tall, with its ears on."
-    : n > 7 * crown ? `An eight-port switch serves seven Pis and an uplink. These ${n} need ${Math.ceil(n / 7)} switches; there is room for ${crown}.`
-    : `Room for ${crown === 1 ? "one eight-port switch" : "two eight-port switches"}: enough ports for these ${n} Pis and an uplink.`;
-  const bayName = { bay: "Bays", tall: "Tall bays", rack: "Rack bays", jetson: "Jetson bays", agx: "AGX bays" }[cfg.bay], bayGrams = { bay: 247.33 + 50.4, tall: 340.37 + 72.75, rack: 491.05 + 97.48, jetson: 191.62 + 44.29, agx: 224.0 + 60.38 }[cfg.bay] || 0;
-  $("box").innerHTML = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[bayName, crown], [{ jetson: "Orin trays", agx: "AGX trays" }[cfg.bay] || "Shelves", crown]] : [])]
-    .map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
-  const grams = 1.01 * (n * (73.06 + 15.86) + cols * (64.31 + 17.38) + high * (10.74 + 11.08) + crown * bayGrams);
-  $("facts").textContent = `${Math.round(cols * PX - man.gap + 2 * CAP)} mm wide, ${Math.round(high * PZ + 28.6)} tall, ${crown && cfg.bay === "agx" ? 127 : 110} deep. `
-    + `About ${(grams / 1000).toFixed(grams < 1000 ? 2 : 1)} kg of printed parts. With a Pi in every cell: about ${(n * 6.2).toFixed(0)} W at typical work, `
-    + `${(n * 14.3).toFixed(0)} W flat out.` + (crown && cfg.bay === "jetson" ? ` Each Jetson adds up to 25 W.` : crown && cfg.bay === "agx" ? ` Each AGX Orin adds up to 60 W.` : "");
+  choices("bays", Object.entries(Wall.BAYS).map(([k, kind]) => [k, kind ? kind.label : "None"]), cfg.bay, (k) => move(Wall.setBay(cfg, k)));
+  $("bayNote").textContent = Wall.note(cfg);
+  $("box").innerHTML = Wall.summary(cfg).parts.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
+  $("facts").textContent = Wall.facts(cfg);
 }
-const bump = (k, by, lo, hi) => () => { cfg[k] = Math.min(hi, Math.max(lo, cfg[k] + by)); panel(); };
-$("colsDown").onclick = bump("cols", -1, 1, 6); $("colsUp").onclick = bump("cols", 1, 1, 6);
-$("rowsDown").onclick = bump("rows", -1, 1, 4); $("rowsUp").onclick = bump("rows", 1, 1, 4);
+const step = (move, by) => () => { Object.assign(cfg, move(cfg, by)); panel(); };
+$("colsDown").onclick = step(Wall.stepCols, -1); $("colsUp").onclick = step(Wall.stepCols, 1);
+$("rowsDown").onclick = step(Wall.stepRows, -1); $("rowsUp").onclick = step(Wall.stepRows, 1);
 panel();
 let grab = null;
 canvas.addEventListener("pointerdown", (e) => { if (T >= CONFIG_AT) grab = { x: e.clientX, az: orbit }; });

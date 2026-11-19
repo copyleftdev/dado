@@ -60,6 +60,7 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - Raspberry Pi's own model of the Pi 5 sits on the carrier's posts with every port through its window and nothing touching. The tightest port clears by 0.61 mm.
 - Joints and latches were simulated across 200,000 parts at printing tolerance.
 - Roofs of the bays were calculated for the load of the rows above them.
+- The site's configurator can only show walls that can be built. Its rules are one file, [`docs/config.js`](docs/config.js), and [`tools/config.test.mjs`](tools/config.test.mjs) walks all 68 walls they allow and every move between them.
 - The Jetson tray's posts sit under the four mounting holes in NVIDIA's own drill file, with 1.7 mm spare under the board and at least 34.9 mm above its cooler.
 - The AGX tray holds a box of the kit's published size between its fences and stops with 0.5 mm of slack, and the bay leaves 50.7 mm above the fan in its top face.
 

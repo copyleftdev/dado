@@ -191,7 +191,7 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
           <button id="rowsDown" aria-label="Fewer rows" style="margin-left:10px">&minus;</button><span class="step" id="rowsN">3</span><button id="rowsUp" aria-label="More rows">+</button><span class="muted">high</span></div></div>
         <div class="ctl"><span>Sleeves, bases and caps</span><div class="row" id="sleeves"></div></div>
         <div class="ctl"><span>Faces</span><div class="row" id="looks"></div><div class="row" id="hues"></div></div>
-        <div class="ctl"><span>Network</span><div class="row" id="bayKinds"></div><p class="muted" style="font-size:14px" id="bayNote"></p></div>
+        <div class="ctl"><span>Bay on top</span><div class="row" id="bayKinds"></div><p class="muted" style="font-size:14px" id="bayNote"></p></div>
         <table id="box"></table>
         <p class="muted" style="font-size:14px" id="facts"></p>
       </div>
@@ -241,6 +241,103 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
 </div>
 
 <script>
+// The rules of the configurator, the same file the film uses (brand/film/config.js).
+// The wall a viewer may build in "Make it yours", and the only ways to change
+// it. Every move returns a wall that can be built, so the page never has to
+// draw or explain one that cannot: a bay always crowns a wall that is a whole
+// number of bays wide. config.test.mjs walks every wall these moves can reach.
+const Wall = (() => {
+  const COLS = [1, 6], ROWS = [1, 4];
+  const PITCH = 70.6, RISE = 45.6, GAP = 3.6, CAPS = 11.2, FOOT = 28.6, DEPTH = 110;  // mm
+  const DENSITY = 1.01, PI_W = [6.2, 14.3];  // g/cm3 of PA12; watts a Pi, typical and flat out
+  // Printed volume in cm3 of what every wall has: per cell, per column, per row.
+  const CM3 = { cell: 73.06 + 15.86, column: 64.31 + 17.38, row: 10.74 + 11.08 };
+  // Each bay: places across, rows up, roof in mm, rows of air slots in its
+  // face, cm3 of bay and tray together, and what stands in it if not a switch.
+  const BAYS = {
+    none: null,
+    bay: { label: "Bay", plural: "Bays", tray: "Shelves", wide: 3, high: 1, roof: 7, airs: 1, cm3: 247.33 + 50.4 },
+    tall: { label: "Tall bay", plural: "Tall bays", tray: "Shelves", wide: 3, high: 2, roof: 10, airs: 1, cm3: 340.37 + 72.75 },
+    rack: { label: "Rack bay", plural: "Rack bays", tray: "Shelves", wide: 4, high: 2, roof: 12, airs: 1, cm3: 491.05 + 97.48 },
+    jetson: { label: "Jetson bay", plural: "Jetson bays", tray: "Orin trays", wide: 2, high: 2, roof: 6, airs: 5, cm3: 191.62 + 44.29,
+      guest: "Jetson", watts: 25 },
+    agx: { label: "AGX bay", plural: "AGX bays", tray: "AGX trays", wide: 2, high: 3, roof: 6, airs: 9, cm3: 224.0 + 60.38,
+      guest: "AGX Orin", watts: 60, depth: 127 },
+  };
+  const PRESETS = { One: [1, 1], Trio: [3, 1], Nine: [3, 3], Twelve: [4, 3] };
+  const known = (bay) => Object.prototype.hasOwnProperty.call(BAYS, bay);
+  const whole = (v, [lo, hi]) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : lo; };
+
+  // The widths a wall may have under a bay: whole numbers of that bay.
+  function widths(bay) {
+    const step = BAYS[bay] ? BAYS[bay].wide : 1, out = [];
+    for (let c = step; c <= COLS[1]; c += step) if (c >= COLS[0]) out.push(c);
+    return out;
+  }
+  // The allowed width nearest to a wanted one; the wider of two equally near.
+  const nearest = (cols, list) => list.reduce((best, c) => (Math.abs(c - cols) <= Math.abs(best - cols) ? c : best));
+  const valid = (s) => known(s.bay) && widths(s.bay).includes(s.cols) && Number.isInteger(s.rows) && s.rows >= ROWS[0] && s.rows <= ROWS[1];
+
+  // A wall from anything: a page address, an old saved choice, nonsense.
+  function repair(raw = {}) {
+    const bay = known(raw.bay) ? raw.bay : "none";
+    return { ...raw, bay, rows: whole(raw.rows ?? 3, ROWS), cols: nearest(whole(raw.cols ?? 3, COLS), widths(bay)) };
+  }
+  // Choosing a bay moves the wall to the nearest width that bay fits.
+  const setBay = (s, bay) => (known(bay) ? { ...s, bay, cols: nearest(s.cols, widths(bay)) } : s);
+  // Width steps through the widths the bay allows; height through the rows.
+  function stepCols(s, by) {
+    const list = widths(s.bay), to = list[list.indexOf(s.cols) + Math.sign(by)];
+    return to === undefined ? s : { ...s, cols: to };
+  }
+  function stepRows(s, by) {
+    const to = s.rows + Math.sign(by);
+    return to < ROWS[0] || to > ROWS[1] ? s : { ...s, rows: to };
+  }
+  const canStep = (s, what, by) => (what === "cols" ? stepCols(s, by) : stepRows(s, by)) !== s;
+  // A preset is a size. It keeps the bay if the bay fits that size, and lets it go if not.
+  function setPreset(s, name) {
+    if (!Object.prototype.hasOwnProperty.call(PRESETS, name)) return s;
+    const [cols, rows] = PRESETS[name];
+    return { ...s, cols, rows, bay: widths(s.bay).includes(cols) ? s.bay : "none" };
+  }
+  const preset = (s) => Object.keys(PRESETS).find((k) => PRESETS[k][0] === s.cols && PRESETS[k][1] === s.rows);
+  const crowns = (s) => (BAYS[s.bay] ? s.cols / BAYS[s.bay].wide : 0);
+
+  // What the wall is: its parts, size, mass and power.
+  function summary(s) {
+    const kind = BAYS[s.bay], crown = crowns(s), n = s.cols * s.rows, high = s.rows + (kind ? kind.high : 0);
+    const parts = [["Cells", n], ["Carriers", n], ["Bases", s.cols], ["Top caps", s.cols], ["Side caps", 2 * high]];
+    if (kind) parts.push([kind.plural, crown], [kind.tray, crown]);
+    const grams = DENSITY * (n * CM3.cell + s.cols * CM3.column + high * CM3.row + (kind ? crown * kind.cm3 : 0));
+    return { n, crown, high, parts, grams, wide: s.cols * PITCH - GAP + CAPS, tall: high * RISE + FOOT, deep: (kind && kind.depth) || DEPTH,
+      typical: n * PI_W[0], flatOut: n * PI_W[1] };
+  }
+  const facts = (s) => {
+    const m = summary(s), kind = BAYS[s.bay], kg = m.grams / 1000;
+    return `${Math.round(m.wide)} mm wide, ${Math.round(m.tall)} tall, ${m.deep} deep. About ${kg.toFixed(kg < 1 ? 2 : 1)} kg of printed parts. `
+      + `With a Pi in every cell: about ${m.typical.toFixed(0)} W at typical work, ${m.flatOut.toFixed(0)} W flat out.`
+      + (kind && kind.guest ? ` Each ${kind.guest} adds up to ${kind.watts} W.` : "");
+  };
+  // What the bay holds, and why the width moves the way it does under it.
+  function note(s) {
+    const kind = BAYS[s.bay], { n, crown } = summary(s), each = crown === 1 ? "It takes" : "Each takes";
+    if (!kind) return "A bay across the top holds what is not a Pi: a switch, a hub or a Jetson.";
+    const holds = {
+      bay: n > 7 * crown ? `An eight-port switch serves seven Pis and an uplink. These ${n} need ${Math.ceil(n / 7)} switches; there is room for ${crown}.`
+        : `Room for ${crown === 1 ? "one eight-port switch" : "two eight-port switches"}: enough ports for these ${n} Pis and an uplink.`,
+      tall: "Two rows high: taller gear, or one rack unit up to 200 mm wide.",
+      rack: "Takes ten-inch rack gear, one unit tall, with its ears on.",
+      jetson: `Two rows high. ${each} one Jetson Orin Nano developer kit, on a tray with posts at the board’s own holes.`,
+      agx: `Three rows high. ${each} one Jetson AGX Orin developer kit, standing between low fences with its top fan clear.`,
+    }[s.bay];
+    const fit = widths(s.bay).length === 1 ? `It is ${["", "", "two", "three", "four"][kind.wide]} cells wide, and so is the wall.`
+      : `The wall widens ${["", "", "two", "three", "four"][kind.wide]} cells at a time to match it.`;
+    return `${holds} ${fit}`;
+  }
+  return { COLS, ROWS, PITCH, RISE, GAP, BAYS, PRESETS, widths, valid, repair, setBay, stepCols, stepRows, canStep, setPreset, preset, crowns, summary, facts, note };
+})();
+
 const DATA = {"profile": "M0.00,0.00 L3.00,0.00 L3.00,3.60 L6.00,3.60 L6.00,0.00 L24.70,0.00 L24.70,3.60 L29.70,3.60 L29.70,2.20 L26.70,2.20 L26.70,0.00 L40.30,0.00 L40.30,2.20 L37.30,2.20 L37.30,3.60 L42.30,3.60 L42.30,0.00 L61.00,0.00 L61.00,3.60 L64.00,3.60 L64.00,0.00 L67.00,0.00 L67.00,-18.00 L68.90,-18.00 L68.90,-13.40 L70.10,-13.40 L70.10,-28.60 L68.90,-28.60 L68.90,-24.00 L67.00,-24.00 L67.00,-42.00 L36.50,-42.00 L36.50,-43.90 L39.50,-43.90 L39.50,-45.10 L27.50,-45.10 L27.50,-43.90 L30.50,-43.90 L30.50,-42.00 L0.00,-42.00 L0.00,-32.20 L-3.60,-32.20 L-3.60,-25.60 L-2.20,-25.60 L-2.20,-30.20 L0.00,-30.20 L0.00,-11.80 L-2.20,-11.80 L-2.20,-16.40 L-3.60,-16.40 L-3.60,-9.80 L0.00,-9.80 Z", "cavity": "M3.00,-3.00 L64.00,-3.00 L64.00,-5.30 L62.80,-5.30 L62.80,-6.50 L64.00,-6.50 L64.00,-39.00 L3.00,-39.00 L3.00,-6.50 L4.20,-6.50 L4.20,-5.30 L3.00,-5.30 Z", "faces": [{"name": "Clay", "h": 35, "hex": "#CD8B7A"}, {"name": "Ochre", "h": 80, "hex": "#BA9960"}, {"name": "Moss", "h": 135, "hex": "#88AB75"}, {"name": "Teal", "h": 195, "hex": "#57AFAF"}, {"name": "Slate", "h": 250, "hex": "#75A3D2"}, {"name": "Lilac", "h": 310, "hex": "#AF90C6"}], "neutrals": [{"name": "Graphite", "hex": "#24272A", "l": 0.27}, {"name": "Putty", "hex": "#88867E", "l": 0.62}, {"name": "Bone", "hex": "#E1DED4", "l": 0.9}]};
 const C = { graphite: "var(--graphite)", putty: "var(--putty)", bone: "var(--bone)", hole: "var(--hole)", metal: "var(--metal)" };
 const F = Object.fromEntries(DATA.faces.map(f => [f.name.toLowerCase(), f.hex]));
@@ -399,10 +496,7 @@ document.getElementById("closer").innerHTML = shots.map(([name, cam, art, items]
   `<div class="shot"><h3>${name}</h3><div class="stage">${art}</div><span class="cam">${cam}</span><ol>${items.map(([b, t]) => `<li><span><b>${b}:</b> ${t}</span></li>`).join("")}</ol></div>`).join("");
 
 // Act three: the configurator. Sizes, masses and power are from the CAD and the earlier figures.
-const state = { cols: 3, rows: 3, sleeve: "Graphite", look: "Run", hue: "teal", bay: "None" };
-// Each: places across, rows up, roof, grams of bay and shelf, most that fit across six columns, rows of air slots.
-const BAYS = { "Bay": [3, 1, 7, 247.33 + 50.4, 2, 1], "Tall bay": [3, 2, 10, 340.37 + 72.75, 2, 1], "Rack bay": [4, 2, 12, 491.05 + 97.48, 1, 1],
-  "Jetson bay": [2, 2, 6, 191.62 + 44.29, 3, 5], "AGX bay": [2, 3, 6, 224.0 + 60.38, 3, 9] };
+const state = Wall.repair({ cols: 3, rows: 3, sleeve: "Graphite", look: "Run", hue: "teal", bay: "none" });
 const sleeveHex = Object.fromEntries(DATA.neutrals.map(n => [n.name, n.hex]));
 const looks = {
   "Monolith": () => (state.sleeve === "Bone" ? sleeveHex.Graphite : sleeveHex.Bone),
@@ -411,52 +505,40 @@ const looks = {
   "Roles": (c) => [F.ochre, F.teal, F.lilac][c % 3],
   "Signal": (c, r) => (c === Math.floor((state.cols - 1) / 2) && r === Math.floor((state.rows - 1) / 2) ? F.clay : F.slate),
 };
-const presets = { "One": [1, 1], "Trio": [3, 1], "Nine": [3, 3], "Twelve": [4, 3] };
 function pressed(id, items, current, set, dot) {
   const el = document.getElementById(id);
   el.innerHTML = items.map(([key, colour]) => dot
     ? `<button class="dot" data-k="${key}" aria-label="${key}" aria-pressed="${key === current}" style="background:${colour}"></button>`
-    : `<button data-k="${key}" aria-pressed="${key === current}">${key}</button>`).join("");
+    : `<button data-k="${key}" aria-pressed="${key === current}">${colour || key}</button>`).join("");
   el.onclick = e => { const b = e.target.closest("button"); if (b) { set(b.dataset.k); draw(); } };
 }
 function draw() {
-  const { cols, rows } = state, n = cols * rows;
-  const kind = BAYS[state.bay], crown = kind && cols % kind[0] === 0 ? Math.min(cols / kind[0], kind[4]) : 0;
-  const high = rows + (crown ? kind[1] : 0);
+  console.assert(Wall.valid(state), "a wall that cannot be built", state);
+  const { cols, rows } = state, kind = Wall.BAYS[state.bay], move = next => Object.assign(state, next);
   const paint = (c, r) => looks[state.look](c, r);
-  const m = crown ? crowned(rows, sleeveHex[state.sleeve], paint, k => paint(1 + kind[0] * k, rows), cols, kind)
+  const m = kind ? crowned(rows, sleeveHex[state.sleeve], paint, k => paint(1 + kind.wide * k, rows), cols, kind)
     : wall(cols, rows, sleeveHex[state.sleeve], paint);
   svg(document.getElementById("preview"), m.w, m.h, m.body, 6);
-  pressed("bayKinds", ["None", ...Object.keys(BAYS)].map(k => [k]), state.bay, k => { state.bay = k; });
-  document.getElementById("bayNote").textContent = !kind ? "A bay across the top holds a switch or a hub, with its ports to the back."
-    : !crown ? (state.bay === "Rack bay" ? "A rack bay is four cells wide: it needs four columns." : state.bay === "Jetson bay" ? "A Jetson bay is two cells wide: it needs two, four or six columns." : state.bay === "AGX bay" ? "An AGX bay is two cells wide: it needs two, four or six columns." : "A bay is three cells wide: it needs three or six columns.")
-    : state.bay === "Jetson bay" ? `Two rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson Orin Nano developer kit, on a tray with posts at the board's own holes.`
-    : state.bay === "AGX bay" ? `Three rows high. ${crown === 1 ? "It takes" : "Each takes"} one Jetson AGX Orin developer kit, standing between low fences with its top fan clear.`
-    : state.bay === "Tall bay" ? "Two rows high: taller gear, or one rack unit up to 200 mm wide."
-    : state.bay === "Rack bay" ? "Takes ten-inch rack gear, one unit tall, with its ears on."
-    : n > 7 * crown ? `An eight-port switch serves seven Pis and an uplink. These ${n} need ${Math.ceil(n / 7)} switches; there is room for ${crown}.`
-    : `Room for ${crown === 1 ? "one eight-port switch" : "two eight-port switches"}: enough ports for these ${n} Pis and an uplink.`;
+  pressed("bayKinds", Object.entries(Wall.BAYS).map(([k, b]) => [k, b ? b.label : "None"]), state.bay, k => move(Wall.setBay(state, k)));
+  document.getElementById("bayNote").textContent = Wall.note(state);
   document.getElementById("colsN").textContent = cols;
   document.getElementById("rowsN").textContent = rows;
-  pressed("presets", Object.keys(presets).map(k => [k]), Object.keys(presets).find(k => presets[k][0] === cols && presets[k][1] === rows), k => { [state.cols, state.rows] = presets[k]; });
+  for (const [id, what, by] of [["colsDown", "cols", -1], ["colsUp", "cols", 1], ["rowsDown", "rows", -1], ["rowsUp", "rows", 1]])
+    document.getElementById(id).disabled = !Wall.canStep(state, what, by);
+  pressed("presets", Object.keys(Wall.PRESETS).map(k => [k]), Wall.preset(state), k => move(Wall.setPreset(state, k)));
   pressed("sleeves", DATA.neutrals.map(x => [x.name, x.hex]), state.sleeve, k => { state.sleeve = k; }, true);
   pressed("looks", Object.keys(looks).map(k => [k]), state.look, k => { state.look = k; });
   const hues = document.getElementById("hues");
   hues.hidden = state.look !== "One voice";
   pressed("hues", DATA.faces.map(f => [f.name.toLowerCase(), f.hex]), state.hue, k => { state.hue = k; }, true);
-  const parts = [["Cells", n], ["Carriers", n], ["Bases", cols], ["Top caps", cols], ["Side caps", 2 * high], ...(crown ? [[state.bay + (crown > 1 ? "s" : ""), crown], [{ "Jetson bay": "Orin trays", "AGX bay": "AGX trays" }[state.bay] || "Shelves", crown]] : [])];
-  document.getElementById("box").innerHTML = parts.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
-  const grams = 1.01 * (n * (73.06 + 15.86) + cols * (64.31 + 17.38) + high * (10.74 + 11.08) + (crown ? crown * kind[3] : 0));
-  const wide = cols * PX - 3.6 + 11.2, tall = high * PZ + 28.6;
-  document.getElementById("facts").textContent =
-    `${Math.round(wide)} mm wide, ${Math.round(tall)} tall, ${crown && state.bay === "AGX bay" ? 127 : 110} deep. About ${(grams / 1000).toFixed(grams < 1000 ? 2 : 1)} kg of printed parts. `
-    + `With a Pi in every cell: about ${(n * 6.2).toFixed(0)} W at typical work, ${(n * 14.3).toFixed(0)} W flat out, over ${n} network cable${n > 1 ? "s" : ""}.` + (crown && state.bay === "Jetson bay" ? " Each Jetson adds up to 25 W." : crown && state.bay === "AGX bay" ? " Each AGX Orin adds up to 60 W." : "");
+  document.getElementById("box").innerHTML = Wall.summary(state).parts.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
+  document.getElementById("facts").textContent = Wall.facts(state);
 }
-const bump = (key, by, lo, hi) => () => { state[key] = Math.min(hi, Math.max(lo, state[key] + by)); draw(); };
-document.getElementById("colsDown").onclick = bump("cols", -1, 1, 6);
-document.getElementById("colsUp").onclick = bump("cols", 1, 1, 6);
-document.getElementById("rowsDown").onclick = bump("rows", -1, 1, 4);
-document.getElementById("rowsUp").onclick = bump("rows", 1, 1, 4);
+const step = (go, by) => () => { Object.assign(state, go(state, by)); draw(); };
+document.getElementById("colsDown").onclick = step(Wall.stepCols, -1);
+document.getElementById("colsUp").onclick = step(Wall.stepCols, 1);
+document.getElementById("rowsDown").onclick = step(Wall.stepRows, -1);
+document.getElementById("rowsUp").onclick = step(Wall.stepRows, 1);
 draw();
 
 // A bay seen from the front: n places across, m up, under a roof of the given thickness.
@@ -468,7 +550,7 @@ function bay(x, y, sleeve, face, n, m, roof, grams, most, airs = 1) {
   return s + `<rect x="${fw / 2 - 22}" y="${fh - 20}" width="44" height="10" fill="#000" opacity="0.10"/></g></g>`;
 }
 // Three columns of cells on their bases with a bay across the top, and caps over it.
-function crowned(rows, sleeve, faceAt, bayFace, cols = 3, [wide, up, roof, , , airs] = [3, 1, 7]) {
+function crowned(rows, sleeve, faceAt, bayFace, cols = 3, { wide, high: up, roof, airs } = Wall.BAYS.bay) {
   let s = "";
   for (let k = 0; k < cols / wide; k++) s += bay(k * wide * PX, 5.6, sleeve, typeof bayFace === "function" ? bayFace(k) : bayFace, wide, up, roof, 0, 0, airs);
   const top = 5.6 + up * PZ;  // the cells start under the bay, however many rows high it is
