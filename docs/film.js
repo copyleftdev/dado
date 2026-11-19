@@ -528,18 +528,26 @@ function frame(dt) {
     const far = 900, perPx = (2 * far * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / H;
     const forward = camera.getWorldDirection(new THREE.Vector3()), from = v(wallCam().x, 50, wallCam().z);
     const settled = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.36, -0.62, 0)).premultiply(camera.quaternion);
-    const frames = clamp01((apart - 0.72) / 0.28);
+    // A tile that has been picked flies to where its part will stand on the parts page, at the size it will have
+    // there, while the others shrink away; then that page is opened.
+    const fly = picked ? eo(clamp01((performance.now() - picked.at) / 560)) : 0, frames = clamp01((apart - 0.72) / 0.28) * (1 - fly);
+    const half = THREE.MathUtils.degToRad(camera.fov / 2), narrow = Math.min(half, Math.atan(Math.tan(half) * camera.aspect));
+    const onto = (cx, cy) => { const ray = new THREE.Vector3((cx / W) * 2 - 1, 1 - (cy / H) * 2, 0.5).unproject(camera).sub(camera.position).normalize();
+      return camera.position.clone().addScaledVector(ray, far / ray.dot(forward)); };
+    $("captions").style.opacity = picked ? 1 - fly : "";
     SPECIMENS.forEach((sp, i) => {
       const k = io(clamp01((apart - i * 0.016) / (1 - 20 * 0.016))), left = gut + (i % across) * cw + 4, up = top + Math.floor(i / across) * ch + 4;
       const w = cw - 8, h = ch - 8, cx = left + w / 2, cy = up + (h - label) / 2;
-      const ray = new THREE.Vector3((cx / W) * 2 - 1, 1 - (cy / H) * 2, 0.5).unproject(camera).sub(camera.position).normalize();
-      const spot = camera.position.clone().addScaledVector(ray, far / ray.dot(forward));
-      const size = (Math.min(w - 10, h - label - 8) * perPx * 1.12) / (2 * sp.radius);  // the ball round a part is bigger than the part looks
+      let spot = onto(cx, cy), size = (Math.min(w - 10, h - label - 8) * perPx * 1.12) / (2 * sp.radius);  // the ball round a part is bigger than the part looks
+      if (picked && i === picked.i) {
+        spot.lerp(onto(W / 2 + (phone ? 0 : 65), H / 2 - (phone ? 88 : 0)), fly);
+        size = mix(size, ((Math.sin(narrow) / 1.22) * (H / 2) / Math.tan(half) * perPx * 0.9) / sp.radius, fly);  // 0.9: measured against that page
+      } else size *= 1 - fly;
       sp.group.visible = true;
       sp.group.position.copy(from).add(sp.centre).lerp(spot, k);
       sp.group.quaternion.identity().slerp(settled, k);
       sp.group.scale.setScalar(mix(1, size, k));
-      Object.assign(sp.link.style, { left: `${left}px`, top: `${up}px`, width: `${w}px`, height: `${h}px`, opacity: frames, pointerEvents: frames > 0.9 ? "auto" : "none" });
+      Object.assign(sp.link.style, { left: `${left}px`, top: `${up}px`, width: `${w}px`, height: `${h}px`, opacity: frames, pointerEvents: frames > 0.9 && !picked ? "auto" : "none" });
     });
   } else for (const sp of SPECIMENS) sp.group.visible = false;
 
@@ -609,6 +617,17 @@ const step = (move, by) => () => { Object.assign(cfg, move(cfg, by)); panel(); }
 $("colsDown").onclick = step(Wall.stepCols, -1); $("colsUp").onclick = step(Wall.stepCols, 1);
 $("rowsDown").onclick = step(Wall.stepRows, -1); $("rowsUp").onclick = step(Wall.stepRows, 1);
 panel();
+// Picking a tile: its part flies to the middle before the parts page opens. A click meant for a new tab is left alone.
+let picked = null;
+$("tiles").addEventListener("click", (e) => {
+  const link = e.target.closest("a");
+  if (!link || reduced || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+  e.preventDefault();
+  if (picked) return;
+  picked = { i: SPECIMENS.findIndex((sp) => sp.link === link), at: performance.now() };
+  setTimeout(() => { location.href = link.href; }, 600);
+});
+addEventListener("pageshow", () => { picked = null; });  // back from the part, the tiles are whole again
 let grab = null;
 canvas.addEventListener("pointerdown", (e) => { if (T >= CONFIG_AT && clock < TOTAL) grab = { x: e.clientX, az: orbit }; });
 addEventListener("pointermove", (e) => { if (grab) orbit = Math.max(-70, Math.min(70, grab.az - (e.clientX - grab.x) * 0.25)); });

@@ -165,8 +165,8 @@ function lay({ sheet }, p) {
   sheet.lookAt(sheet.position.clone().sub(cut.normal)); sheet.scale.setScalar(p.radius * 4);
 }
 const tone = (hex) => { const c = new THREE.Color(hex), l = c.getHSL({}).l; return c.lerp(new THREE.Color(l < 0.3 ? 0xffffff : 0x000000), l < 0.3 ? 0.34 : 0.22); };
-for (const p of PARTS) {
-  const geo = await load(p.id);
+// A part's mesh is fetched the first time it is wanted: the one asked for comes first, the rest behind it.
+const ready = (p) => (p.ready ??= load(p.id).then((geo) => {
   const skin = new THREE.MeshStandardMaterial({ color: p.face ?? PAL.graphite, roughness: 0.93, side: THREE.DoubleSide, clipShadows: true });
   const line = new THREE.LineBasicMaterial({ color: p.face ? 0x000000 : 0x565b60, transparent: true, opacity: p.face ? 0.2 : 0.6 });
   p.mesh = new THREE.Mesh(geo.g, skin); p.mesh.castShadow = p.mesh.receiveShadow = true;
@@ -174,7 +174,7 @@ for (const p of PARTS) {
   p.box = geo.box; p.centre = geo.box.getCenter(new THREE.Vector3()); p.size = geo.box.getSize(new THREE.Vector3()); p.radius = p.size.length() / 2;
   p.mesh.visible = false; p.mesh.renderOrder = 6; scene.add(p.mesh);
   p.fill = fill(geo.g, tone(p.face ?? PAL.graphite), 1);
-}
+}));
 // What a carrier holds. The fan is a stand-in made here: a 25 mm frame 6 thick with a rotor and a hub, where the
 // cradle holds it. The Pi is Raspberry Pi's own model: a lighter copy comes for the carrier's tile once the tiles are
 // up, and the full one the first time the carrier is opened.
@@ -218,7 +218,7 @@ function light(p) {
   ground.position.set(p.centre.x, p.box.min.y - 0.05, p.centre.z);
 }
 function only(p) {
-  for (const q of PARTS) { q.mesh.visible = q === p; q.fill.group.visible = false; }
+  for (const q of PARTS) if (q.mesh) { q.mesh.visible = q === p; q.fill.group.visible = false; }
   fan.mesh.visible = fan.fill.group.visible = false;
   for (const m of [pi.mesh, pi.far]) if (m) m.visible = false;
   if (pi.fill) pi.fill.group.visible = false;
@@ -237,14 +237,19 @@ function snap(p, company = []) {
   for (const mesh of company) mesh.visible = false;
   return canvas.toDataURL("image/png");
 }
-for (const p of PARTS) p.picture = snap(p, p.id === "carrier" ? [fan.mesh] : []);
 
 // ---------------------------------------------------------------- the tiles
 const money = (g) => `$${Math.round(g * PRINT[0])} to $${Math.round(g * PRINT[1])}`;
-$("families").innerHTML = FAMILIES.map(([key, title, about]) => `<section class="family"><small>${PARTS.filter((p) => p.in === key).length} parts</small>
-  <h2>${title}</h2><p>${about}</p><div class="tiles">${PARTS.filter((p) => p.in === key).map((p) =>
-    `<a class="tile" href="#${p.id}" id="tile-${p.id}"><img src="${p.picture}" alt="" width="480" height="360"><div><b>${p.name}</b><span>${p.blurb}</span><em>${p.body} mm</em></div></a>`).join("")}</div></section>`).join("");
-$("count").textContent = `${PARTS.length} parts make the whole system. Pick one to turn it over, cut it open and read what each feature is for.`;
+// The wall of tiles is made the first time it is to be shown: every part fetched, a picture taken of each.
+let stocked = null;
+const stock = () => (stocked ??= Promise.all(PARTS.map(ready)).then(() => {
+  for (const p of PARTS) p.picture = snap(p, p.id === "carrier" ? [fan.mesh] : []);
+  $("families").innerHTML = FAMILIES.map(([key, title, about]) => `<section class="family"><small>${PARTS.filter((p) => p.in === key).length} parts</small>
+    <h2>${title}</h2><p>${about}</p><div class="tiles">${PARTS.filter((p) => p.in === key).map((p) =>
+      `<a class="tile" href="#${p.id}" id="tile-${p.id}"><img src="${p.picture}" alt="" width="480" height="360"><div><b>${p.name}</b><span>${p.blurb}</span><em>${p.body} mm</em></div></a>`).join("")}</div></section>`).join("");
+  $("count").textContent = `${PARTS.length} parts make the whole system. Pick one to turn it over, cut it open and read what each feature is for.`;
+  stocked.done = true;
+}));
 
 // ---------------------------------------------------------------- the bench
 const controls = new OrbitControls(camera, canvas);
@@ -375,16 +380,18 @@ addEventListener("resize", () => { if (look.part) resize(); });
 
 // ------------------------------------------------------------ which is showing
 // The page's address says which: nothing after the # is the wall of tiles, a part's name is that part on the bench.
-function route(first) {
-  const p = PARTS.find((q) => q.id === location.hash.slice(1));
+let turn = 0;
+async function route(first) {
+  const p = PARTS.find((q) => q.id === location.hash.slice(1)), mine = ++turn;
   if (!p) {
     renderer.setAnimationLoop(null); const left = look.part; look.part = null;
+    if (!stocked?.done) { document.body.dataset.view = "loading"; await stock(); if (mine !== turn) return; }
     document.body.dataset.view = "gallery"; document.title = "Dado Parts"; retile();
     if (left) { const tile = $(`tile-${left.id}`); tile.scrollIntoView({ block: "center" }); tile.focus({ preventScroll: true }); }
     return;
   }
-  const tile = $(`tile-${p.id}`).querySelector("img"), from = tile.getBoundingClientRect();
-  const fly = document.body.dataset.view === "gallery" && !first && !reduced && from.width > 0;
+  const tile = $(`tile-${p.id}`)?.querySelector("img"), from = tile?.getBoundingClientRect();
+  const fly = tile && document.body.dataset.view === "gallery" && !first && !reduced && from.width > 0;
   if (fly) {
     // The tile's picture grows to fill the window, and the live part arrives behind it.
     const ghost = tile.cloneNode();
@@ -393,6 +400,7 @@ function route(first) {
     Object.assign(ghost.style, { left: "0", top: "0", width: "100vw", height: "100vh", opacity: "0" });
     setTimeout(() => ghost.remove(), 900);
   }
+  await ready(p); if (mine !== turn) return;
   document.body.dataset.view = "detail"; scrollTo(0, 0);
   open(p);
 }
@@ -400,11 +408,10 @@ addEventListener("hashchange", () => route(false));
 // The carrier's tile is redrawn with the Pi on it once a lighter copy of the model has come. The one renderer is busy
 // while a part is on the bench, so the picture is taken the next time the tiles are showing.
 function retile() {
-  if (!pi.far || pi.tiled || look.part) return;
+  if (!pi.far || pi.tiled || look.part || !stocked?.done) return;
   const carrier = PARTS.find((p) => p.id === "carrier");
   carrier.picture = snap(carrier, [fan.mesh, pi.far]); $("tile-carrier").querySelector("img").src = carrier.picture; pi.tiled = true;
 }
-load("pi-far").then((geo) => { pi.far = board(geo, 6); retile(); });
 addEventListener("keydown", (e) => {
   if (!look.part || e.target.matches?.("input")) return;
   if (e.key === "Escape") { if (home) location.href = home; else location.hash = ""; }
@@ -414,5 +421,8 @@ addEventListener("keydown", (e) => {
 // Come from the film's own tiles, "All parts" and Escape go back to them, not to this page's.
 const home = new URLSearchParams(location.search).get("from") === "film" ? "index.html#parts" : "";
 if (home) $("toAll").href = home;
-route(true);
 window.dado = { PARTS, look, camera };
+// The part asked for is shown as soon as it has come; the others, and the Pi for the carrier's tile, follow.
+await route(true);
+for (const p of PARTS) await ready(p);
+load("pi-far").then((geo) => { pi.far = board(geo, 6); retile(); });
