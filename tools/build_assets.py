@@ -65,7 +65,8 @@ manifest = {"parts": {}, "pitch": [cell["body.width"] + cell["gap"], cell["body.
             "cell": [cell["body.width"], cell["body.depth"] if "body.depth" in cell else 100.0, cell["body.height"]],
             "gap": cell["gap"], "wall": w, "base_rise": base["base.height"] + base["gap"], "trim": 2.0}
 
-for doc in ("cell", "base", "trimtop", "trimrail", "trimlip", "bay", "baytall", "bayrack", "bayduo", "bayagx"):
+for doc in ("cell", "base", "trimtop", "trimrail", "trimlip", "bay", "baytall", "bayrack", "bayduo", "bayagx",
+            "spacerrow", "spacercol", "spacercross", "basehalf", "trimtophalf"):
     pos, tri, edges = read(f".ringwright/{doc}/view/scene.rwv")
     manifest["parts"][doc] = write(doc, pos, tri, segments(edges))
     if doc == "cell":

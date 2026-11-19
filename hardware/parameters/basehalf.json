@@ -1,0 +1,173 @@
+{
+ "part": "basehalf",
+ "unit": "mm",
+ "parameters": [
+  {
+   "description": "Front to back: as the cell, so their fronts are one plane",
+   "id": "base.depth",
+   "value": 100.0
+  },
+  {
+   "description": "Play up and down between bases: as made, their heights differ by a few tenths",
+   "id": "base.float",
+   "value": 0.8
+  },
+  {
+   "description": "Tall enough for the side joint, clear of the rounded corners",
+   "id": "base.height",
+   "value": 22.0
+  },
+  {
+   "description": "",
+   "expr": "base.float + 0.6",
+   "id": "base.reach",
+   "value": 1.4
+  },
+  {
+   "description": "As the part it stands under: a cell, or a column spacer half a pitch wide",
+   "id": "body.width",
+   "value": 31.7
+  },
+  {
+   "description": "Where a finger's free end is, from the front of its part",
+   "id": "catch.from_front",
+   "value": 12.0
+  },
+  {
+   "description": "How far a cell's teeth reach: sets the notches in the top rail",
+   "id": "cell.reach",
+   "value": 1.4
+  },
+  {
+   "description": "",
+   "expr": "head.width / 2 + base.float",
+   "id": "chan.half",
+   "value": 6.8
+  },
+  {
+   "description": "The four long outer edges",
+   "id": "corner.radius",
+   "value": 2.0
+  },
+  {
+   "description": "Latch finger between bases",
+   "id": "finger.length",
+   "value": 12.0
+  },
+  {
+   "description": "That finger, across the joint",
+   "id": "finger.width",
+   "value": 1.0
+  },
+  {
+   "description": "Lip flange",
+   "id": "flange.height",
+   "value": 1.4
+  },
+  {
+   "description": "Rails and lips cut back from the front, as on the cell",
+   "id": "front.relief",
+   "value": 9.0
+  },
+  {
+   "description": "Closes the front of the hollows",
+   "id": "front.wall",
+   "value": 3.0
+  },
+  {
+   "description": "Between joined parts: the height of lips",
+   "id": "gap",
+   "value": 3.6
+  },
+  {
+   "description": "Rail head",
+   "id": "head.height",
+   "value": 1.2
+  },
+  {
+   "description": "Rail head",
+   "id": "head.width",
+   "value": 12.0
+  },
+  {
+   "description": "Notch into a rail's stem",
+   "id": "notch.depth",
+   "value": 0.65
+  },
+  {
+   "description": "",
+   "expr": "stem.width / 2 + base.float",
+   "id": "open.half",
+   "value": 3.8
+  },
+  {
+   "description": "Pads",
+   "id": "pad.height",
+   "value": 1.0
+  },
+  {
+   "description": "Pads in from the sides",
+   "id": "pad.inset",
+   "value": 3.0
+  },
+  {
+   "description": "Pads: two ribs underneath that the base stands on",
+   "id": "pad.width",
+   "value": 3.0
+  },
+  {
+   "description": "",
+   "expr": "stem.height + head.height",
+   "id": "rail.top",
+   "value": 3.0999999999999996
+  },
+  {
+   "description": "Rail stem",
+   "id": "stem.height",
+   "value": 1.9
+  },
+  {
+   "description": "Rail stem",
+   "id": "stem.width",
+   "value": 6.0
+  },
+  {
+   "description": "",
+   "expr": "catch.from_front + 0.3",
+   "id": "tooth.from",
+   "value": 12.3
+  },
+  {
+   "description": "Tooth along the joint, ramps included",
+   "id": "tooth.length",
+   "value": 4.0
+  },
+  {
+   "description": "Each ramp",
+   "id": "tooth.ramp",
+   "value": 1.5
+  },
+  {
+   "description": "",
+   "expr": "body.width / 2",
+   "id": "u.mid",
+   "value": 15.85
+  },
+  {
+   "description": "",
+   "expr": "base.height / 2",
+   "id": "v.mid",
+   "value": 11.0
+  },
+  {
+   "description": "Deck, floor, sides and the web under the rail",
+   "id": "wall",
+   "value": 3.0
+  },
+  {
+   "description": "Lip web",
+   "id": "web.width",
+   "value": 2.0
+  }
+ ]
+}

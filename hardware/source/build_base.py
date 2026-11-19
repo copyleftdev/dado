@@ -12,7 +12,9 @@ under each column."""
 import json, math, subprocess, sys
 
 RW = __import__("os").environ.get("RINGWRIGHT", "ringwright")
-DOC = "base"
+# "base" stands under a column of cells; "basehalf" under a column of column spacers.
+DOC = sys.argv[1] if len(sys.argv) > 1 else "base"
+WIDTH = {"base": 67, "basehalf": 31.7}[DOC]
 
 
 def rw(*args, stdin=None):
@@ -26,7 +28,7 @@ def ref(feature, role, expect=1):
 
 P = {
     # What it shares with the cell; these must match the cell.
-    "body.width": (67, "As the cell: the pitch across is this plus the gap"),
+    "body.width": (WIDTH, "As the part it stands under: a cell, or a column spacer half a pitch wide"),
     "gap": (3.6, "Between joined parts: the height of lips"),
     "stem.width": (6, "Rail stem"),
     "head.width": (12, "Rail head"),
@@ -271,7 +273,7 @@ def run(ops, last, key, rounded):
           "checks": [{"kind": "valid_solid", "body": "base.body"},
                      {"kind": "volume", "body": "base.body", "unit": "mm",
                       "at_least": want * 0.9995, "at_most": want * 1.0005}]}
-    open(f"tx-base-{key}.json", "w").write(json.dumps(tx, indent=1))
+    open(f"tx-{DOC}-{key}.json", "w").write(json.dumps(tx, indent=1))
     dry = rw("dry-run", "--brief", "-", stdin=json.dumps(tx))
     if not dry["ok"]:
         sys.exit(f"{key}: {json.dumps(dry['failure'], indent=1)[:3000]}")

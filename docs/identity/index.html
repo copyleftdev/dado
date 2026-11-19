@@ -138,6 +138,7 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
         <div>dado bay<span>the place of several cells, for a switch, a hub or a larger board</span></div>
         <div>dado shelf<span>slides into a bay, holds the device</span></div>
         <div>dado tray<span>a shelf fitted to one computer, such as a Jetson</span></div>
+        <div>dado spacer<span>half a place of room, for air and cables</span></div>
       </div>
     </div>
   </section>
@@ -162,6 +163,15 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
     </div>
     <div class="stage" style="padding:clamp(16px,4vw,36px)"><svg id="crown" role="img" aria-label="Six cells in two rows with a bay across the top"></svg></div>
     <div class="schemes" id="bays"></div>
+  </section>
+  <section>
+    <span class="eyebrow">Room between</span>
+    <h2>A spacer is half a place, so two of them put the wall back in step.</h2>
+    <div class="two">
+      <p>Some walls want room: air between hot rows, or somewhere for the cables to go. A row spacer is a cell's section half a row high; a column spacer is the same section half a place wide. Each has the cell's rail on top and lips underneath, so it slides on and latches like everything else, and a cross fills the corner where a line of one meets a line of the other.</p>
+      <p class="muted">Every spacer has a closed front with air slots and an open back, so air goes straight through. Behind, a line of row spacers is an open tray that carries cables across, and a column of spacers is an open shaft that takes 23 of them from top to bottom. A spacer always runs the whole line, and a column of them goes between bays, never under one.</p>
+    </div>
+    <div class="stage" style="padding:clamp(16px,4vw,36px)"><svg id="spaced" role="img" aria-label="Six cells in two rows, with a line of row spacers between the rows and a column of spacers between each two columns"></svg></div>
   </section>
 
   <section>
@@ -192,6 +202,7 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
         <div class="ctl"><span>Sleeves, bases and caps</span><div class="row" id="sleeves"></div></div>
         <div class="ctl"><span>Faces</span><div class="row" id="looks"></div><div class="row" id="hues"></div></div>
         <div class="ctl"><span>Bay on top</span><div class="row" id="bayKinds"></div><p class="muted" style="font-size:14px" id="bayNote"></p></div>
+        <div class="ctl"><span>Spacers</span><div class="row" id="spaces"></div><p class="muted" style="font-size:14px" id="spaceNote"></p></div>
         <table id="box"></table>
         <p class="muted" style="font-size:14px" id="facts"></p>
       </div>
@@ -245,13 +256,16 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 14px; 
 // The wall a viewer may build in "Make it yours", and the only ways to change
 // it. Every move returns a wall that can be built, so the page never has to
 // draw or explain one that cannot: a bay always crowns a wall that is a whole
-// number of bays wide. config.test.mjs walks every wall these moves can reach.
+// number of bays wide, and spacers are on only where there is somewhere for
+// them to go. config.test.mjs walks every wall these moves can reach.
 const Wall = (() => {
   const COLS = [1, 6], ROWS = [1, 4];
   const PITCH = 70.6, RISE = 45.6, GAP = 3.6, CAPS = 11.2, FOOT = 28.6, DEPTH = 110;  // mm
   const DENSITY = 1.01, PI_W = [6.2, 14.3];  // g/cm3 of PA12; watts a Pi, typical and flat out
   // Printed volume in cm3 of what every wall has: per cell, per column, per row.
-  const CM3 = { cell: 73.06 + 15.86, column: 64.31 + 17.38, row: 10.74 + 11.08 };
+  const CM3 = { cell: 73.06 + 15.86, column: 64.31 + 17.38, row: 10.74 + 11.08,
+    rowSpacer: 52.49, colSpacer: 43.29, cross: 19.03, halfColumn: 41.43 + 10.32 };
+  const SHAFT = 23;  // standard network cables a column of spacers takes
   // Each bay: places across, rows up, roof in mm, rows of air slots in its
   // face, cm3 of bay and tray together, and what stands in it if not a switch.
   const BAYS = {
@@ -276,41 +290,65 @@ const Wall = (() => {
   }
   // The allowed width nearest to a wanted one; the wider of two equally near.
   const nearest = (cols, list) => list.reduce((best, c) => (Math.abs(c - cols) <= Math.abs(best - cols) ? c : best));
-  const valid = (s) => known(s.bay) && widths(s.bay).includes(s.cols) && Number.isInteger(s.rows) && s.rows >= ROWS[0] && s.rows <= ROWS[1];
+  const crowns = (s) => (BAYS[s.bay] ? s.cols / BAYS[s.bay].wide : 0);
+  // Spacers. A line of row spacers goes between each two rows of cells; a line of column
+  // spacers between each two columns, or between each two bays, since a bay cannot stand
+  // across one. A wall with nowhere for a line to go cannot have that kind switched on.
+  const canSpace = (s, what) => (what === "rows" ? s.rows : crowns(s) || s.cols) >= 2;
+  const settle = (s) => ({ ...s, rowGaps: Boolean(s.rowGaps) && canSpace(s, "rows"), colGaps: Boolean(s.colGaps) && canSpace(s, "cols") });
+  const toggleSpace = (s, what) => {
+    const key = what === "rows" ? "rowGaps" : "colGaps";
+    return canSpace(s, what) ? { ...s, [key]: !s[key] } : s;
+  };
+  // Which rows and which columns have a line of spacers after them.
+  function spaced(s) {
+    const every = BAYS[s.bay] ? BAYS[s.bay].wide : 1, rows = [], cols = [];
+    if (s.rowGaps) for (let r = 0; r < s.rows - 1; r++) rows.push(r);
+    if (s.colGaps) for (let c = every - 1; c < s.cols - 1; c += every) cols.push(c);
+    return { rows, cols };
+  }
+  const valid = (s) => known(s.bay) && widths(s.bay).includes(s.cols) && Number.isInteger(s.rows) && s.rows >= ROWS[0] && s.rows <= ROWS[1]
+    && typeof s.rowGaps === "boolean" && typeof s.colGaps === "boolean" && (!s.rowGaps || canSpace(s, "rows")) && (!s.colGaps || canSpace(s, "cols"));
 
   // A wall from anything: a page address, an old saved choice, nonsense.
   function repair(raw = {}) {
     const bay = known(raw.bay) ? raw.bay : "none";
-    return { ...raw, bay, rows: whole(raw.rows ?? 3, ROWS), cols: nearest(whole(raw.cols ?? 3, COLS), widths(bay)) };
+    const on = (v) => v === true || v === "1" || v === "true";
+    return settle({ ...raw, bay, rows: whole(raw.rows ?? 3, ROWS), cols: nearest(whole(raw.cols ?? 3, COLS), widths(bay)), rowGaps: on(raw.rowGaps), colGaps: on(raw.colGaps) });
   }
   // Choosing a bay moves the wall to the nearest width that bay fits.
-  const setBay = (s, bay) => (known(bay) ? { ...s, bay, cols: nearest(s.cols, widths(bay)) } : s);
+  const setBay = (s, bay) => (known(bay) ? settle({ ...s, bay, cols: nearest(s.cols, widths(bay)) }) : s);
   // Width steps through the widths the bay allows; height through the rows.
   function stepCols(s, by) {
     const list = widths(s.bay), to = list[list.indexOf(s.cols) + Math.sign(by)];
-    return to === undefined ? s : { ...s, cols: to };
+    return to === undefined ? s : settle({ ...s, cols: to });
   }
   function stepRows(s, by) {
     const to = s.rows + Math.sign(by);
-    return to < ROWS[0] || to > ROWS[1] ? s : { ...s, rows: to };
+    return to < ROWS[0] || to > ROWS[1] ? s : settle({ ...s, rows: to });
   }
   const canStep = (s, what, by) => (what === "cols" ? stepCols(s, by) : stepRows(s, by)) !== s;
   // A preset is a size. It keeps the bay if the bay fits that size, and lets it go if not.
   function setPreset(s, name) {
     if (!Object.prototype.hasOwnProperty.call(PRESETS, name)) return s;
     const [cols, rows] = PRESETS[name];
-    return { ...s, cols, rows, bay: widths(s.bay).includes(cols) ? s.bay : "none" };
+    return settle({ ...s, cols, rows, bay: widths(s.bay).includes(cols) ? s.bay : "none" });
   }
   const preset = (s) => Object.keys(PRESETS).find((k) => PRESETS[k][0] === s.cols && PRESETS[k][1] === s.rows);
-  const crowns = (s) => (BAYS[s.bay] ? s.cols / BAYS[s.bay].wide : 0);
 
   // What the wall is: its parts, size, mass and power.
   function summary(s) {
     const kind = BAYS[s.bay], crown = crowns(s), n = s.cols * s.rows, high = s.rows + (kind ? kind.high : 0);
     const parts = [["Cells", n], ["Carriers", n], ["Bases", s.cols], ["Top caps", s.cols], ["Side caps", 2 * high]];
     if (kind) parts.push([kind.plural, crown], [kind.tray, crown]);
-    const grams = DENSITY * (n * CM3.cell + s.cols * CM3.column + high * CM3.row + (kind ? crown * kind.cm3 : 0));
-    return { n, crown, high, parts, grams, wide: s.cols * PITCH - GAP + CAPS, tall: high * RISE + FOOT, deep: (kind && kind.depth) || DEPTH,
+    const lines = spaced(s), across = lines.rows.length, down = lines.cols.length;
+    if (across) parts.push(["Row spacers", across * s.cols]);
+    if (down) parts.push(["Column spacers", down * high], ["Half bases", down], ["Half top caps", down]);
+    if (across && down) parts.push(["Crosses", across * down]);
+    const grams = DENSITY * (n * CM3.cell + s.cols * CM3.column + high * CM3.row + (kind ? crown * kind.cm3 : 0)
+      + across * s.cols * CM3.rowSpacer + down * (high * CM3.colSpacer + CM3.halfColumn) + across * down * CM3.cross);
+    return { n, crown, high, parts, grams, across, down, wide: s.cols * PITCH - GAP + CAPS + down * PITCH / 2, tall: high * RISE + FOOT + across * RISE / 2,
+      deep: (kind && kind.depth) || DEPTH,
       typical: n * PI_W[0], flatOut: n * PI_W[1] };
   }
   const facts = (s) => {
@@ -335,7 +373,19 @@ const Wall = (() => {
       : `The wall widens ${["", "", "two", "three", "four"][kind.wide]} cells at a time to match it.`;
     return `${holds} ${fit}`;
   }
-  return { COLS, ROWS, PITCH, RISE, GAP, BAYS, PRESETS, widths, valid, repair, setBay, stepCols, stepRows, canStep, setPreset, preset, crowns, summary, facts, note };
+  // What the spacers are doing, or why a kind cannot be switched on.
+  function spaceNote(s) {
+    const { across, down } = summary(s), count = (n, one, many) => `${["No", "One", "Two", "Three", "Four", "Five"][n]} ${n === 1 ? one : many}`;
+    const said = [];
+    if (across) said.push(`${count(across, "line", "lines")} of row spacers: half a row of air between the rows, and a tray behind for cables to run across.`);
+    if (down) said.push(`${count(down, "column", "columns")} of spacers: a shaft behind, top to bottom, for ${SHAFT} cables${down === 1 ? "" : " each"}.`);
+    if (!across && !down) said.push("A spacer is half a place of room, for air and for cables.");
+    if (!canSpace(s, "rows")) said.push("Row spacers go between rows: this wall has one.");
+    if (!canSpace(s, "cols")) said.push(BAYS[s.bay] ? "Column spacers go between bays: this wall has one." : "Column spacers go between columns: this wall has one.");
+    return said.join(" ");
+  }
+  return { COLS, ROWS, PITCH, RISE, GAP, BAYS, PRESETS, widths, valid, repair, setBay, stepCols, stepRows, canStep, setPreset, preset, crowns,
+    canSpace, toggleSpace, spaced, summary, facts, note, spaceNote };
 })();
 
 const DATA = {"profile": "M0.00,0.00 L3.00,0.00 L3.00,3.60 L6.00,3.60 L6.00,0.00 L24.70,0.00 L24.70,3.60 L29.70,3.60 L29.70,2.20 L26.70,2.20 L26.70,0.00 L40.30,0.00 L40.30,2.20 L37.30,2.20 L37.30,3.60 L42.30,3.60 L42.30,0.00 L61.00,0.00 L61.00,3.60 L64.00,3.60 L64.00,0.00 L67.00,0.00 L67.00,-18.00 L68.90,-18.00 L68.90,-13.40 L70.10,-13.40 L70.10,-28.60 L68.90,-28.60 L68.90,-24.00 L67.00,-24.00 L67.00,-42.00 L36.50,-42.00 L36.50,-43.90 L39.50,-43.90 L39.50,-45.10 L27.50,-45.10 L27.50,-43.90 L30.50,-43.90 L30.50,-42.00 L0.00,-42.00 L0.00,-32.20 L-3.60,-32.20 L-3.60,-25.60 L-2.20,-25.60 L-2.20,-30.20 L0.00,-30.20 L0.00,-11.80 L-2.20,-11.80 L-2.20,-16.40 L-3.60,-16.40 L-3.60,-9.80 L0.00,-9.80 Z", "cavity": "M3.00,-3.00 L64.00,-3.00 L64.00,-5.30 L62.80,-5.30 L62.80,-6.50 L64.00,-6.50 L64.00,-39.00 L3.00,-39.00 L3.00,-6.50 L4.20,-6.50 L4.20,-5.30 L3.00,-5.30 Z", "faces": [{"name": "Clay", "h": 35, "hex": "#CD8B7A"}, {"name": "Ochre", "h": 80, "hex": "#BA9960"}, {"name": "Moss", "h": 135, "hex": "#88AB75"}, {"name": "Teal", "h": 195, "hex": "#57AFAF"}, {"name": "Slate", "h": 250, "hex": "#75A3D2"}, {"name": "Lilac", "h": 310, "hex": "#AF90C6"}], "neutrals": [{"name": "Graphite", "hex": "#24272A", "l": 0.27}, {"name": "Putty", "hex": "#88867E", "l": 0.62}, {"name": "Bone", "hex": "#E1DED4", "l": 0.9}]};
@@ -496,7 +546,7 @@ document.getElementById("closer").innerHTML = shots.map(([name, cam, art, items]
   `<div class="shot"><h3>${name}</h3><div class="stage">${art}</div><span class="cam">${cam}</span><ol>${items.map(([b, t]) => `<li><span><b>${b}:</b> ${t}</span></li>`).join("")}</ol></div>`).join("");
 
 // Act three: the configurator. Sizes, masses and power are from the CAD and the earlier figures.
-const state = Wall.repair({ cols: 3, rows: 3, sleeve: "Graphite", look: "Run", hue: "teal", bay: "none" });
+const state = Wall.repair({ cols: 3, rows: 3, sleeve: "Graphite", look: "Run", hue: "teal", bay: "none", rowGaps: false, colGaps: false });
 const sleeveHex = Object.fromEntries(DATA.neutrals.map(n => [n.name, n.hex]));
 const looks = {
   "Monolith": () => (state.sleeve === "Bone" ? sleeveHex.Graphite : sleeveHex.Bone),
@@ -516,11 +566,16 @@ function draw() {
   console.assert(Wall.valid(state), "a wall that cannot be built", state);
   const { cols, rows } = state, kind = Wall.BAYS[state.bay], move = next => Object.assign(state, next);
   const paint = (c, r) => looks[state.look](c, r);
-  const m = kind ? crowned(rows, sleeveHex[state.sleeve], paint, k => paint(1 + kind.wide * k, rows), cols, kind)
-    : wall(cols, rows, sleeveHex[state.sleeve], paint);
+  const m = built(state, sleeveHex[state.sleeve], paint, k => paint(1 + (kind ? kind.wide : 1) * k, rows));
   svg(document.getElementById("preview"), m.w, m.h, m.body, 6);
   pressed("bayKinds", Object.entries(Wall.BAYS).map(([k, b]) => [k, b ? b.label : "None"]), state.bay, k => move(Wall.setBay(state, k)));
   document.getElementById("bayNote").textContent = Wall.note(state);
+  const gaps = { rows: [state.rowGaps, "Between rows"], cols: [state.colGaps, kind ? "Between bays" : "Between columns"] };
+  const spaces = document.getElementById("spaces");
+  spaces.innerHTML = Object.entries(gaps).map(([k, [on, label]]) =>
+    `<button data-k="${k}" aria-pressed="${on}"${Wall.canSpace(state, k) ? "" : " disabled"}>${label}</button>`).join("");
+  spaces.onclick = e => { const b = e.target.closest("button"); if (b && !b.disabled) { move(Wall.toggleSpace(state, b.dataset.k)); draw(); } };
+  document.getElementById("spaceNote").textContent = Wall.spaceNote(state);
   document.getElementById("colsN").textContent = cols;
   document.getElementById("rowsN").textContent = rows;
   for (const [id, what, by] of [["colsDown", "cols", -1], ["colsUp", "cols", 1], ["rowsDown", "rows", -1], ["rowsUp", "rows", 1]])
@@ -549,6 +604,34 @@ function bay(x, y, sleeve, face, n, m, roof, grams, most, airs = 1) {
   for (let a = 0; a < airs; a++) for (let k = 0; k < slots; k++) s += `<rect x="${fw / 2 - ((slots - 1) / 2) * 10.5 - 4 + k * 10.5}" y="${3 + a * 11.5}" width="8" height="7" fill="${C.hole}"/>`;
   return s + `<rect x="${fw / 2 - 22}" y="${fh - 20}" width="44" height="10" fill="#000" opacity="0.10"/></g></g>`;
 }
+// A spacer seen from the front: wide by high, in the sleeve's colour, with its air slots.
+function spacer(x, y, sleeve, wide, high, across, up) {
+  let s = `<g transform="translate(${x},${y})"><rect width="${wide}" height="${high}" rx="2" fill="${sleeve}"/>`;
+  for (let r = 0; r < up; r++) for (let k = 0; k < across; k++)
+    s += `<rect x="${wide / 2 - ((across - 1) / 2) * 10.5 - 4 + k * 10.5}" y="${high / 2 - ((up - 1) / 2) * 11.5 - 3.5 + r * 11.5}" width="8" height="7" fill="${C.hole}"/>`;
+  return s + "</g>";
+}
+// Any wall the rules allow: cells on their bases, a bay across the top if there is one, spacers where the rules put them, caps over all.
+function built(wall, sleeve, faceAt, bayFace) {
+  const { cols, rows } = wall, kind = Wall.BAYS[wall.bay], lines = Wall.spaced(wall), HX = PX / 2, HZ = PZ / 2;
+  const colX = c => c * PX + lines.cols.filter(k => k < c).length * HX, up = r => r * PZ + lines.rows.filter(k => k < r).length * HZ;
+  const top = 5.6 + (kind ? kind.high * PZ : 0), stack = rows * PZ + lines.rows.length * HZ, rowY = r => top + stack - up(r) - PZ;
+  let s = "";
+  if (kind) for (let k = 0; k < cols / kind.wide; k++) s += bay(colX(k * kind.wide), 5.6, sleeve, bayFace(k), kind.wide, kind.high, kind.roof, 0, 0, kind.airs);
+  for (let c = 0; c < cols; c++) {
+    s += `<rect x="${colX(c)}" y="0" width="67" height="2" fill="${sleeve}"/><rect x="${colX(c)}" y="${top + stack}" width="67" height="22" rx="2" fill="${sleeve}"/>`;
+    for (let r = 0; r < rows; r++) s += cell(colX(c), rowY(r), sleeve, faceAt(c, r));
+    for (const r of lines.rows) s += spacer(colX(c), rowY(r) - HZ, sleeve, 67, 19.2, 5, 1);
+  }
+  for (const c of lines.cols) {
+    const x = colX(c) + PX;
+    s += `<rect x="${x}" y="0" width="31.7" height="2" fill="${sleeve}"/><rect x="${x}" y="${top + stack}" width="31.7" height="22" rx="2" fill="${sleeve}"/>`;
+    for (let q = 0; q < (kind ? kind.high : 0); q++) s += spacer(x, 5.6 + q * PZ, sleeve, 31.7, 42, 2, 3);
+    for (let r = 0; r < rows; r++) s += spacer(x, rowY(r), sleeve, 31.7, 42, 2, 3);
+    for (const r of lines.rows) s += spacer(x, rowY(r) - HZ, sleeve, 31.7, 19.2, 2, 1);
+  }
+  return { body: s, w: cols * PX - 3.6 + lines.cols.length * HX, h: top + stack + 22 };
+}
 // Three columns of cells on their bases with a bay across the top, and caps over it.
 function crowned(rows, sleeve, faceAt, bayFace, cols = 3, { wide, high: up, roof, airs } = Wall.BAYS.bay) {
   let s = "";
@@ -562,6 +645,8 @@ function crowned(rows, sleeve, faceAt, bayFace, cols = 3, { wide, high: up, roof
 }
 { const m = crowned(2, C.graphite, (c, r) => F[order[(c + r) % 6]], F.slate);
   svg(document.getElementById("crown"), m.w, m.h, m.body, 6); }
+{ const m = built(Wall.repair({ cols: 3, rows: 2, bay: "none", rowGaps: true, colGaps: true }), C.graphite, (c, r) => F[order[(c + r) % 6]]);
+  svg(document.getElementById("spaced"), m.w, m.h, m.body, 6); }
 document.getElementById("bays").innerHTML = [
   ["Bay", 3, 1, 7, F.slate, "Three wide, one high. 201.7 by 30.2 mm on its shelf: desktop switches and hubs up to 29 mm tall. Carries one row of cells above it."],
   ["Tall bay", 3, 2, 10, F.teal, "Three wide, two high. 201.7 by 72.8 mm: taller gear, or one rack unit up to 200 mm wide. Carries three rows above it."],

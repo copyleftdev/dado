@@ -1,0 +1,224 @@
+{
+ "part": "spacercol",
+ "unit": "mm",
+ "parameters": [
+  {
+   "description": "Front to back: 3 port overhang, 85 board, 12 behind",
+   "id": "body.depth",
+   "value": 100.0
+  },
+  {
+   "description": "A whole row",
+   "id": "body.height",
+   "value": 42.0
+  },
+  {
+   "description": "Half a pitch less a gap: two of these and their gaps are one place",
+   "id": "body.width",
+   "value": 31.7
+  },
+  {
+   "description": "The finger's free end: behind the relief",
+   "id": "catch.from_front",
+   "value": 12.0
+  },
+  {
+   "description": "",
+   "expr": "head.width / 2 + float",
+   "id": "chan.half",
+   "value": 6.8
+  },
+  {
+   "description": "The four long outer edges",
+   "id": "corner.radius",
+   "value": 2.0
+  },
+  {
+   "description": "Free end to root: long enough to bend the whole 1.4 at the end of the play",
+   "id": "finger.length",
+   "value": 12.0
+  },
+  {
+   "description": "The finger, across the joint: the direction it bends",
+   "id": "finger.width",
+   "value": 1.0
+  },
+  {
+   "description": "Lip flange, the part that holds",
+   "id": "flange.height",
+   "value": 1.4
+  },
+  {
+   "description": "Play across the stacking joint: it holds up and down only",
+   "id": "float",
+   "value": 0.8
+  },
+  {
+   "description": "Rails, lips and skids cut back from the front, so the gaps between cells read as clean lines",
+   "id": "front.relief",
+   "value": 9.0
+  },
+  {
+   "description": "The closed front",
+   "id": "front.wall",
+   "value": 3.0
+  },
+  {
+   "description": "Between joined cells: the height of the lips and skids",
+   "id": "gap",
+   "value": 3.6
+  },
+  {
+   "description": "Rail head",
+   "id": "head.height",
+   "value": 1.2
+  },
+  {
+   "description": "Rail head",
+   "id": "head.width",
+   "value": 12.0
+  },
+  {
+   "description": "Into the stem: the tooth's 0.6 and a little",
+   "id": "notch.depth",
+   "value": 0.65
+  },
+  {
+   "description": "",
+   "expr": "stem.width / 2 + float",
+   "id": "open.half",
+   "value": 3.8
+  },
+  {
+   "description": "",
+   "expr": "stem.height + head.height",
+   "id": "rail.top",
+   "value": 3.0999999999999996
+  },
+  {
+   "description": "No floor or roof over this much of the back: stacked, an open shaft for cables",
+   "id": "shaft.depth",
+   "value": 40.0
+  },
+  {
+   "description": "",
+   "expr": "side.head / 2 + side.float",
+   "id": "side.chan",
+   "value": 9.2
+  },
+  {
+   "description": "Side joint: a longer finger, for it bends further",
+   "id": "side.finger.length",
+   "value": 16.0
+  },
+  {
+   "description": "Side joint: and a stouter one",
+   "id": "side.finger.width",
+   "value": 1.4
+  },
+  {
+   "description": "Play up and down in the side joint",
+   "id": "side.float",
+   "value": 1.6
+  },
+  {
+   "description": "Side rail head: still holds 1.4 at either end of that play",
+   "id": "side.head",
+   "value": 15.2
+  },
+  {
+   "description": "",
+   "expr": "stem.width / 2 + side.float",
+   "id": "side.open",
+   "value": 4.6
+  },
+  {
+   "description": "Side joint: 0.6 past the stem when centred",
+   "id": "side.tooth.reach",
+   "value": 2.2
+  },
+  {
+   "description": "Skids in from the body's sides: the rounded corner needs the first 2",
+   "id": "skid.inset",
+   "value": 3.0
+  },
+  {
+   "description": "Skids: plain ribs the cell stands on, as tall as the lips",
+   "id": "skid.width",
+   "value": 3.0
+  },
+  {
+   "description": "Their height",
+   "id": "slot.height",
+   "value": 7.0
+  },
+  {
+   "description": "Slot to slot across",
+   "id": "slot.pitch",
+   "value": 10.5
+  },
+  {
+   "description": "Row of slots to row",
+   "id": "slot.step",
+   "value": 11.5
+  },
+  {
+   "description": "Air slots in the front, as in a carrier's face",
+   "id": "slot.width",
+   "value": 8.0
+  },
+  {
+   "description": "Rail stem: a lip's flange plus 0.5 to lift in",
+   "id": "stem.height",
+   "value": 1.9
+  },
+  {
+   "description": "Rail stem",
+   "id": "stem.width",
+   "value": 6.0
+  },
+  {
+   "description": "",
+   "expr": "catch.from_front + 0.3",
+   "id": "tooth.from",
+   "value": 12.3
+  },
+  {
+   "description": "Tooth along the joint, ramps included",
+   "id": "tooth.length",
+   "value": 4.0
+  },
+  {
+   "description": "Each ramp",
+   "id": "tooth.ramp",
+   "value": 1.5
+  },
+  {
+   "description": "Tooth beyond the lip's edge: 0.6 past the stem when centred",
+   "id": "tooth.reach",
+   "value": 1.4
+  },
+  {
+   "description": "",
+   "expr": "body.width / 2",
+   "id": "u.mid",
+   "value": 15.85
+  },
+  {
+   "description": "",
+   "expr": "body.height / 2",
+   "id": "v.mid",
+   "value": 21.0
+  },
+  {
+   "description": "Where printed flame-retardant materials reach V-0",
+   "id": "wall",
+   "value": 3.0
+  },
+  {
+   "description": "Lip web",
+   "id": "web.width",
+   "value": 2.0
+  }
+ ]
+}

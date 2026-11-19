@@ -1,0 +1,83 @@
+== 1. Sound ==
+PASS  spacerrow mesh is closed and consistently wound: 660 triangles, every edge used once each way: True
+PASS  spacerrow mesh volume against the kernel's: mesh 52483.7 mm3, kernel 52487.3 mm3, 0.007% apart
+PASS  spacerrow thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  spacercol mesh is closed and consistently wound: 916 triangles, every edge used once each way: True
+PASS  spacercol mesh volume against the kernel's: mesh 43285.8 mm3, kernel 43289.4 mm3, 0.008% apart
+PASS  spacercol thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  spacercross mesh is closed and consistently wound: 536 triangles, every edge used once each way: True
+PASS  spacercross mesh volume against the kernel's: mesh 19031.0 mm3, kernel 19033.2 mm3, 0.011% apart
+PASS  spacercross thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  basehalf mesh is closed and consistently wound: 696 triangles, every edge used once each way: True
+PASS  basehalf mesh volume against the kernel's: mesh 41427.8 mm3, kernel 41431.3 mm3, 0.008% apart
+PASS  basehalf thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.2, 1.4, 2.0, 2.14]
+PASS  trimtophalf mesh is closed and consistently wound: 220 triangles, every edge used once each way: True
+PASS  trimtophalf mesh volume against the kernel's: mesh 10315.5 mm3, kernel 10315.5 mm3, 0.000% apart
+PASS  trimtophalf thinnest section: 1.00 mm (floor for this check 0.8 mm); thinnest values found [1.0, 1.12, 1.4, 2.0, 2.14, 2.2]
+== 2. Two halves make one place ==
+PASS  spacercol, width: 31.7 mm; two and their gaps are 70.6, the pitch across is 70.6
+PASS  spacercross, width: 31.7 mm; two and their gaps are 70.6, the pitch across is 70.6
+PASS  basehalf, width: 31.7 mm; two and their gaps are 70.6, the pitch across is 70.6
+PASS  trimtophalf, width: 31.7 mm; two and their gaps are 70.6, the pitch across is 70.6
+PASS  spacerrow, height: 19.2 mm; two and their gaps are 45.6, the rise is 45.6
+PASS  spacercross, height: 19.2 mm; two and their gaps are 45.6, the rise is 45.6
+PASS  spacerrow: every joint dimension is the cell's: differing: none
+PASS  spacercol: every joint dimension is the cell's: differing: none
+PASS  spacercross: every joint dimension is the cell's: differing: none
+PASS  the other way each is a whole place: row spacer 67 wide, column spacer 42 high, as a cell
+== 3. Joined: seated without touching, held when pulled ==
+PASS  a row spacer on a cell: seated: points of one part inside the other: 0
+PASS  a row spacer on a cell, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a cell on a row spacer: seated: points of one part inside the other: 0
+PASS  a cell on a row spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a row spacer on a row spacer: seated: points of one part inside the other: 0
+PASS  a row spacer on a row spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a column spacer on a column spacer: seated: points of one part inside the other: 0
+PASS  a column spacer on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a cross on a column spacer: seated: points of one part inside the other: 0
+PASS  a cross on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a column spacer on a cross: seated: points of one part inside the other: 0
+PASS  a column spacer on a cross, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a cross on a cross: seated: points of one part inside the other: 0
+PASS  a cross on a cross, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a column spacer on its base: seated: points of one part inside the other: 0
+PASS  a column spacer on its base, pulled apart 1.2 mm: the lips meet the rail's head: 323 points
+PASS  a half top cap on a column spacer: seated: points of one part inside the other: 0
+PASS  a half top cap on a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 315 points
+PASS  a column spacer at a cell's rail side: seated: points of one part inside the other: 0
+PASS  a column spacer at a cell's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 320 points
+PASS  a cell at a column spacer's rail side: seated: points of one part inside the other: 0
+PASS  a cell at a column spacer's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 320 points
+PASS  a column spacer beside a column spacer: seated: points of one part inside the other: 0
+PASS  a column spacer beside a column spacer, pulled apart 1.2 mm: the lips meet the rail's head: 320 points
+PASS  a half base at a base's rail side: seated: points of one part inside the other: 0
+PASS  a half base at a base's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  a base at a half base's rail side: seated: points of one part inside the other: 0
+PASS  a base at a half base's rail side, pulled apart 1.2 mm: the lips meet the rail's head: 306 points
+PASS  row spacers side by side: no joint between them, 3.6 mm apart: points of one inside the other: 0
+PASS  a cross beside a row spacer: no joint between them, 3.6 mm apart: points of one inside the other: 0
+PASS  a row spacer beside a cross: no joint between them, 3.6 mm apart: points of one inside the other: 0
+== 4. Back in step ==
+PASS  a cell, two row spacers, a cell: the upper cell stands 91.2 mm up: exactly two rows (91.2), so it lines up with a neighbour that has no spacers
+PASS  a cell, two column spacers, a cell: the far cell is 141.2 mm over: exactly two places (141.2), so a bay above still fits
+PASS  a two-wide bay on two column spacers and a cell: it seats without touching (0 points); pulled up 1.2 mm it is held by the cell's rail (306 points)
+NOTE  a bay over column spacers is not held by them: its lips fall between the two spacers' rails (0 points meet when pulled): it is held only where it stands on cells
+== 5. Ways through ==
+PASS  the shaft: a column spacer, a cross and a column spacer stacked: 2520 points from under the stack to over it, in the rear 40 mm: inside a part: 0
+NOTE  the shaft takes 23 standard cables, 6.0 mm: 1028 mm2, filled no more than 65 %
+NOTE  the shaft takes 58 slim 28 AWG cables, 3.8 mm: 1028 mm2, filled no more than 65 %
+PASS  the tray: a row spacer, a cross and a row spacer in a line: 1680 points from one end to the other, in the rear 40 mm between floor and roof: inside a part: 0
+NOTE  the tray takes 12 standard cables: 528 mm2, filled no more than 65 %; they are laid in from behind
+PASS  the cross ends where the tray and the shaft begin: 60 mm deep; behind it the tray and the shaft meet with nothing between
+PASS  air through spacerrow: 5 slots, 2.8 cm2; a straight line through each, front to back: blocked points: 0
+PASS  air through spacercol: 6 slots, 3.4 cm2; a straight line through each, front to back: blocked points: 0
+PASS  air through spacercross: 2 slots, 1.1 cm2; a straight line through each, front to back: blocked points: 0
+== 6. Load ==
+PASS  3 loaded cells on a row spacer: the roof behind the side walls carries about 2.4 N and sags about 0.07 mm (0.25 allowed, as for a bay's roof)
+PASS  9 loaded cells on a row spacer: the roof behind the side walls carries about 7.1 N and sags about 0.22 mm (0.25 allowed, as for a bay's roof)
+== 7. Not checked, and what to know ==
+NOTE  no side joint on the half-height parts: row spacers and crosses are held from above and below only; the columns stay joined by their cells
+NOTE  a spacer runs the whole line: a row spacer under every column of its row, with a cross wherever it meets a column of spacers; a column spacer in every row of its column. A bay cannot stand across a single column spacer
+NOTE  the wall's edges: there is no side cap half a row high: at a row of spacers the side caps skip 22.8 mm
+NOTE  cables: a lead leaves a port at the back of a cell, turns behind the wall and is laid into a tray or a shaft from behind; the bend that takes, and whether air moves usefully through the slots, are not modelled
+{'PASS': 67, 'FAIL': 0, 'NOTE': 8}

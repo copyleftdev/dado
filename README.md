@@ -23,6 +23,10 @@ Dado is an open-hardware enclosure for Raspberry Pi 5 clusters. Each Pi lives in
 | Rack bay | Four wide, two high, for ten-inch rack gear one unit tall | 278.8 × 87.6 × 100 | [`bayrack.step`](hardware/step/bayrack.step), [`shelfrack.step`](hardware/step/shelfrack.step) |
 | Jetson bay | Two wide, two high, for an NVIDIA Jetson Orin Nano developer kit on its own tray | 137.6 × 87.6 × 100 | [`bayduo.step`](hardware/step/bayduo.step), [`orin.step`](hardware/step/orin.step) |
 | AGX bay | Two wide, three high, for an NVIDIA Jetson AGX Orin developer kit, whose fan is in its top face | 137.6 × 133.2 × 100 | [`bayagx.step`](hardware/step/bayagx.step), [`agx.step`](hardware/step/agx.step) |
+| Row spacer | Half a row of room between two rows: air through it, a cable tray behind | 67 × 19.2 × 100 | [`spacerrow.step`](hardware/step/spacerrow.step) |
+| Column spacer | Half a place of room between two columns: air through it, a cable shaft behind | 31.7 × 42 × 100 | [`spacercol.step`](hardware/step/spacercol.step) |
+| Cross | Where a line of row spacers meets a column of spacers | 31.7 × 19.2 × 60 | [`spacercross.step`](hardware/step/spacercross.step) |
+| Half base and half top cap | Under and over a column of spacers | 31.7 wide | [`basehalf.step`](hardware/step/basehalf.step), [`trimtophalf.step`](hardware/step/trimtophalf.step) |
 
 Cells sit 70.6 mm apart across and 45.6 mm apart up. Every dimension of every part, with a sentence saying why it is what it is, is in [`hardware/parameters`](hardware/parameters). The reasoning behind the design is in [SPEC.md](SPEC.md).
 
@@ -33,6 +37,8 @@ Cells sit 70.6 mm apart across and 45.6 mm apart up. Every dimension of every pa
 ![The Jetson bay standing on two cells, with a third beside it](docs/img/jetson.png)
 
 ![The AGX bay, three rows high, standing on two cells](docs/img/agx.png)
+
+![Row spacers on three cells, with a column spacer and a cross beside them](docs/img/spacers.png)
 
 ## How it works
 
@@ -60,7 +66,8 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - Raspberry Pi's own model of the Pi 5 sits on the carrier's posts with every port through its window and nothing touching. The tightest port clears by 0.61 mm.
 - Joints and latches were simulated across 200,000 parts at printing tolerance.
 - Roofs of the bays were calculated for the load of the rows above them.
-- The site's configurator can only show walls that can be built. Its rules are one file, [`docs/config.js`](docs/config.js), and [`tools/config.test.mjs`](tools/config.test.mjs) walks all 68 walls they allow and every move between them.
+- The site's configurator can only show walls that can be built. Its rules are one file, [`docs/config.js`](docs/config.js), and [`tools/config.test.mjs`](tools/config.test.mjs) walks all 196 walls they allow and every move between them.
+- Two spacers and their gaps are exactly one place, across and up. A stack of column spacers leaves a clear shaft for 23 network cables, a line of row spacers a clear tray for 12, and a straight line through every air slot is unblocked.
 - The Jetson tray's posts sit under the four mounting holes in NVIDIA's own drill file, with 1.7 mm spare under the board and at least 34.9 mm above its cooler.
 - The AGX tray holds a box of the kit's published size between its fences and stops with 0.5 mm of slack, and the bay leaves 50.7 mm above the fan in its top face.
 
@@ -73,7 +80,9 @@ Each part was built from a script that states its volume by hand; the CAD kernel
 - **The single-height bay carries one row of cells above it,** not three. The tall bay carries three.
 - **The Jetson bay was checked against NVIDIA's published sizes, not a model of the board.** Its cooling is not modelled (the board can draw about 25 W), and it takes 9 to 20 V at a barrel socket, not the Pis' 5 V.
 - **The AGX bay was checked against a plain box of NVIDIA's three outside sizes.** The kit's feet and underside are not in the drawing used, and the tray's latch fingers need 1.2 mm of room under the kit to release. Its cooling is not modelled (15 to 60 W), and it stands 18.5 mm out behind the bay.
-- **Wire management stops at "out the back".** A cable spine was started and set aside.
+- **Row spacers and crosses have no side joint.** They are too low to carry it, so they are held from above and below only. There is no side cap half a row high.
+- **A bay over column spacers is held only by the cells under it,** so the configurator puts columns of spacers between bays, never under one.
+- **Wire management is a route, not a fit.** Spacers give cables a tray and a shaft behind the wall; how tightly a lead bends from a port into them is not modelled, and neither is the air through their slots.
 - **Tall walls need a deeper base** than the desk-scale one here.
 
 ## Projections
@@ -88,6 +97,7 @@ Calculated from the part volumes and published figures; none is measured. The fu
 | Four and an AGX Orin | 4 | 149 × 257 × 127 | 2.2 kg | 55 W | $253 to $479 |
 | Six and a bay | 6 | 219 × 165 × 110 | 1.8 kg | 37 W | $317 to $600 |
 | Nine | 9 | 219 × 165 × 110 | 2.1 kg | 56 W | $309 to $583 |
+| Nine, spaced | 9 | 290 × 211 × 110 | 2.9 kg | 56 W | $518 to $980 |
 | Twenty-four and two bays | 24 | 431 × 257 × 110 | 6.0 kg | 149 W | $925 to $1,748 |
 | A hundred | 100 | 714 × 485 × 110 | 21.0 kg | 620 W | $2,757 to $5,214 |
 

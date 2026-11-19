@@ -57,6 +57,22 @@ Nothing may cover the fan, so the kit is not strapped. It stands between two fen
 
 The kit is deeper than a bay. The tray's plate carries on 21 past the bay's back, the kit's sockets stand 18.5 behind it, and the latch fingers are tongues cut into the longer plate.
 
+## Spacers
+
+A spacer is the cell's section at half size, with the cell's rail on top and its lips underneath.
+
+| Spacer | Body | Goes | Behind |
+|---|---|---|---|
+| Row spacer | 67 by 19.2 by 100 | between two rows | no side walls over the rear 40: a tray, side to side |
+| Column spacer | 31.7 by 42 by 100 | between two columns | no floor or roof over the rear 40: a shaft, top to bottom |
+| Cross | 31.7 by 19.2 by 60 | where the two meet | it ends where the tray and the shaft begin |
+
+Half a rise less a gap is 19.2 and half a pitch less a gap is 31.7, so two spacers and their gaps are exactly one place and the lattice comes back into step. Each has a closed front with air slots 8 by 7 and an open back.
+
+The column spacer carries the cell's side joint. The row spacer and the cross do not: that joint's lips are 22.4 tall. A spacer runs the whole line: a row spacer under every column of its row, a cross wherever that line meets a column of spacers, a column spacer in every row of its column. A column of spacers stands on a half base and is closed by a half top cap. A bay's lips fall between the rails of two column spacers, so a column of spacers goes between bays, not under one.
+
+The shaft is 25.7 by 40 and takes 23 cables 6 across at 65 % fill; the tray is 13.2 by 40 and takes 12. Behind its side walls a row spacer's roof is a shelf 40 deep: nine loaded cells above it sag it 0.22, against 0.25 allowed.
+
 ## Tolerances
 
 Designed for powder-bed nylon at ±0.30 on every dimension. Injection moulding at ±0.10 would let the plays above be reduced; that study has not been done.

@@ -18,8 +18,8 @@ const HUES = ["clay", "ochre", "moss", "teal", "slate", "lilac"];
 // The rear shot was added after the rest was timed: for REAR seconds from 79
 // the film's own clock T holds still while the camera goes round the back.
 // The bay's shot follows it the same way, for BAY seconds more.
-const REAR = 8, BAY = 33, HOLD = REAR + BAY, TOTAL = 88 + HOLD, CONFIG_AT = 85.5, PX_PER_S = 115;
-const B0 = 79 + REAR, B1 = B0 + BAY, B2 = B0 + 11, B3 = B2 + 9.4, B4 = B3 + 6.2;  // B2: the first bay leaves, its taller and wider kin follow; B3: the Jetson bay; B4: the AGX bay
+const REAR = 8, BAY = 40, HOLD = REAR + BAY, TOTAL = 88 + HOLD, CONFIG_AT = 85.5, PX_PER_S = 115;
+const B0 = 79 + REAR, B1 = B0 + BAY, B2 = B0 + 11, B3 = B2 + 9.4, B4 = B3 + 6.2, B5 = B4 + 6.2;  // B2: the first bay leaves, its taller and wider kin follow; B3: the Jetson bay; B4: the AGX bay; B5: the spacers
 const still = new URLSearchParams(location.search).get("t");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -86,7 +86,7 @@ async function part(name, creased) {
   }
   return { g, lines };
 }
-const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "bayduo", "orin", "bayagx", "agx", "pi-far", "pi"];
+const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "bayduo", "orin", "bayagx", "agx", "spacerrow", "spacercol", "spacercross", "basehalf", "trimtophalf", "pi-far", "pi"];
 const [man, ...loaded] = await Promise.all([
   fetch("assets/manifest.json").then((r) => r.json()),
   ...names.map((n) => part(n, !n.startsWith("pi"))),
@@ -149,6 +149,9 @@ const pool = (n, geo) => Array.from({ length: n }, () => {
   const m = solid(geo, M.sleeve, M.sleeveLine); scene.add(m); return { m, arr: 0 };
 });
 const bases = pool(6, G.base), tops = pool(6, G.trimtop), rails = pool(7, G.trimrail), lips = pool(7, G.trimlip);  // four rows and a three-row bay make seven
+// Spacers: up to three lines of six between rows, five columns of seven between columns, and a cross wherever they meet.
+const rowSpacers = pool(18, G.spacerrow), colSpacers = pool(35, G.spacercol), crosses = pool(15, G.spacercross);
+const halfBases = pool(5, G.basehalf), halfTops = pool(5, G.trimtophalf);
 // Two bays, each with its shelf and a switch strapped to it, ports to the back.
 const bays = [0, 1].map(() => {
   const group = new THREE.Group(), inner = new THREE.Group(), face = matte(PAL.slate);
@@ -207,7 +210,7 @@ const loops = man.section.map((pts) => {
 // ---------------------------------------------------------------- the looks
 // The wall being configured. Its size and bay change only through Wall's moves, so it can always be built.
 const asked = new URLSearchParams(location.search);
-const cfg = Wall.repair({ cols: asked.get("cols") ?? 3, rows: 3, sleeve: "graphite", look: "run", hue: "teal", bay: asked.get("bay") ?? "none" });
+const cfg = Wall.repair({ cols: asked.get("cols") ?? 3, rows: asked.get("rows") ?? 3, rowGaps: asked.get("rowgaps"), colGaps: asked.get("colgaps"), sleeve: "graphite", look: "run", hue: "teal", bay: asked.get("bay") ?? "none" });
 const FILM = { cols: 3, rows: 3, sleeve: "graphite", hue: "teal" };
 function look(name, c, r, s) {
   switch (name) {
@@ -254,10 +257,11 @@ function filmCam(T) {
 }
 let orbit = 26;
 function wallCam() {
-  const w = cfg.cols * PX - man.gap + 2 * CAP, h = LIFT + (cfg.rows + bayRows()) * PZ + 2, aspect = innerWidth / innerHeight;
+  const spacers = Wall.summary(cfg), run = cfg.cols * PX - man.gap + spacers.down * PX / 2;
+  const w = run + 2 * CAP, h = LIFT + (cfg.rows + bayRows()) * PZ + spacers.across * PZ / 2 + 2, aspect = innerWidth / innerHeight;
   const wide = innerWidth > 760, across = wide ? 0.4 : 0.56, up = wide ? 0.55 : 0.34;
   const d = Math.max(h / up, (w + 70) / (across * aspect)) / 0.4987;
-  return { x: -(cfg.cols * PX - man.gap) / 2, y: 50, z: (h - 3.6) / 2, az: orbit, el: 14, d };
+  return { x: -run / 2, y: 50, z: (h - 3.6) / 2, az: orbit, el: 14, d };
 }
 function aim(c, fit) {
   const az = THREE.MathUtils.degToRad(c.az), el = THREE.MathUtils.degToRad(c.el), d = c.d * fit;
@@ -284,7 +288,8 @@ const CAPS = [
   [B0 + 0.3, B2 - 0.4, "Act two · Look closer", "The bay.", "A switch or a hub takes the place of three cells, on the same joints. The cables stay behind."],
   [B2 + 0.1, B3 - 0.4, "Act two · Look closer", "Taller. Wider.", "The same idea at two more sizes, for gear that is not a desktop switch."],
   [B3 + 0.1, B4 - 0.4, "Act two · Look closer", "Not only Pis.", "A bay two cells wide and two rows high takes a Jetson Orin Nano developer kit, on its own tray."],
-  [B4 + 0.1, B1 - 0.3, "Act two · Look closer", "Room to breathe.", "A Jetson AGX Orin developer kit has its fan in its top face, so its bay stands three rows high."],
+  [B4 + 0.1, B5 - 0.4, "Act two · Look closer", "Room to breathe.", "A Jetson AGX Orin developer kit has its fan in its top face, so its bay stands three rows high."],
+  [B5 + 0.1, B1 - 0.3, "Act two · Look closer", "Half a place.", "Spacers put room between rows or between columns, for air and for cables. Two of them make one place, so the wall stays in step."],
   [79.6 + HOLD, 85.2 + HOLD, "Act three", "Make it yours.", "Pick a size and its colours. The list is what would be in the box."],
 ].map(([a, b, kicker, head, body]) => {
   const el = document.createElement("div");
@@ -321,7 +326,9 @@ const NOTES = [
   [B2 + 0.9, B2 + 3.3, [-196, 0, 120], "", [-190, -70], "Tall bay", "Two rows high: taller gear, or one rack unit up to 200 mm wide."],
   [B2 + 5.6, B2 + 8.0, [-270, 0, 120], "", [-170, -70], "Rack bay", "Four cells wide: ten-inch rack gear, one unit tall, with its ears on."],
   [B3 + 2.0, B4 - 1.6, [-126, 0, 120], "", [-190, -70], "Jetson bay", "The board on four posts at NVIDIA’s own hole spacing, with 35 mm of air above its cooler."],
-  [B4 + 2.0, B1 - 2.0, [-126, 0, 165], "", [-190, -70], "AGX bay", "The kit stands between low fences with 50 mm of air above its fan. Nothing straps over it."],
+  [B4 + 2.0, B5 - 1.6, [-126, 0, 165], "", [-190, -70], "AGX bay", "The kit stands between low fences with 50 mm of air above its fan. Nothing straps over it."],
+  [B5 + 2.2, B1 - 1.8, [-33.5, 0, 55.2], "", [250, -110], "Row spacer", "Half a row high. Air goes straight through; behind, a tray carries cables across."],
+  [B5 + 2.2, B1 - 1.8, [-227.6, 0, 21], "", [-210, -60], "Column spacer", "Half a place wide. Behind, a shaft takes 23 cables from top to bottom."],
 ].map(([a, b, at, rides, off, head, body], i, all) => {
   const el = document.createElement("div");
   el.className = "label" + (off[0] < 0 ? " left" : "");
@@ -338,6 +345,8 @@ const NOTES = [
 let clock = still === null ? 0 : +still, T = 0, wasConfig = false;
 const bg = new THREE.Color(), ink = new THREE.Color(), tmp = new THREE.Color();
 const eased = { cols: 3, rows: 3, bay: 0 };
+// How many lines of spacers stand before each column and under each row, eased, so the wall opens and closes.
+const pushed = { col: Array(7).fill(0), row: Array(8).fill(0) };
 const seg = (a, b) => clamp01((T - a) / (b - a));
 const segc = (a, b) => clamp01((clock - a) / (b - a));
 const place = (obj, x, y, z) => obj.position.set(x, z, -y);
@@ -374,6 +383,10 @@ function frame(dt) {
   // the wall's size, and how far it has risen onto its bases
   const cols = config ? cfg.cols : 3, rows = config ? cfg.rows : 3;
   eased.cols = mix(eased.cols, cols, config ? rate : 1); eased.rows = mix(eased.rows, rows, config ? rate : 1);
+  const lines = config ? Wall.spaced(cfg) : { rows: [], cols: [] };
+  pushed.col.forEach((v, c) => { pushed.col[c] = mix(v, lines.cols.filter((k) => k < c).length, config ? rate : 1); });
+  pushed.row.forEach((v, r) => { pushed.row[r] = mix(v, lines.rows.filter((k) => k < r).length, config ? rate : 1); });
+  const colX = (c) => -(c * PX + pushed.col[c] * PX / 2), rowZ = (r) => r * PZ + pushed.row[r] * PZ / 2, allRows = pushed.row[7] * PZ / 2;
   const lift = study ? 0 : config ? 1 : act3 ? io(seg(82.2, 83.8)) : io(seg(29.5, 31.3));
   const backB = 46 * (io(seg(62.2, 63.6)) - io(seg(69.2, 70.2)));
 
@@ -392,7 +405,7 @@ function frame(dt) {
     if (!config && u.c === 3 && u.r === 0) arr = segc(B2 + 3.4, B2 + 4.8) * (1 - segc(B3 - 1.1, B3 + 0.1));
     u.arr = arr;
     u.group.visible = arr > 0.001 && (i > 0 || T >= 5);
-    place(u.group, -u.c * PX, -(1 - eo(arr)) * 360 + (i === 1 && study ? backB : 0), u.r * PZ + lift * LIFT);
+    place(u.group, colX(u.c), -(1 - eo(arr)) * 360 + (i === 1 && study ? backB : 0), rowZ(u.r) + lift * LIFT);
     if (i === 0) {
       const grow = T < 10 ? Math.max(0.001, io(seg(5, 8.6))) : 1;
       u.sleeve.scale.z = grow; u.sleeve.position.z = -100 * (1 - grow);
@@ -415,29 +428,47 @@ function frame(dt) {
     b.arr = config ? b.arr + ((cfg.bay === "bay" && k < crowned ? 1 : 0) - b.arr) * rate
       : k ? 0 : segc(B0 + 1.8, B0 + 3.4) * (1 - segc(B2 - 1.7, B2 - 0.5));
     b.group.visible = b.arr > 0.002;
-    place(b.group, -k * 3 * PX, -(1 - eo(b.arr)) * 360, config ? LIFT + eased.rows * PZ : PZ);
+    place(b.group, colX(k * 3), -(1 - eo(b.arr)) * 360, config ? LIFT + eased.rows * PZ + allRows : PZ);
     b.inner.position.z = shelfOut; b.inner.visible = config || clock > B0 + 3.2;
     b.face.color.lerp(tmp.setHex(config ? look("config", 1 + 3 * k, cfg.rows) : PAL.slate), config ? rate * 1.4 : 1);
   });
   const SHOTS = { tall: [B2 - 0.4, B2 + 1.2, B2 + 3.1, B2 + 4.1, PAL.teal], rack: [B2 + 4.4, B2 + 6, B3 - 1.3, B3 - 0.1, PAL.ochre],
-    jetson: [B3, B3 + 1.6, B4 - 1.3, B4 - 0.1, PAL.moss], agx: [B4, B4 + 1.6, B1 - 1.9, B1 - 0.7, PAL.lilac] };
+    jetson: [B3, B3 + 1.6, B4 - 1.3, B4 - 0.1, PAL.moss], agx: [B4, B4 + 1.6, B5 - 1.3, B5 - 0.1, PAL.lilac] };
   for (const kind of ["tall", "rack", "jetson", "agx"]) {
     const { pool: made, wide } = CROWNS[kind], [a0, a1, z0, z1, hex] = SHOTS[kind];
     const film = segc(a0, a1) * (1 - segc(z0, z1));
     made.forEach((b, k) => {
       b.arr = config ? b.arr + ((cfg.bay === kind && k < crowned ? 1 : 0) - b.arr) * rate : k ? 0 : film;
       b.group.visible = b.arr > 0.002;
-      place(b.group, -k * wide * PX, -(1 - eo(b.arr)) * 360, config ? LIFT + eased.rows * PZ : PZ);
+      place(b.group, colX(k * wide), -(1 - eo(b.arr)) * 360, config ? LIFT + eased.rows * PZ + allRows : PZ);
       if (config) b.face.color.lerp(tmp.setHex(look("config", 1 + wide * k, cfg.rows)), rate * 1.4);
       else b.face.color.setHex(hex);
     });
   }
   const show = (p, on, a, b) => { p.arr = config ? p.arr + ((on ? 1 : 0) - p.arr) * rate : on ? seg(a, b) : 0; p.m.visible = p.arr > 0.002; return eo(p.arr); };
   const rise = act3 ? 82.4 : 30, cap = act3 ? 83.4 : 31.6, wallUp = !study && T >= 24;
-  bases.forEach((p, c) => place(p.m, -c * PX, (1 - show(p, wallUp && c < cols, rise + c * 0.25, rise + 1.7 + c * 0.25)) * 320, -2.6));
-  tops.forEach((p, c) => place(p.m, -c * PX, -(1 - show(p, wallUp && c < cols, cap + c * 0.2, cap + 1.3 + c * 0.2)) * 140, LIFT + (eased.rows + eased.bay) * PZ));
-  rails.forEach((p, r) => place(p.m, -eased.cols * PX, -(1 - show(p, wallUp && r < rows + extra, cap + 0.4 + r * 0.2, cap + 1.7 + r * 0.2)) * 140, LIFT + r * PZ));
-  lips.forEach((p, r) => place(p.m, CAP, -(1 - show(p, wallUp && r < rows + extra, cap + 0.4 + r * 0.2, cap + 1.7 + r * 0.2)) * 140, LIFT + r * PZ));
+  bases.forEach((p, c) => place(p.m, colX(c), (1 - show(p, wallUp && c < cols, rise + c * 0.25, rise + 1.7 + c * 0.25)) * 320, -2.6));
+  tops.forEach((p, c) => place(p.m, colX(c), -(1 - show(p, wallUp && c < cols, cap + c * 0.2, cap + 1.3 + c * 0.2)) * 140, LIFT + (eased.rows + eased.bay) * PZ + allRows));
+  rails.forEach((p, r) => place(p.m, -(eased.cols * PX + pushed.col[6] * PX / 2), -(1 - show(p, wallUp && r < rows + extra, cap + 0.4 + r * 0.2, cap + 1.7 + r * 0.2)) * 140, LIFT + rowZ(r)));
+  lips.forEach((p, r) => place(p.m, CAP, -(1 - show(p, wallUp && r < rows + extra, cap + 0.4 + r * 0.2, cap + 1.7 + r * 0.2)) * 140, LIFT + rowZ(r)));
+
+  // Spacers. In the film they stand on and beside the borrowed row of three; after it, wherever the wall's rules put them.
+  // One that is leaving keeps the place it had.
+  const stand = (p, on, x, z, film = 0) => {
+    p.arr = config ? p.arr + ((on ? 1 : 0) - p.arr) * rate : film;
+    if (on || !config) { p.x = x; p.z = z; }
+    p.m.visible = p.arr > 0.002; place(p.m, p.x ?? x, -(1 - eo(p.arr)) * 360, p.z ?? z);
+  };
+  const shot = (k) => segc(B5 + k * 0.25, B5 + 1.5 + k * 0.25) * (1 - segc(B1 - 1.9, B1 - 0.7));
+  const lineX = (c) => colX(c) - PX, lineZ = (r) => rowZ(r) + PZ, lr = lines.rows, lc = lines.cols, base = config ? LIFT : 0;
+  rowSpacers.forEach((p, n) => { const i = Math.floor(n / 6), c = n % 6;
+    stand(p, i < lr.length && c < cols, colX(c), base + (config ? lineZ(lr[i] ?? 0) : PZ), !i && c < 3 ? shot(c) : 0); });
+  colSpacers.forEach((p, n) => { const j = Math.floor(n / 7), q = n % 7;
+    stand(p, j < lc.length && q < rows + extra, config ? lineX(lc[j] ?? 0) : -3 * PX, base + rowZ(q), n ? 0 : shot(3)); });
+  crosses.forEach((p, n) => { const i = Math.floor(n / 5), j = n % 5;
+    stand(p, i < lr.length && j < lc.length, config ? lineX(lc[j] ?? 0) : -3 * PX, base + (config ? lineZ(lr[i] ?? 0) : PZ), n ? 0 : shot(4)); });
+  halfBases.forEach((p, j) => stand(p, j < lc.length, lineX(lc[j] ?? 0), -2.6));
+  halfTops.forEach((p, j) => stand(p, j < lc.length, lineX(lc[j] ?? 0), LIFT + (eased.rows + eased.bay) * PZ + allRows));
 
   // camera
   const want = config ? wallCam() : filmCam(T);
@@ -449,8 +480,8 @@ function frame(dt) {
   }
   const overBay = config ? 0 : io(segc(B0 - 0.6, B0 + 1.4)) * (1 - io(segc(B1 - 1.2, B1 + 0.6)));
   if (overBay > 0) {
-    const grown = io(segc(B2 - 0.6, B2 + 1)), wider = io(segc(B2 + 3.2, B2 + 4.8)) * (1 - io(segc(B3 - 0.8, B3 + 0.8))), taller = io(segc(B4 - 0.8, B4 + 0.8));
-    const b = { x: mix(-104, -138, wider), y: 10, z: mix(44, 64, grown) + 22 * taller, az: 32 - 8 * segc(B0, B1), el: 17, d: mix(720, 860, grown) + 90 * wider + 90 * taller };
+    const grown = io(segc(B2 - 0.6, B2 + 1)), wider = io(segc(B2 + 3.2, B2 + 4.8)) * (1 - io(segc(B3 - 0.8, B3 + 0.8))), taller = io(segc(B4 - 0.8, B4 + 0.8)) * (1 - io(segc(B5 - 0.8, B5 + 0.8))), low = io(segc(B5 - 0.8, B5 + 0.8));
+    const b = { x: mix(-104, -138, wider) - 16 * low, y: 10, z: mix(44, 64, grown) + 22 * taller - 26 * low, az: 32 - 8 * segc(B0, B1), el: 17, d: mix(720, 860, grown) + 90 * wider + 90 * taller };
     for (const n in want) want[n] = mix(want[n], b[n], overBay);
   }
   cable.visible = rear > 0.02;
@@ -517,6 +548,11 @@ function panel() {
   choices("hues", HUES.map((h) => [h]), cfg.hue, (k) => { cfg.hue = k; }, true);
   choices("bays", Object.entries(Wall.BAYS).map(([k, kind]) => [k, kind ? kind.label : "None"]), cfg.bay, (k) => move(Wall.setBay(cfg, k)));
   $("bayNote").textContent = Wall.note(cfg);
+  const gaps = { rows: [cfg.rowGaps, "Between rows"], cols: [cfg.colGaps, Wall.BAYS[cfg.bay] ? "Between bays" : "Between columns"] };
+  $("spaces").innerHTML = Object.entries(gaps).map(([k, [on, label]]) =>
+    `<button type="button" data-k="${k}" aria-pressed="${on}"${Wall.canSpace(cfg, k) ? "" : " disabled"}>${label}</button>`).join("");
+  $("spaces").onclick = (e) => { const b = e.target.closest("button"); if (b && !b.disabled) { move(Wall.toggleSpace(cfg, b.dataset.k)); panel(); } };
+  $("spaceNote").textContent = Wall.spaceNote(cfg);
   $("box").innerHTML = Wall.summary(cfg).parts.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
   $("facts").textContent = Wall.facts(cfg);
 }

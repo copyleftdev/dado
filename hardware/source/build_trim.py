@@ -5,6 +5,7 @@ cluster by covering the joints nothing is joined to.
 Each is a 2 mm plate carrying one half of the cell's own joint, drawn with
 the cell's own code, so it slides on and latches the way a cell does:
   trimtop   over a top rail: a plate with the cell's lips and skids under it
+  trimtophalf  the same, half a pitch wide, for the top of a column of spacers
   trimrail  over a side rail: a plate with the cell's side lips
   trimlip   into side lips: a plate with the cell's side rail
 """
@@ -43,6 +44,7 @@ def into_lips():
 # document: (what to change, outline, which reliefs, joint, fingers, notches)
 TRIMS = {
     "trimtop": ({"body.height": T}, top, dict(top=False, under=True, rail=False, lips=False), c.UNDER, True, False),
+    "trimtophalf": ({"body.height": T, "body.width": 31.7}, top, dict(top=False, under=True, rail=False, lips=False), c.UNDER, True, False),
     "trimrail": ({"body.width": T}, over_rail, dict(top=False, under=False, rail=False, lips=True), c.SIDE, True, False),
     "trimlip": ({"body.width": T}, into_lips, dict(top=False, under=False, rail=True, lips=False), c.SIDE, False, True),
 }
