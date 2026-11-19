@@ -144,8 +144,24 @@ def main():
     names = args or list(DEFECTS)
     if "none" not in names:
         names = ["none"] + names
-    with ThreadPoolExecutor(max_workers=12) as pool:
-        got = {r["name"]: r for r in pool.map(one, names)}
+    # Every copy asks one serving Ringwright, which builds each different part once and
+    # runs no more workers than the machine has cores. One already named is used as it is.
+    server = None
+    if not os.environ.get("RINGWRIGHT_SERVER"):
+        socket = os.path.join(tempfile.mkdtemp(), "ringwright.sock")
+        server = subprocess.Popen([RW, "serve", "--socket", socket], stdout=subprocess.PIPE, text=True)
+        server.stdout.readline()  # it says one line when it is listening
+        os.environ["RINGWRIGHT_SERVER"] = socket
+    try:
+        with ThreadPoolExecutor(max_workers=12) as pool:
+            got = {r["name"]: r for r in pool.map(one, names)}
+    finally:
+        if server:
+            said = subprocess.run([RW, "serve", "--stats"], capture_output=True, text=True).stdout
+            subprocess.run([RW, "serve", "--stop"], capture_output=True)
+            server.wait(timeout=180)
+            did = json.loads(said)["result"]
+            print(f"one Ringwright served {did['jobs_done']} jobs: {did['built']} builds, {did['cache_hits'] + did['joined']} answered from builds already made")
     base = got["none"]
     assert base["build"] is None, base
     dirty = {s: f for s, f in base["suites"].items() if f}

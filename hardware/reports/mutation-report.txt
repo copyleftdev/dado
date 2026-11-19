@@ -1,3 +1,4 @@
+one Ringwright served 12085 jobs: 249 builds, 7877 answered from builds already made
 unchanged designs: every suite passes
 CAUGHT  cell: no lift in the joint  [flange as thick as the stem is tall]
           fit_check.py: the joint proof
@@ -108,4 +109,4 @@ CAUGHT  caps: plate too thin  [a 0.6 mm plate: below what prints]
 
 37 of 37 planted defects caught
 
-Run of 2026-11-19, after gussets were put under the pull of the carrier, shelves and trays.
+Run of 2026-11-19 through one serving Ringwright: 212 seconds for all 37.
