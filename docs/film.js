@@ -6,7 +6,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { Line2 } from "three/addons/lines/Line2.js";
 import { LineGeometry } from "three/addons/lines/LineGeometry.js";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
-import { toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
+import { mergeGeometries, toCreasedNormals } from "three/addons/utils/BufferGeometryUtils.js";
 import { Wall } from "./config.js";
 
 const PAL = {
@@ -89,7 +89,7 @@ async function part(name, creased) {
   }
   return { g, lines };
 }
-const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "bayduo", "orin", "bayagx", "agx", "spacerrow", "spacercol", "spacercross", "basehalf", "trimtophalf", "pi-far", "pi"];
+const names = ["cell", "carrier", "base", "trimtop", "trimrail", "trimlip", "bay", "shelf", "baytall", "shelftall", "bayrack", "shelfrack", "bayduo", "orin", "bayagx", "agx", "spacerrow", "spacercol", "spacercross", "basehalf", "trimtophalf", "pi-lite", "pi"];
 const [man, ...loaded] = await Promise.all([
   fetch("assets/manifest.json").then((r) => r.json()),
   ...names.map((n) => part(n, !n.startsWith("pi"))),
@@ -107,23 +107,72 @@ const M = {
   faceLine: new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.16 }),
 };
 M.ghost.transparent = true;
-function solid(geo, material, lineMaterial) {
-  const m = new THREE.Mesh(geo.g, material);
-  m.castShadow = m.receiveShadow = true;
-  if (geo.lines && lineMaterial) m.add(new THREE.LineSegments(geo.lines, lineMaterial));
-  return m;
+// Drawing. Most parts appear many times, so each kind is drawn once for all its copies. What the film moves about
+// is a stand-in: an empty object that carries one copy's place. Before each frame the places of the stand-ins that
+// are showing are copied into one instanced mesh for their kind, and one more for its edges.
+const LAYERS = [], BY_KIND = new Map();
+function layer(geometry, material, { lines = null, lineMaterial = null, tinted = false, cast = true } = {}) {
+  const made = { geometry, material, lines, lineMaterial, tinted, cast, stands: [], mesh: null, edges: null };
+  LAYERS.push(made); return made;
+}
+function stand(to, paint = null) {
+  const s = new THREE.Object3D(); s.paint = paint; to.stands.push(s); return s;
+}
+M.face = matte(0xffffff);  // every coloured face is this, tinted copy by copy
+// A part: a real mesh for the one see-through sleeve, a stand-in for everything else. A face's colour is read each
+// frame from the material it was given, which is never itself drawn, so the film goes on changing that as before.
+function solid(geo, material, lineMaterial, cast = true) {
+  if (material === M.ghost) {
+    const m = new THREE.Mesh(geo.g, material);
+    m.castShadow = m.receiveShadow = true;
+    if (geo.lines && lineMaterial) m.add(new THREE.LineSegments(geo.lines, lineMaterial));
+    return m;
+  }
+  const tinted = material !== M.sleeve, key = `${tinted ? "face" : "sleeve"}${cast ? "" : ", no shadow"}`;
+  if (!BY_KIND.has(geo)) BY_KIND.set(geo, {});
+  const mine = BY_KIND.get(geo)[key] ??= layer(geo.g, tinted ? M.face : M.sleeve, { lines: geo.lines, lineMaterial, tinted, cast });
+  return stand(mine, tinted ? material : null);
+}
+// Each layer gets room for every stand-in it has, the first time it is drawn.
+function raise(made) {
+  const room = made.stands.length, mesh = new THREE.InstancedMesh(made.geometry, made.material, room);
+  mesh.castShadow = made.cast; mesh.receiveShadow = true; mesh.frustumCulled = false; mesh.count = 0;
+  made.mesh = mesh; scene.add(mesh);
+  if (made.lines && made.lineMaterial) {
+    // Edges are line segments, which three.js has no instanced kind of. An instanced mesh that says it is line
+    // segments is drawn as them, once for each copy, with the mesh's own places.
+    const edges = new THREE.InstancedMesh(made.lines, made.lineMaterial, room);
+    edges.isMesh = false; edges.isLine = edges.isLineSegments = true;
+    edges.instanceMatrix = mesh.instanceMatrix; edges.frustumCulled = false; edges.count = 0;
+    made.edges = edges; scene.add(edges);
+  }
+}
+const showing = (o) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
+function muster() {
+  for (const made of LAYERS) {
+    if (!made.mesh) raise(made);
+    let n = 0;
+    for (const s of made.stands) {
+      if (!showing(s)) continue;
+      made.mesh.setMatrixAt(n, s.matrixWorld);
+      if (made.tinted) made.mesh.setColorAt(n, s.paint.color);
+      n++;
+    }
+    made.mesh.count = n; made.mesh.visible = n > 0; made.mesh.instanceMatrix.needsUpdate = true;
+    if (made.tinted && made.mesh.instanceColor) made.mesh.instanceColor.needsUpdate = true;
+    if (made.edges) { made.edges.count = n; made.edges.visible = n > 0; }
+  }
 }
 
-// A 25 mm fan, 6 thick, where the cradle holds it: a frame, a rotor and a hub.
-const fan = new THREE.Group();
-{
-  const dark = new THREE.MeshStandardMaterial({ color: 0x17181a, roughness: 0.6 }), blade = new THREE.MeshStandardMaterial({ color: 0x2b2d31, roughness: 0.5 });
-  const frame = new THREE.Mesh(new THREE.BoxGeometry(25, 25, 5.2), dark);
-  const rotor = new THREE.Mesh(new THREE.CylinderGeometry(11.2, 11.2, 5.6, 40), blade);
-  const hub = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 6, 24), dark);
-  rotor.rotation.x = hub.rotation.x = Math.PI / 2;
-  fan.add(frame, rotor, hub); fan.position.set(-33.5, 25, -5.6);
-}
+// A 25 mm fan, 6 thick, where the cradle holds it: a frame, a rotor and a hub, as one solid.
+const FAN = (() => {
+  const turned = (g) => g.rotateX(Math.PI / 2);
+  const g = mergeGeometries([new THREE.BoxGeometry(25, 25, 5.2), turned(new THREE.CylinderGeometry(11.2, 11.2, 5.6, 40)), turned(new THREE.CylinderGeometry(4.6, 4.6, 6, 24))]);
+  g.translate(-33.5, 25, -5.6);
+  return layer(g, new THREE.MeshStandardMaterial({ color: 0x1c1d20, roughness: 0.6 }), { cast: false });
+})();
+// The light Pi: each of its larger bodies as a plain box. It is what a cell holds whenever the film is not close to it.
+const LITE = layer(G["pi-lite"].g, M.pi, { cast: false });
 // One network cable for the rear shot: a plug in the Ethernet port and its lead.
 const cable = new THREE.Group();
 {
@@ -143,10 +192,11 @@ const units = SLOTS.map(([c, r], i) => {
   const sleeve = solid(G.cell, i ? M.sleeve : M.ghost, i ? M.sleeveLine : M.ghostLine);
   const face = matte(PAL.bone);
   const carrier = solid(G.carrier, face, M.faceLine);
-  const pi = new THREE.Mesh(G[i ? "pi-far" : "pi"].g, M.pi);
-  pi.receiveShadow = true;
-  inner.add(carrier, pi, fan.clone()); group.add(sleeve, inner); scene.add(group);
-  return { c, r, group, inner, sleeve, pi, face, arr: 0, tint: new THREE.Color(PAL.bone) };
+  // Raspberry Pi's full model is drawn only in the two cells the film goes close to, and only while it is close.
+  const pi = i === 0 || i === 3 ? new THREE.Mesh(G.pi.g, M.pi) : null, lite = stand(LITE);
+  if (pi) { pi.receiveShadow = true; inner.add(pi); }
+  inner.add(carrier, lite, stand(FAN)); group.add(sleeve, inner); scene.add(group);
+  return { c, r, group, inner, sleeve, pi, lite, face, arr: 0, tint: new THREE.Color(PAL.bone) };
 });
 const pool = (n, geo) => Array.from({ length: n }, () => {
   const m = solid(geo, M.sleeve, M.sleeveLine); scene.add(m); return { m, arr: 0 };
@@ -209,8 +259,8 @@ const SPECIMENS = [["cell", "Cell"], ["carrier", "Carrier", PAL.clay], ["base", 
   ["trimtophalf", "Half top cap"]].map(([id, name, hex]) => {
   const geo = G[id]; geo.g.computeBoundingBox();
   const centre = geo.g.boundingBox.getCenter(new THREE.Vector3()), radius = geo.g.boundingBox.getSize(new THREE.Vector3()).length() / 2;
-  const mesh = solid(geo, hex ? matte(hex) : M.sleeve, hex ? M.faceLine : M.sleeveLine);
-  mesh.castShadow = false; mesh.position.copy(centre).negate();
+  const mesh = solid(geo, hex ? matte(hex) : M.sleeve, hex ? M.faceLine : M.sleeveLine, false);
+  mesh.position.copy(centre).negate();
   const group = new THREE.Group(); group.add(mesh); group.visible = false; scene.add(group);
   const link = document.createElement("a");
   link.className = "tile"; link.href = `parts.html?from=film#${id}`; link.innerHTML = `<b>${name}</b>`;
@@ -432,12 +482,17 @@ function frame(dt) {
     if (i === 0) {
       const grow = T < 10 ? Math.max(0.001, io(seg(5, 8.6))) : 1;
       u.sleeve.scale.z = grow; u.sleeve.position.z = -100 * (1 - grow);
-      u.inner.visible = T >= 10; u.pi.visible = T >= 11.4;
+      u.inner.visible = T >= 10;
       u.pi.position.y = T < 14 ? 110 * (1 - eo(seg(11.4, 13.6))) : 0;
       out = T < 13.8 ? 150 + 420 * (1 - eo(seg(10, 12))) : T < 20 ? 150 * (1 - io(seg(13.8, 16.4)))
         : 62 * (io(seg(70.6, 72)) - io(seg(77.6, 79)));
     }
     if (i === 3 && !config) out = 62 * (io(seg(43.5, 45)) - io(seg(45.9, 47.2)));
+    if (u.pi) {
+      // Close: the first cell while it is alone, studied or seen from behind; the fourth while it is pulled.
+      const close = !config && (i === 0 ? T < 24.5 || (T >= 52.5 && clock < 79 + REAR + 1) : T > 42.8 && T < 47.8), there = i > 0 || T >= 11.4;
+      u.pi.visible = there && close; u.lite.visible = there && !close;
+    }
     u.inner.position.z = out;
     if (config) u.tint.lerp(tmp.setHex(look("config", u.c, u.r)), jump === 1 ? 1 : rate * 1.4);
     else filmTint(T, u.c, u.r, u.tint);
@@ -580,8 +635,10 @@ function frame(dt) {
   const panel = $("panel");
   if (panel.hidden === (config && !gone)) { panel.hidden = !(config && !gone); }
   $("play").hidden = config;
+  scene.updateMatrixWorld(); muster();
   renderer.render(scene, camera);
 }
+scene.matrixWorldAutoUpdate = false;  // the places are brought up to date once, just above, for muster and the draw alike
 
 // ------------------------------------------------------------- configurator
 const LOOK_NAMES = { monolith: "Monolith", voice: "One voice", run: "Run", roles: "Roles", signal: "Signal" };
@@ -593,7 +650,12 @@ function choices(id, items, current, pick, dot) {
     : `<button type="button" data-k="${k}" aria-pressed="${k === current}">${label}</button>`).join("");
   el.onclick = (e) => { const b = e.target.closest("button"); if (b) { pick(b.dataset.k); panel(); } };
 }
+// The film is drawn only while something is changing. Whatever changes it says how long to keep drawing: long
+// enough for the eased things to settle.
+let awake = performance.now() + (still === null ? 4000 : 9000);
+const wake = (ms = 1600) => { awake = Math.max(awake, performance.now() + ms); };
 function panel() {
+  wake(2600);
   console.assert(Wall.valid(cfg), "a wall that cannot be built", cfg);
   const move = (next) => Object.assign(cfg, next);
   $("colsN").textContent = cfg.cols; $("rowsN").textContent = cfg.rows;
@@ -624,13 +686,13 @@ $("tiles").addEventListener("click", (e) => {
   if (!link || reduced || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
   e.preventDefault();
   if (picked) return;
-  picked = { i: SPECIMENS.findIndex((sp) => sp.link === link), at: performance.now() };
+  picked = { i: SPECIMENS.findIndex((sp) => sp.link === link), at: performance.now() }; wake(1500);
   setTimeout(() => { location.href = link.href; }, 600);
 });
-addEventListener("pageshow", () => { picked = null; });  // back from the part, the tiles are whole again
+addEventListener("pageshow", () => { picked = null; wake(1500); });  // back from the part, the tiles are whole again
 let grab = null;
 canvas.addEventListener("pointerdown", (e) => { if (T >= CONFIG_AT && clock < TOTAL) grab = { x: e.clientX, az: orbit }; });
-addEventListener("pointermove", (e) => { if (grab) orbit = Math.max(-70, Math.min(70, grab.az - (e.clientX - grab.x) * 0.25)); });
+addEventListener("pointermove", (e) => { if (grab) { orbit = Math.max(-70, Math.min(70, grab.az - (e.clientX - grab.x) * 0.25)); wake(1400); } });
 addEventListener("pointerup", () => { grab = null; });
 
 // ------------------------------------------------------------------ driving
@@ -639,7 +701,10 @@ function size() {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   for (const l of loops) l.line.material.resolution.set(innerWidth, innerHeight);
   $("track").style.height = still === null ? `${END * PX_PER_S + innerHeight}px` : "0";
+  wake(900);
 }
+document.addEventListener("visibilitychange", () => wake(600));  // and again when the page is come back to
+document.fonts?.ready.then(() => wake(600));  // the labels are measured, so they are placed again once their type has come
 addEventListener("resize", size); size();
 const span = () => document.documentElement.scrollHeight - innerHeight;
 // Coming back from a part, the page opens where it was left: on the configurator, or on the tiles after it.
@@ -658,7 +723,7 @@ function setSound(on) {
   if (on) score.play().catch(() => setSound(false));
 }
 $("sound").onclick = () => { byPlay = false; setSound(!sound); };
-window.dado = { score, get sound() { return sound; } };  // for checking the sound from outside
+window.dado = { score, get sound() { return sound; }, renderer, scene, camera };  // for checking the sound and the renderer from outside
 let playing = false;
 // Pausing with the button also stops music the film started; scrolling by hand or reaching the end does not.
 const stop = (quiet) => { playing = false; $("play").textContent = "Play the film"; if (quiet === true && byPlay) { byPlay = false; setSound(false); } };
@@ -683,8 +748,10 @@ renderer.setAnimationLoop(() => {
   score.volume = Math.min(1, Math.max(0, level));
   if (!sound && level < 0.01 && !score.paused) score.pause();
   const goal = (scrollY / Math.max(1, span())) * END;
-  clock = still !== null ? +still : reduced ? goal : clock + (goal - clock) * (1 - Math.exp(-dt * 7));
+  const before = clock;
+  clock = still !== null ? +still : reduced || Math.abs(goal - clock) < 0.0008 ? goal : clock + (goal - clock) * (1 - Math.exp(-dt * 7));
   T = clock <= 79 ? clock : clock < 79 + HOLD ? 79 : clock - HOLD;
-  frame(dt);
+  if (clock !== before) wake();
+  if (performance.now() < awake) frame(dt);
   document.documentElement.dataset.ready = "1";
 });

@@ -142,6 +142,21 @@ for name, least in (("pi", float(sys.argv[1]) if len(sys.argv) > 1 else 2.0), ("
     manifest["parts"][name] = write(name, placed, chosen, np.zeros((0, 3)), rgba)
     print(name, "bodies kept", int(keep.sum()), manifest["parts"][name]["triangles"], "triangles")
 
+# A third Pi, for a wall: every body at least 5 mm across as the box it fills, in its own colour. Behind a closed
+# face, seen through five slots from across a wall, that is all the eye can tell, at a hundredth of the triangles.
+FACES = [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)]  # corner = x + 2y + 4z, wound outward
+box_pos, box_tri, box_rgba = [], [], []
+for i in np.flatnonzero((diag >= 5.0) | board):
+    corners = np.array([[(lo[i], hi[i])[(c >> a) & 1][a] for a in range(3)] for c in range(8)])
+    for quad in FACES:  # four corners of its own a face, so each face is shaded flat
+        at = len(box_pos)
+        box_pos += [corners[c] for c in quad]
+        box_tri += [(at, at + 1, at + 2), (at, at + 2, at + 3)]
+        box_rgba += [np.r_[tone[i], 255]] * 4
+box_pos = np.array(box_pos)
+manifest["parts"]["pi-lite"] = write("pi-lite", in_cell(on_carrier(box_pos)), np.array(box_tri), np.zeros((0, 3)), np.array(box_rgba))
+print("pi-lite", "bodies kept", int(((diag >= 5.0) | board).sum()), manifest["parts"]["pi-lite"]["triangles"], "triangles")
+
 json.dump(manifest, open(f"{OUT}/manifest.json", "w"))
 for k, v in manifest["parts"].items():
     print(f"{k:9s} {v['triangles']:7d} tris  {v['lo']} to {v['hi']}")
